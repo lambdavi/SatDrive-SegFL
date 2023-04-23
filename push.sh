@@ -1,5 +1,4 @@
 #!/bin/sh
-
 git add .
 if [[ -z $1 ]];
 then 
