@@ -4,9 +4,10 @@ git add .
 if [[ -z $1 ]];
 then 
     echo "No parameter passed. Default message loaded."
-    git commit -am "made changes"
+    git commit -m "made changes"
 else
-    git commit -am $1
+    git commit -m $1
 fi
 git push
-echo "Pushed!"
+echo "Press enter"
+read
