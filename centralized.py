@@ -20,6 +20,7 @@ from datasets.idda import IDDADataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -178,7 +179,6 @@ def main():
 
     metrics = set_metrics(args)
     train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
-    print(train_clients)
     """server = Server(args, train_clients, test_clients, model, metrics)
     server.train()"""
     c = train_clients[0]

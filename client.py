@@ -15,6 +15,7 @@ class Client:
         self.dataset = dataset
         self.name = self.dataset.client_name
         self.model = model
+        self.device = "cuda"
         self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
@@ -44,22 +45,22 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        samples = 0.
-        cumulative_loss = 0.
         for _, (images, labels) in enumerate(self.train_loader):
+            images = images.to(self.device, dtype=torch.float32)
+            labels = labels.to(self.device, dtype=torch.long)
+            optimizer.zero_grad()
             outputs = self._get_outputs(images) # Apply the loss
-            loss = self.criterion(outputs,labels) # Reset the optimizer
+            loss = self.reduction(self.criterion(outputs,labels),labels) # Reset the optimizer
             # Backward pass
             loss.backward()
             # Update parameters
             optimizer.step()
             optimizer.zero_grad()
-            samples+=images.shape[0]
-            cumulative_loss += loss.item()
-        print(f"Loss at epoch {cur_epoch}: {cumulative_loss/samples}")
+
+        print(f"Epoch {cur_epoch} ended.")
 
     def get_optimizer(net, lr, wd, momentum):
-        optimizer = torch.optim.SGD(net.parameters(), lr=lr, weight_decay=wd, momentum=momentum)
+        optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=wd, momentum=momentum)
         return optimizer
 
     def train(self):
@@ -69,12 +70,10 @@ class Client:
         :return: length of the local dataset, copy of the model parameters
         """
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, weight_decay=0.00001, momentum=0.9)
-
-        #optimizer = self.get_optimizer(self.model.parameters(), 0.01, 0.000001, 0.9)
-        # TODO: missing code here!
+        self.model.train()
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
-        raise NotImplementedError
+        #raise NotImplementedError
 
     def test(self, metric):
         """

@@ -5,9 +5,11 @@ from PIL import Image
 from torch import from_numpy
 from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 class_eval = [255, 2, 4, 255, 11, 5, 0, 0, 1, 8, 13, 3, 7, 6, 255, 255, 15, 14, 12, 9, 10]
-
+IMG_DIR = "images"
+LAB_DIR = "labels"
 
 class IDDADataset(VisionDataset):
 
@@ -30,8 +32,19 @@ class IDDADataset(VisionDataset):
         return lambda x: from_numpy(mapping[x])
 
     def __getitem__(self, index: int) -> Any:
-        # TODO: missing code here!
-        raise NotImplementedError
+        
+        #img_path = os.path.join(self.root, self.list_samples[index])
+        image = Image.open(os.path.join(self.root,IMG_DIR, self.list_samples[index]+".jpg")).convert("RGB")
+        #image = Image.open(p1+self.list_samples[index]+".jpg").convert("RGB")
+        label = Image.open(os.path.join(self.root, LAB_DIR, self.list_samples[index]+".png"))
+        #label = Image.open(p2+self.list_samples[index]+".png")
+        
+        if self.transform:
+            image = self.transform(image)
+        if self.target_transform:
+            label = self.target_transform(label)
+        return image, label
+        #raise NotImplementedError
 
     def __len__(self) -> int:
         return len(self.list_samples)
