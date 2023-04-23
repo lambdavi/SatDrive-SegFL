@@ -30,4 +30,3 @@ python main.py --dataset idda --model deeplabv3_mobilenetv2 --num_rounds 200 --n
 [1] Caldas, Sebastian, et al. "Leaf: A benchmark for federated settings." Workshop on Federated Learning for Data Privacy and Confidentiality (2019). 
 
 [2] Fantauzzo, Lidia, et al. "FedDrive: generalizing federated learning to semantic segmentation in autonomous driving." 2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2022.
-# mldl23
