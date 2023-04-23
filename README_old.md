@@ -1,7 +1,14 @@
-# Real World Federated Learning
+# Towards Real World Federated Learning
 ### Machine Learning and Deep Learning 2023
 #### Politecnico di Torino
-Code for the Federated Learning project.
+Starting code for the Federated Learning project. Some functions are explicitly left blank for students to fill in.
+
+## Setup
+#### Environment
+If not working on CoLab, install environment with conda (preferred): 
+```bash 
+conda env create -f mldl23fl.yml
+```
 
 #### Datasets
 The repository supports experiments on the following datasets:
