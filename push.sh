@@ -8,5 +8,3 @@ else
     git commit -m "$1"
 fi
 git push
-echo "Press enter"
-read
