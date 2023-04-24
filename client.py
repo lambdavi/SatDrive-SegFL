@@ -106,9 +106,11 @@ class Client:
         with torch.no_grad():
             for i, (images, labels) in enumerate(self.test_loader):
                 images = images.to(self.device)
-                targets = targets.to(self.device)
+                labels = labels.to(self.device)
                 # Forward pass
                 outputs = self._get_outputs(images) # Apply the loss
                 loss = self.reduction(self.criterion(outputs,labels),labels)
-                self.update_metric(metric, outputs, labels)
-                self.print_step_loss(loss, len(self.test_loader) + i + 1)
+                _, prediction = outputs.max(dim=1)
+                labels = labels.cpu().numpy()
+                prediction = prediction.cpu().numpy()
+                metric.update(labels, prediction)                self.print_step_loss(loss, len(self.test_loader) + i + 1)
