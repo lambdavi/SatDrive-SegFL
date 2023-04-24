@@ -86,7 +86,7 @@ class Client:
         optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=wd, momentum=momentum)
         return optimizer
 
-    def train(self, metric):
+    def train(self):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
