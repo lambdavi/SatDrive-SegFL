@@ -31,6 +31,11 @@ class Client:
         labels = labels.cpu().numpy()
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
+    # ADDED
+    @staticmethod
+    def print_step_loss(losses, step):
+        for name, l in losses.items():
+            print(f"Train_{name}: {l} at step:{step}")
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -45,17 +50,29 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        for _, (images, labels) in enumerate(self.train_loader):
-            images = images.to(self.device)
-            labels = labels.to(self.device)
+
+        # ADDED 
+        dict_all_epoch_losses = defaultdict(lambda: 0)
+        #self.loader.sampler.set_epoch(cur_epoch)
+
+        for cur_step, (images, labels) in enumerate(self.train_loader):
+            images = images.to(self.device, dtype=torch.float32)
+            labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
+
             outputs = self._get_outputs(images) # Apply the loss
             loss = self.reduction(self.criterion(outputs,labels),labels) # Reset the optimizer
+            dict_calc_losses = {'loss_tot': loss}
+            dict_calc_losses['loss_tot'].backward()
+
+            test_print_interval = 100
+            if (cur_step + 1) % test_print_interval == 0:
+                self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)
             # Backward pass
-            loss.backward()
+            #loss.backward()
             # Update parameters
             optimizer.step()
-            optimizer.zero_grad()
+            #optimizer.zero_grad()
 
         print(f"Epoch {cur_epoch} ended.")
 
