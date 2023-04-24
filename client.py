@@ -113,5 +113,6 @@ class Client:
                 _, prediction = outputs.max(dim=1)
                 labels = labels.cpu().numpy()
                 prediction = prediction.cpu().numpy()
-                metric.update(labels, prediction)                
-                self.print_step_loss(loss, len(self.test_loader) + i + 1)
+                metric.update(labels, prediction)
+            print(metric.get_results())
+                #self.print_step_loss(loss, len(self.test_loader) + i + 1)
