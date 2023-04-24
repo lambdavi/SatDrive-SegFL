@@ -24,7 +24,6 @@ class IDDADataset(VisionDataset):
         self.list_samples = list_samples
         self.client_name = client_name
         self.target_transform = self.get_mapping()
-
     @staticmethod
     def get_mapping():
         classes = class_eval
@@ -36,7 +35,7 @@ class IDDADataset(VisionDataset):
     def __getitem__(self, index: int) -> Any:
         image = Image.open(os.path.join(self.root,IMG_DIR, self.list_samples[index]+".jpg")).convert("RGB")
         label = Image.open(os.path.join(self.root, LAB_DIR, self.list_samples[index]+".png"))
-        if self.transform:
+        if self.transform: # != None
             image, label = self.transform(image, label)
         if self.target_transform:
             label = self.target_transform(label)

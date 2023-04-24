@@ -60,27 +60,33 @@ class Client:
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
 
-            outputs = self._get_outputs(images) # Apply the loss
-            loss = self.reduction(self.criterion(outputs,labels),labels) # Reset the optimizer
+            outputs = self._get_outputs(images)
+            loss = self.reduction(self.criterion(outputs,labels),labels)
+            #loss.backward()
             dict_calc_losses = {'loss_tot': loss}
             dict_calc_losses['loss_tot'].backward()
 
-            test_print_interval = 100
+            """test_print_interval = 100
             if (cur_step + 1) % test_print_interval == 0:
-                self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)
+                self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)"""
             # Backward pass
-            #loss.backward()
+            # loss.backward()
             # Update parameters
             optimizer.step()
             #optimizer.zero_grad()
 
+            # To update metrics:
+            # self.update_metric(metric, outputs, labels)
+
         print(f"Epoch {cur_epoch} ended.")
+        self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)
+
 
     def get_optimizer(net, lr, wd, momentum):
         optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=wd, momentum=momentum)
         return optimizer
 
-    def train(self):
+    def train(self, metric):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -90,16 +96,19 @@ class Client:
         self.model.train()
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
-        #raise NotImplementedError
 
     def test(self, metric):
         """
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
-        # TODO: missing code here!
+        self.model.eval()
         with torch.no_grad():
             for i, (images, labels) in enumerate(self.test_loader):
-                # TODO: missing code here!
-                raise NotImplementedError
+                images = images.to(self.device)
+                targets = targets.to(self.device)
+                # Forward pass
+                outputs = self._get_outputs(images) # Apply the loss
+                loss = self.reduction(self.criterion(outputs,labels),labels)
                 self.update_metric(metric, outputs, labels)
+                self.print_step_loss(loss, len(self.test_loader) + i + 1)
