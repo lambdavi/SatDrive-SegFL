@@ -183,7 +183,8 @@ def main():
     server.train()"""
     c = train_clients[0]
     c.train()
-    c.test(metrics)
+    c.test(metrics["test_same_dom"])
+
 
 if __name__ == '__main__':
     main()
