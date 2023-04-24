@@ -46,8 +46,8 @@ class Client:
         :param optimizer: optimizer used for the local training
         """
         for _, (images, labels) in enumerate(self.train_loader):
-            images = images.to(self.device, dtype=torch.float32)
-            labels = labels.to(self.device, dtype=torch.long)
+            images = images.to(self.device)
+            labels = labels.to(self.device)
             optimizer.zero_grad()
             outputs = self._get_outputs(images) # Apply the loss
             loss = self.reduction(self.criterion(outputs,labels),labels) # Reset the optimizer
