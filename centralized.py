@@ -136,7 +136,49 @@ def get_datasets(args):
 
     return train_datasets, test_datasets
 
+# TEMP FUNCTION
+def get_centralized_datasets(args):
 
+    train_dataset = []
+    train_transforms, test_transforms = get_transforms(args)
+    train_datasets = []
+    if args.dataset == 'idda':
+        root = 'data/idda'
+        with open(os.path.join(root, 'train.json'), 'r') as f:
+            all_data = json.load(f)
+        for client_id in all_data.keys():
+            train_dataset+=(all_data[client_id])
+        train_datasets.append(IDDADataset(root=root, list_samples=train_dataset, transform=train_transforms,
+                                                client_name='centralized'))
+        with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
+            test_same_dom_data = f.read().splitlines()
+            test_same_dom_dataset = IDDADataset(root=root, list_samples=test_same_dom_data, transform=test_transforms,
+                                                client_name='test_same_dom')
+        with open(os.path.join(root, 'test_diff_dom.txt'), 'r') as f:
+            test_diff_dom_data = f.read().splitlines()
+            test_diff_dom_dataset = IDDADataset(root=root, list_samples=test_diff_dom_data, transform=test_transforms,
+                                                client_name='test_diff_dom')
+        test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
+
+    elif args.dataset == 'femnist':
+        niid = args.niid
+        train_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'train')
+        test_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'test')
+        train_data, test_data = read_femnist_data(train_data_dir, test_data_dir)
+
+        train_transforms, test_transforms = get_transforms(args)
+
+        train_datasets, test_datasets = [], []
+
+        for user, data in train_data.items():
+            train_datasets.append(Femnist(data, train_transforms, user))
+        for user, data in test_data.items():
+            test_datasets.append(Femnist(data, test_transforms, user))
+
+    else:
+        raise NotImplementedError
+
+    return train_datasets, test_datasets
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
     if args.model == 'deeplabv3_mobilenetv2':
@@ -174,14 +216,15 @@ def main():
     print('Done.')
 
     print('Generate datasets...')
-    train_datasets, test_datasets = get_datasets(args)
+    train_datasets, test_datasets = get_centralized_datasets(args)
     print('Done.')
 
     metrics = set_metrics(args)
     train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
     """server = Server(args, train_clients, test_clients, model, metrics)
     server.train()"""
-    c = train_clients[0]
+
+    c = Client(args, train_datasets[0], model, False)
     c.train()
     c.test(metrics["test_same_dom"])
 
