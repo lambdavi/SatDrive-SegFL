@@ -1,0 +1,33 @@
+
+Initializing model...
+Done.
+Generate datasets...
+Centralized flag is on
+Done.
+Epoch 0 ended.
+Train_loss_tot: 0.328244149684906 at step:150
+Epoch 1 ended.
+Train_loss_tot: 0.3070216476917267 at step:300
+Epoch 2 ended.
+Train_loss_tot: 0.2697375416755676 at step:450
+Epoch 3 ended.
+Train_loss_tot: 0.17403723299503326 at step:600
+Epoch 4 ended.
+Train_loss_tot: 0.21118111908435822 at step:750
+Traceback (most recent call last):
+  File "/content/mldl23/centralized_wandb.py", line 258, in <module>
+    main()
+  File "/content/mldl23/centralized_wandb.py", line 254, in main
+    wandb.log_artifact(c.model)
+  File "/usr/local/lib/python3.9/dist-packages/wandb/sdk/wandb_run.py", line 344, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.9/dist-packages/wandb/sdk/wandb_run.py", line 334, in wrapper
+    return func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.9/dist-packages/wandb/sdk/wandb_run.py", line 2774, in log_artifact
+    return self._log_artifact(
+  File "/usr/local/lib/python3.9/dist-packages/wandb/sdk/wandb_run.py", line 2909, in _log_artifact
+    artifact, aliases = self._prepare_artifact(
+  File "/usr/local/lib/python3.9/dist-packages/wandb/sdk/wandb_run.py", line 3000, in _prepare_artifact
+    raise ValueError(
+ValueError: You must pass an instance of wandb.Artifact or a valid file path to log_artifact
+{'Total samples': 600, 'Overall Acc': 0.9260944380722511, 'Mean Acc': 0.4618124559110709, 'Mean Precision': 0.5936814882721316, 'FreqW Acc': 0.8692556003654057, 'Mean IoU': 0.4043074754720592, 'Class IoU': {0: 0.9464666371562315, 1: 0.7957212396759817, 2: 0.8407566573963143, 3: 0.5589628561517287, 4: 0.11633446477011526, 5: 0.13754373569462455, 6: 0.01664694470601762, 7: 0.0, 8: 0.7125643995014277, 9: 0.49509584805043244, 10: 0.9288205223838917, 11: 0.004047044685370119, 12: 0.0, 13: 0.915959257380811, 14: 0.0, 15: 0.0}, 'Class Acc': {0: 0.9705456388655648, 1: 0.8800490205247786, 2: 0.9288820489548301, 3: 0.8437068253706366, 4: 0.13203820782681253, 5: 0.15668125217119594, 6: 0.016671055672252334, 7: 0.0, 8: 0.8644611878869645, 9: 0.6712153980448987, 10: 0.9586791406574258, 11: 0.004051352514834168, 12: 0.0, 13: 0.9620181660869406, 14: 0.0, 15: 0.0}, 'Class Prec': {0: 0.9744565425434355, 1: 0.8925215116636227, 2: 0.8986002865968348, 3: 0.6235262151370619, 4: 0.4944768044331123, 5: 0.5296525488612942, 6: 0.9200652527183649, 7: 0.0, 8: 0.8021870870846926, 9: 0.6536049357905065, 10: 0.9675555414610322, 11: 0.791930835278426, 12: 0.0, 13: 0.9503262507857233, 14: 0.0, 15: 0.0}}

@@ -20,7 +20,6 @@ from datasets.idda import IDDADataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -104,13 +103,15 @@ def get_datasets(args):
 
         if args.centr:
           # If centralized we get all training data on one single client
-          print("Centralized flag is on")
+          print("Centralized mode set")
           with open(os.path.join(root, 'train.txt'), 'r') as f:
             all_data = f.read().splitlines()
           train_datasets.append(IDDADataset(root=root, list_samples=all_data, transform=train_transforms,
                                              client_name='centralized'))
         else:
           # Otherwise we divide data in multiple datasets.
+          print("Distributed Mode Set")
+
           with open(os.path.join(root, 'train.json'), 'r') as f:
             all_data = json.load(f)
           for client_id in all_data.keys():
@@ -232,7 +233,9 @@ def main():
     server.train()"""
 
     c = Client(args, train_datasets[0], model, False)
-    c.train()
+    print("### TRAIN ###")
+    c.train(metrics["eval_train"])
+    print("### TEST ###")
     c.test(metrics["test_same_dom"])
 
 

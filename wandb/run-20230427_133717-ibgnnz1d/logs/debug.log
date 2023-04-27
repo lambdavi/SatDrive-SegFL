@@ -1,0 +1,43 @@
+2023-04-27 13:37:17,221 INFO    MainThread:16281 [wandb_setup.py:_flush():76] Configure stats pid to 16281
+2023-04-27 13:37:17,221 INFO    MainThread:16281 [wandb_setup.py:_flush():76] Loading settings from /root/.config/wandb/settings
+2023-04-27 13:37:17,221 INFO    MainThread:16281 [wandb_setup.py:_flush():76] Loading settings from /content/mldl23/wandb/settings
+2023-04-27 13:37:17,221 INFO    MainThread:16281 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-04-27 13:37:17,221 INFO    MainThread:16281 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-04-27 13:37:17,221 INFO    MainThread:16281 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'centralized_wandb.py', 'program': '/content/mldl23/centralized_wandb.py'}
+2023-04-27 13:37:17,222 INFO    MainThread:16281 [wandb_init.py:_log_setup():507] Logging user logs to /content/mldl23/wandb/run-20230427_133717-ibgnnz1d/logs/debug.log
+2023-04-27 13:37:17,222 INFO    MainThread:16281 [wandb_init.py:_log_setup():508] Logging internal logs to /content/mldl23/wandb/run-20230427_133717-ibgnnz1d/logs/debug-internal.log
+2023-04-27 13:37:17,222 INFO    MainThread:16281 [wandb_init.py:init():547] calling init triggers
+2023-04-27 13:37:17,222 INFO    MainThread:16281 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {}
+2023-04-27 13:37:17,222 INFO    MainThread:16281 [wandb_init.py:init():595] starting backend
+2023-04-27 13:37:17,222 INFO    MainThread:16281 [wandb_init.py:init():599] setting up manager
+2023-04-27 13:37:17,233 INFO    MainThread:16281 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-04-27 13:37:17,242 INFO    MainThread:16281 [wandb_init.py:init():605] backend started and connected
+2023-04-27 13:37:17,247 INFO    MainThread:16281 [wandb_init.py:init():695] updated telemetry
+2023-04-27 13:37:17,267 INFO    MainThread:16281 [wandb_init.py:init():732] communicating run to backend with 60.0 second timeout
+2023-04-27 13:37:17,821 INFO    MainThread:16281 [wandb_run.py:_on_init():2176] communicating current version
+2023-04-27 13:37:17,889 INFO    MainThread:16281 [wandb_run.py:_on_init():2185] got version response 
+2023-04-27 13:37:17,889 INFO    MainThread:16281 [wandb_init.py:init():782] starting run threads in backend
+2023-04-27 13:37:17,945 INFO    MainThread:16281 [wandb_run.py:_console_start():2157] atexit reg
+2023-04-27 13:37:17,946 INFO    MainThread:16281 [wandb_run.py:_redirect():2012] redirect: SettingsConsole.WRAP_RAW
+2023-04-27 13:37:17,946 INFO    MainThread:16281 [wandb_run.py:_redirect():2077] Wrapping output streams.
+2023-04-27 13:37:17,946 INFO    MainThread:16281 [wandb_run.py:_redirect():2102] Redirects installed.
+2023-04-27 13:37:17,947 INFO    MainThread:16281 [wandb_init.py:init():824] run started, returning control to user process
+2023-04-27 13:37:17,948 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set batch_size = 4 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,948 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb batch_size 4 None
+2023-04-27 13:37:17,948 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set test_batch_size = 10 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,948 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb test_batch_size 10 None
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set epochs = 5 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb epochs 5 None
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set lr = 0.1 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb lr 0.1 None
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set momentum = 0.1 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb momentum 0.1 None
+2023-04-27 13:37:17,949 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set no_cuda = False - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,950 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb no_cuda False None
+2023-04-27 13:37:17,950 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set seed = 42 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,950 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb seed 42 None
+2023-04-27 13:37:17,950 INFO    MainThread:16281 [wandb_config.py:__setitem__():152] config set log_interval = 10 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f5e544a2f10>>
+2023-04-27 13:37:17,950 INFO    MainThread:16281 [wandb_run.py:_config_callback():1285] config_cb log_interval 10 None
+2023-04-27 13:37:19,921 INFO    MainThread:16281 [wandb_watch.py:watch():51] Watching
+2023-04-27 13:39:28,803 WARNING MsgRouterThr:16281 [router.py:message_loop():77] message_loop has been closed

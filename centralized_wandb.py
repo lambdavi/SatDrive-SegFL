@@ -251,6 +251,8 @@ def main():
     # WandB – Save the model checkpoint. This automatically saves a file to the cloud and associates it with the current run.
     torch.save(c.model.state_dict(), "model.h5")
     wandb.save('model.h5')
+    wandb.log_artifact(c.model)
+
 
 if __name__ == '__main__':
     main()
