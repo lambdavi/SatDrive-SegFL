@@ -4,7 +4,7 @@ import torch
 from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
-
+import wandb
 from utils.utils import HardNegativeMining, MeanReduction
 
 
@@ -93,6 +93,8 @@ class Client:
         :return: length of the local dataset, copy of the model parameters
         """
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, weight_decay=0.00001, momentum=0.9)
+        wandb.watch(self.model, log="all")
+
         self.model.train()
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
