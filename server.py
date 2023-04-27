@@ -27,8 +27,8 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
-            c.train()
-            raise NotImplementedError
+            update = c.train()
+            updates.append(update)
         return updates
 
     def aggregate(self, updates):
@@ -46,8 +46,8 @@ class Server:
         """
         for r in range(self.args.num_rounds):
             updates = self.train_round(self.train_clients)
-            #TODO
-            # raise NotImplementedError
+            aggregated_params = self.aggregate(updates)
+            # self.eval_train()
 
     def eval_train(self):
         """
