@@ -12,7 +12,7 @@ import datasets.ss_transforms as sstr
 import datasets.np_transforms as nptr
 
 from torch import nn
-from client import Client
+from client_full_centr import Client
 from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
@@ -188,11 +188,11 @@ def main():
     print('Done.')
 
     metrics = set_metrics(args)
-    train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
+    #train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
     """server = Server(args, train_clients, test_clients, model, metrics)
     server.train()"""
 
-    c = Client(args, train_datasets[0], model, False)
+    c = Client(args, train_datasets[0], test_datasets[1], model, False)
     print("### TRAIN ###")
     c.train(metrics["eval_train"])
     print("### TEST ###")
