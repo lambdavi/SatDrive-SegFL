@@ -27,8 +27,7 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
-            # TODO: missing code here!
-            # c.train() ????
+            c.train()
             raise NotImplementedError
         return updates
 
@@ -46,8 +45,9 @@ class Server:
         This method orchestrates the training the evals and tests at rounds level
         """
         for r in range(self.args.num_rounds):
-            # TODO: missing code here!
-            raise NotImplementedError
+            updates = self.train_round(self.train_clients)
+            #TODO
+            # raise NotImplementedError
 
     def eval_train(self):
         """
