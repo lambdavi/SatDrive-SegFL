@@ -101,9 +101,19 @@ def get_datasets(args):
 
     if args.dataset == 'idda':
         root = 'data/idda'
-        with open(os.path.join(root, 'train.json'), 'r') as f:
+
+        if args.centr:
+          # If centralized we get all training data on one single client
+          print("Centralized flag is on")
+          with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data = f.read().splitlines()
+          train_datasets.append(IDDADataset(root=root, list_samples=all_data, transform=train_transforms,
+                                             client_name='centralized'))
+        else:
+          # Otherwise we divide data in multiple datasets.
+          with open(os.path.join(root, 'train.json'), 'r') as f:
             all_data = json.load(f)
-        for client_id in all_data.keys():
+          for client_id in all_data.keys():
             train_datasets.append(IDDADataset(root=root, list_samples=all_data[client_id], transform=train_transforms,
                                               client_name=client_id))
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
@@ -138,17 +148,14 @@ def get_datasets(args):
 
 # TEMP FUNCTION
 def get_centralized_datasets(args):
-
     train_dataset = []
     train_transforms, test_transforms = get_transforms(args)
     train_datasets = []
     if args.dataset == 'idda':
         root = 'data/idda'
-        with open(os.path.join(root, 'train.json'), 'r') as f:
-            all_data = json.load(f)
-        for client_id in all_data.keys():
-            train_dataset+=(all_data[client_id])
-        train_datasets.append(IDDADataset(root=root, list_samples=train_dataset, transform=train_transforms,
+        with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data = f.read().splitlines()
+        train_datasets.append(IDDADataset(root=root, list_samples=all_data, transform=train_transforms,
                                                 client_name='centralized'))
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
             test_same_dom_data = f.read().splitlines()
@@ -216,7 +223,7 @@ def main():
     print('Done.')
 
     print('Generate datasets...')
-    train_datasets, test_datasets = get_centralized_datasets(args)
+    train_datasets, test_datasets = get_datasets(args)
     print('Done.')
 
     metrics = set_metrics(args)
