@@ -108,7 +108,6 @@ class ClientCentr:
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
-        final_transf = T.ToPILImage()
         self.model.eval()
         with torch.no_grad():
             for i, (images, labels) in enumerate(self.test_loader):

@@ -31,7 +31,6 @@ class Client:
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
 
-    # ADDED
     @staticmethod
     def print_step_loss(losses, step):
         for name, l in losses.items():
@@ -77,15 +76,13 @@ class Client:
             #optimizer.zero_grad()
 
             # To update metrics:
-            self.update_metric(metric, outputs, labels)
+            #self.update_metric(metric, outputs, labels)
 
         print(f"Epoch {cur_epoch} ended.")
-        print(metric.get_results())
+        #print(metric.get_results())
         self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)
 
-
-
-    def train(self, metric):
+    def train(self):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -95,7 +92,7 @@ class Client:
 
         self.model.train()
         for epoch in range(self.args.num_epochs):
-            self.run_epoch(epoch, optimizer, metric)
+            self.run_epoch(epoch, optimizer)
         
         return len(self.dataset), self.model.state_dict()
 
