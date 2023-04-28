@@ -27,6 +27,9 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
+            #Update parameters of the client model
+            c.model.load_state_dict(self.model_params_dict)
+
             update = c.train()
             updates.append(update)
         return updates
@@ -46,7 +49,7 @@ class Server:
         """
         for r in range(self.args.num_rounds):
             updates = self.train_round(self.train_clients)
-            aggregated_params = self.aggregate(updates)
+            self.model_params_dict = self.aggregate(updates)
             # self.eval_train()
 
     def eval_train(self):
