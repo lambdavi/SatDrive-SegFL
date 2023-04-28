@@ -20,4 +20,7 @@ def get_parser():
     parser.add_argument('--print_test_interval', type=int, default=10, help='client print test interval')
     parser.add_argument('--eval_interval', type=int, default=10, help='eval interval')
     parser.add_argument('--test_interval', type=int, default=10, help='test interval')
+    # New Argument:
+    parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
+
     return parser
