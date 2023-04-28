@@ -19,7 +19,7 @@ from utils.args import get_parser
 from datasets.idda import IDDADataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
-
+import wandb
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 def set_seed(random_seed):
@@ -101,9 +101,19 @@ def get_datasets(args):
 
     if args.dataset == 'idda':
         root = 'data/idda'
-        with open(os.path.join(root, 'train.json'), 'r') as f:
+
+        if args.centr:
+          # If centralized we get all training data on one single client
+          print("Centralized flag is on")
+          with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data = f.read().splitlines()
+          train_datasets.append(IDDADataset(root=root, list_samples=all_data, transform=train_transforms,
+                                             client_name='centralized'))
+        else:
+          # Otherwise we divide data in multiple datasets.
+          with open(os.path.join(root, 'train.json'), 'r') as f:
             all_data = json.load(f)
-        for client_id in all_data.keys():
+          for client_id in all_data.keys():
             train_datasets.append(IDDADataset(root=root, list_samples=all_data[client_id], transform=train_transforms,
                                               client_name=client_id))
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
@@ -136,7 +146,46 @@ def get_datasets(args):
 
     return train_datasets, test_datasets
 
+# TEMP FUNCTION
+def get_centralized_datasets(args):
+    train_dataset = []
+    train_transforms, test_transforms = get_transforms(args)
+    train_datasets = []
+    if args.dataset == 'idda':
+        root = 'data/idda'
+        with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data = f.read().splitlines()
+        train_datasets.append(IDDADataset(root=root, list_samples=all_data, transform=train_transforms,
+                                                client_name='centralized'))
+        with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
+            test_same_dom_data = f.read().splitlines()
+            test_same_dom_dataset = IDDADataset(root=root, list_samples=test_same_dom_data, transform=test_transforms,
+                                                client_name='test_same_dom')
+        with open(os.path.join(root, 'test_diff_dom.txt'), 'r') as f:
+            test_diff_dom_data = f.read().splitlines()
+            test_diff_dom_dataset = IDDADataset(root=root, list_samples=test_diff_dom_data, transform=test_transforms,
+                                                client_name='test_diff_dom')
+        test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
 
+    elif args.dataset == 'femnist':
+        niid = args.niid
+        train_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'train')
+        test_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'test')
+        train_data, test_data = read_femnist_data(train_data_dir, test_data_dir)
+
+        train_transforms, test_transforms = get_transforms(args)
+
+        train_datasets, test_datasets = [], []
+
+        for user, data in train_data.items():
+            train_datasets.append(Femnist(data, train_transforms, user))
+        for user, data in test_data.items():
+            test_datasets.append(Femnist(data, test_transforms, user))
+
+    else:
+        raise NotImplementedError
+
+    return train_datasets, test_datasets
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
     if args.model == 'deeplabv3_mobilenetv2':
@@ -164,6 +213,20 @@ def gen_clients(args, train_datasets, test_datasets, model):
 
 
 def main():
+    # Wandb Setup
+    wandb.init(entity="lambdavi", project="test_mldl")
+
+    # WandB – Config is a variable that holds and saves hyperparameters and inputs
+    config = wandb.config          # Initialize config
+    config.batch_size = 4          # input batch size for training (default: 64)
+    config.test_batch_size = 10    # input batch size for testing (default: 1000)
+    config.epochs = 5            # number of epochs to train (default: 10)
+    config.lr = 0.1               # learning rate (default: 0.01)
+    config.momentum = 0.1          # SGD momentum (default: 0.5) 
+    config.no_cuda = False         # disables CUDA training
+    config.seed = 42               # random seed (default: 42)
+    config.log_interval = 10     # how many batches to wait before logging training status
+
     parser = get_parser()
     args = parser.parse_args()
     set_seed(args.seed)
@@ -181,9 +244,14 @@ def main():
     train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
     """server = Server(args, train_clients, test_clients, model, metrics)
     server.train()"""
-    c = train_clients[0]
+
+    c = Client(args, train_datasets[0], model, False)
     c.train()
     c.test(metrics["test_same_dom"])
+    # WandB – Save the model checkpoint. This automatically saves a file to the cloud and associates it with the current run.
+    torch.save(c.model.state_dict(), "model.h5")
+    wandb.save('model.h5')
+    wandb.log_artifact(c.model)
 
 
 if __name__ == '__main__':

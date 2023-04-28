@@ -12,6 +12,7 @@ import datasets.ss_transforms as sstr
 import datasets.np_transforms as nptr
 
 from torch import nn
+from client_full_centr import ClientCentr
 from client import Client
 from datasets.femnist import Femnist
 from server import Server
@@ -100,9 +101,21 @@ def get_datasets(args):
 
     if args.dataset == 'idda':
         root = 'data/idda'
-        with open(os.path.join(root, 'train.json'), 'r') as f:
+
+        if args.centr:
+          # If centralized we get all training data on one single client
+          print("Centralized mode set")
+          with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data = f.read().splitlines()
+          train_datasets.append(IDDADataset(root=root, list_samples=all_data, transform=train_transforms,
+                                             client_name='centralized'))
+        else:
+          # Otherwise we divide data in multiple datasets.
+          print("Distributed Mode Set")
+
+          with open(os.path.join(root, 'train.json'), 'r') as f:
             all_data = json.load(f)
-        for client_id in all_data.keys():
+          for client_id in all_data.keys():
             train_datasets.append(IDDADataset(root=root, list_samples=all_data[client_id], transform=train_transforms,
                                               client_name=client_id))
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
@@ -134,7 +147,6 @@ def get_datasets(args):
         raise NotImplementedError
 
     return train_datasets, test_datasets
-
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
@@ -178,9 +190,15 @@ def main():
     print('Done.')
 
     metrics = set_metrics(args)
-    train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
-    server = Server(args, train_clients, test_clients, model, metrics)
-    server.train()
+    #train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
+    """server = Server(args, train_clients, test_clients, model, metrics)
+    server.train()"""
+
+    c = ClientCentr(args, train_datasets[0], test_datasets[1], model, False)
+    print("### TRAIN ###")
+    c.train(metrics["eval_train"])
+    print("### TEST ###")
+    c.test(metrics["test_same_dom"])
 
 
 if __name__ == '__main__':
