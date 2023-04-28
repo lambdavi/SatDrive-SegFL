@@ -93,7 +93,6 @@ class Client:
         self.model.train()
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
-        
         return len(self.dataset), self.model.state_dict()
 
     def test(self, metric):

@@ -27,9 +27,11 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
-            # TODO: missing code here!
-            # c.train() ????
-            raise NotImplementedError
+            #Update parameters of the client model
+            c.model.load_state_dict(self.model_params_dict)
+
+            update = c.train()
+            updates.append(update)
         return updates
 
     def aggregate(self, updates):
@@ -46,8 +48,9 @@ class Server:
         This method orchestrates the training the evals and tests at rounds level
         """
         for r in range(self.args.num_rounds):
-            # TODO: missing code here!
-            raise NotImplementedError
+            updates = self.train_round(self.train_clients)
+            self.model_params_dict = self.aggregate(updates)
+            # self.eval_train()
 
     def eval_train(self):
         """
