@@ -30,6 +30,7 @@ class Client:
         labels = labels.cpu().numpy()
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
+
     # ADDED
     @staticmethod
     def print_step_loss(losses, step):
@@ -95,6 +96,8 @@ class Client:
         self.model.train()
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer, metric)
+        
+        return len(self.dataset), self.model.state_dict()
 
     def test(self, metric):
         """
