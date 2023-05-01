@@ -22,5 +22,5 @@ def get_parser():
     parser.add_argument('--test_interval', type=int, default=10, help='test interval')
     # New Argument:
     parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
-
+    parser.add_argument('--opt', type=str, choices=['SGD', 'adam'], default = 'SGD', help='Optimizer choice')
     return parser
