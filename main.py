@@ -195,7 +195,7 @@ def main():
 
     c = ClientCentr(args, train_datasets[0], test_datasets[1], model, False)
     print("### TRAIN ###")
-    c.train(metrics["eval_train"])
+    c.train()
     print("### TEST ###")
     c.test(metrics["test_same_dom"])
 
