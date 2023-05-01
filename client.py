@@ -47,7 +47,7 @@ class Client:
             return self.model(images)
         raise NotImplementedError
 
-    def run_epoch(self, cur_epoch, optimizer, metric):
+    def run_epoch(self, cur_epoch, optimizer):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
         :param cur_epoch: current epoch of training
