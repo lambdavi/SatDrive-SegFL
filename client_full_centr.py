@@ -120,7 +120,7 @@ class ClientCentr:
                 labels = labels.cpu().numpy()
                 prediction = prediction.cpu().numpy()
                 metric.update(labels, prediction)
-
+        print(metric.get_results())
             
 
         
