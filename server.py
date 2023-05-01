@@ -17,6 +17,7 @@ class Server:
 
     def select_clients(self):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
+        np.random.seed(self.args.seed)
         return np.random.choice(self.train_clients, num_clients, replace=False)
 
     def train_round(self, clients):
@@ -27,9 +28,11 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
-            # TODO: missing code here!
-            # c.train() ????
-            raise NotImplementedError
+            print(f"Client: {c.name} turn. ({i+1}/{len(clients)})")
+            #Update parameters of the client model
+            c.model.load_state_dict(self.model_params_dict)
+            update = c.train()
+            updates.append(update)
         return updates
 
     def aggregate(self, updates):
@@ -38,16 +41,42 @@ class Server:
         :param updates: updates received from the clients
         :return: aggregated parameters
         """
-        # TODO: missing code here!
-        raise NotImplementedError
+        total_weight = 0.
+        base = OrderedDict()
+
+        for (client_samples, client_model) in updates:
+            total_weight += client_samples
+            for key, value in client_model.items():
+                if key in base:
+                    base[key] += client_samples * value.type(torch.FloatTensor)
+                else:
+                    base[key] = client_samples * value.type(torch.FloatTensor)
+
+        averaged_sol_n = copy.deepcopy(self.model_params_dict)
+
+        for key, value in base.items():
+            if total_weight != 0:
+                averaged_sol_n[key] = value.to('cuda') / total_weight
+
+        return averaged_sol_n
 
     def train(self):
         """
         This method orchestrates the training the evals and tests at rounds level
         """
         for r in range(self.args.num_rounds):
-            # TODO: missing code here!
-            raise NotImplementedError
+            print("------------------")
+            print(f"Round {r} started.")
+            print("------------------")
+
+            # Select random subset of clients
+            chosen_client = self.select_clients()
+            # Train a round
+            updates = self.train_round(chosen_client)
+            # Aggregate the parameters
+            self.model_params_dict = self.aggregate(updates)
+            self.model.load_state_dict(self.model_params_dict, strict=False)            
+            ## self.eval_train()
 
     def eval_train(self):
         """
