@@ -31,7 +31,7 @@ class Server:
             print(f"Client: {c.name} turn. ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
-            update = c.train()
+            update = c.train(self.metrics["eval_train"])
             updates.append(update)
         return updates
 

@@ -188,15 +188,15 @@ def main():
     print('Done.')
 
     metrics = set_metrics(args)
-    #train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
-    """server = Server(args, train_clients, test_clients, model, metrics)
-    server.train()"""
+    train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
+    server = Server(args, train_clients, test_clients, model, metrics)
+    server.train()
 
-    c = Client(args, train_datasets[0], model, False, test_datasets[1])
+    """c = Client(args, train_datasets[0], model, False, test_datasets[1])
     print("### TRAIN ###")
     c.train(metrics["eval_train"])
     print("### TEST ###")
-    c.test(metrics["test_same_dom"])
+    c.test(metrics["test_same_dom"])"""
 
 
 if __name__ == '__main__':

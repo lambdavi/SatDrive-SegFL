@@ -54,7 +54,6 @@ class Client:
         :param optimizer: optimizer used for the local training
         """
 
-        metric.reset()
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
@@ -67,7 +66,6 @@ class Client:
             self.update_metric(metric, outputs, labels)
 
         print("-----------------------------------------------------")
-        print(f"Mean IoU after epoch {cur_epoch}: {metric.get_results()['Mean IoU']}")
         print(f"Loss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
         print("-----------------------------------------------------")
 
@@ -84,9 +82,12 @@ class Client:
             optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
 
         self.model.train()
+        metric.reset()
+
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer, metric)
-        
+        print(f"Mean IoU obtained: {metric.get_results()['Mean IoU']}")
+
         return len(self.dataset), self.model.state_dict()
 
     def test(self, metric):
