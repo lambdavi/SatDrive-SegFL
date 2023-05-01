@@ -63,11 +63,9 @@ class Client:
             loss.backward()
             # Update parameters
             optimizer.step()
-            self.update_metric(metric, outputs, labels)
+            #self.update_metric(metric, outputs, labels)
 
-        print("-----------------------------------------------------")
         print(f"Loss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
-        print("-----------------------------------------------------")
 
     def train(self, metric):
         # TODO: add a flag for eval_train, otherwise metric is not considered to speed up training 
@@ -83,10 +81,11 @@ class Client:
 
         self.model.train()
         metric.reset()
-
+        print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer, metric)
-        print(f"Mean IoU obtained: {metric.get_results()['Mean IoU']}")
+        #print(f"\n\t** Mean IoU obtained: {metric.get_results()['Mean IoU']} **")
+        print("-----------------------------------------------------")
 
         return len(self.dataset), self.model.state_dict()
 
@@ -104,7 +103,7 @@ class Client:
                 outputs = self._get_outputs(images) # Apply the loss
                 loss = self.reduction(self.criterion(outputs,labels),labels)
                 self.update_metric(metric, outputs, labels)
-            print(f"Test: Loss value at step: {(len(self.train_loader) + i + 1)}: {loss.item()}")
-            print(metric.get_results())
-        print("-----------------------------------------------------")
+            #print(f"Test: Loss value at step: {(len(self.test_loader) + i + 1)}: {loss.item()}")
+            res=metric.get_results()
+            print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 

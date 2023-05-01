@@ -75,19 +75,35 @@ class Server:
             updates = self.train_round(chosen_client)
             # Aggregate the parameters
             self.model_params_dict = self.aggregate(updates)
-            self.model.load_state_dict(self.model_params_dict, strict=False)            
-            ## self.eval_train()
+            self.model.load_state_dict(self.model_params_dict, strict=False)
+
+        print("------------------------------------")
+        print(f"Evaluation of the trainset started.")
+        print("------------------------------------")            
+        self.eval_train()
+        self.test()
 
     def eval_train(self):
         """
         This method handles the evaluation on the train clients
         """
-        # TODO: missing code here!
-        raise NotImplementedError
+        evalutation_client = self.train_clients[0]
+        self.train_clients[0].model.load_state_dict(self.model_params_dict)
+        evalutation_client.test(self.metrics["eval_train"])
 
     def test(self):
         """
             This method handles the test on the test clients
         """
-        # TODO: missing code here!
-        raise NotImplementedError
+        print("------------------------------------")
+        print(f"Test on SAME DOMAIN DATA started.")
+        print("------------------------------------")
+        self.test_clients[0].model.load_state_dict(self.model_params_dict)
+        self.test_clients[0].test(self.metrics["test_same_dom"])
+        print("------------------------------------")
+        print(f"Test on DIFFERENT DOMAIN DATA started.")
+        print("------------------------------------")
+        self.test_clients[1].model.load_state_dict(self.model_params_dict)
+        self.test_clients[1].test(self.metrics["test_diff_dom"])
+
+        
