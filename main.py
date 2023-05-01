@@ -194,9 +194,9 @@ def main():
 
     c = Client(args, train_datasets[0], model, False, test_datasets[1])
     print("### TRAIN ###")
-    c.train()
+    c.train(metrics["eval_train"])
     print("### TEST ###")
-    c.test(metrics["test_diff_dom"])
+    c.test(metrics["test_same_dom"])
 
 
 if __name__ == '__main__':

@@ -24,6 +24,7 @@ class IDDADataset(VisionDataset):
         self.list_samples = list_samples
         self.client_name = client_name
         self.target_transform = self.get_mapping()
+        
     @staticmethod
     def get_mapping():
         classes = class_eval

@@ -47,46 +47,32 @@ class Client:
             return self.model(images)
         raise NotImplementedError
 
-    def run_epoch(self, cur_epoch, optimizer):
+    def run_epoch(self, cur_epoch, optimizer, metric):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
 
-        # ADDED 
-        dict_all_epoch_losses = defaultdict(lambda: 0)
-        #self.loader.sampler.set_epoch(cur_epoch)
-
+        metric.reset()
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-
             outputs = self._get_outputs(images)
             loss = self.reduction(self.criterion(outputs,labels),labels)
-            #loss.backward()
-            dict_calc_losses = {'loss_tot': loss}
-            dict_calc_losses['loss_tot'].backward()
-
-            """test_print_interval = 100
-            if (cur_step + 1) % test_print_interval == 0:
-                self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)"""
-            # Backward pass
-            # loss.backward()
+            loss.backward()
             # Update parameters
             optimizer.step()
+            self.update_metric(metric, outputs, labels)
 
-            #optimizer.zero_grad()
+        print("-----------------------------------------------------")
+        print(f"Mean IoU after epoch {cur_epoch}: {metric.get_results()['Mean IoU']}")
+        print(f"Loss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
+        print("-----------------------------------------------------")
 
-            # To update metrics:
-            #self.update_metric(metric, outputs, labels)
-
-        print(f"Epoch {cur_epoch} ended.")
-        #print(metric.get_results())
-        self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)
-
-    def train(self):
+    def train(self, metric):
+        # TODO: add a flag for eval_train, otherwise metric is not considered to speed up training 
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -96,9 +82,10 @@ class Client:
             optimizer = torch.optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
         elif self.args.opt == 'adam':
             optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
+
         self.model.train()
         for epoch in range(self.args.num_epochs):
-            self.run_epoch(epoch, optimizer)
+            self.run_epoch(epoch, optimizer, metric)
         
         return len(self.dataset), self.model.state_dict()
 
@@ -115,8 +102,8 @@ class Client:
                 # Forward pass
                 outputs = self._get_outputs(images) # Apply the loss
                 loss = self.reduction(self.criterion(outputs,labels),labels)
-                _, prediction = outputs.max(dim=1)
-                labels = labels.cpu().numpy()
-                prediction = prediction.cpu().numpy()
-                metric.update(labels, prediction)
+                self.update_metric(metric, outputs, labels)
+            print(f"Test: Loss value at step: {(len(self.train_loader) + i + 1)}: {loss.item()}")
             print(metric.get_results())
+        print("-----------------------------------------------------")
+
