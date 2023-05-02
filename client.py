@@ -99,7 +99,7 @@ class Client:
         self.model.train()
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
-            self.run_epoch(epoch, optimizer, scheduler)
+            self.run_epoch(epoch, optimizer)
             if scheduler:
                 scheduler.step()
         print("-----------------------------------------------------")
