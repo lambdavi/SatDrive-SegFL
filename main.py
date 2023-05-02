@@ -77,20 +77,20 @@ def get_transforms(args):
     return train_transforms, test_transforms
 
 
-def read_femnist_dir(data_dir):
-    data = defaultdict(lambda: {})
-    files = os.listdir(data_dir)
-    files = [f for f in files if f.endswith('.json')]
-    for f in files:
-        file_path = os.path.join(data_dir, f)
-        with open(file_path, 'r') as inf:
-            cdata = json.load(inf)
-        data.update(cdata['user_data'])
-    return data
+# def read_femnist_dir(data_dir):
+#     data = defaultdict(lambda: {})
+#     files = os.listdir(data_dir)
+#     files = [f for f in files if f.endswith('.json')]
+#     for f in files:
+#         file_path = os.path.join(data_dir, f)
+#         with open(file_path, 'r') as inf:
+#             cdata = json.load(inf)
+#         data.update(cdata['user_data'])
+#     return data
 
 
-def read_femnist_data(train_data_dir, test_data_dir):
-    return read_femnist_dir(train_data_dir), read_femnist_dir(test_data_dir)
+# def read_femnist_data(train_data_dir, test_data_dir):
+#     return read_femnist_dir(train_data_dir), read_femnist_dir(test_data_dir)
 
 
 def get_datasets(args):
@@ -127,20 +127,20 @@ def get_datasets(args):
                                                 client_name='test_diff_dom')
         test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
 
-    elif args.dataset == 'femnist':
-        niid = args.niid
-        train_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'train')
-        test_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'test')
-        train_data, test_data = read_femnist_data(train_data_dir, test_data_dir)
+    # elif args.dataset == 'femnist':
+    #     niid = args.niid
+    #     train_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'train')
+    #     test_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'test')
+    #     train_data, test_data = read_femnist_data(train_data_dir, test_data_dir)
 
-        train_transforms, test_transforms = get_transforms(args)
+    #     train_transforms, test_transforms = get_transforms(args)
 
-        train_datasets, test_datasets = [], []
+    #     train_datasets, test_datasets = [], []
 
-        for user, data in train_data.items():
-            train_datasets.append(Femnist(data, train_transforms, user))
-        for user, data in test_data.items():
-            test_datasets.append(Femnist(data, test_transforms, user))
+    #     for user, data in train_data.items():
+    #         train_datasets.append(Femnist(data, train_transforms, user))
+    #     for user, data in test_data.items():
+    #         test_datasets.append(Femnist(data, test_transforms, user))
 
     else:
         raise NotImplementedError
@@ -168,6 +168,7 @@ def set_metrics(args):
 def gen_clients(args, train_datasets, test_datasets, model):
     clients = [[], []]
     for i, datasets in enumerate([train_datasets, test_datasets]):
+        # For each dataset datasets (one for each client), create and append a client
         for ds in datasets:
             clients[i].append(Client(args, ds, model, test_client=i == 1))
     return clients[0], clients[1]

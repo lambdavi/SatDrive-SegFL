@@ -100,10 +100,10 @@ class Client:
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
+
             if scheduler:
                 scheduler.step()
         print("-----------------------------------------------------")
-
         return len(self.dataset), self.model.state_dict()
 
     def test(self, metric):
