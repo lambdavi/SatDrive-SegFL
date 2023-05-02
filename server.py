@@ -15,9 +15,12 @@ class Server:
         self.metrics = metrics
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
 
-    def select_clients(self):
+    def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
-        np.random.seed(self.args.seed)
+        if seed:
+            np.random.seed(seed)
+        else:
+            np.random.seed(self.args.seed)
         return np.random.choice(self.train_clients, num_clients, replace=False)
 
     def train_round(self, clients):
@@ -71,7 +74,7 @@ class Server:
             print("------------------")
 
             # Select random subset of clients
-            chosen_client = self.select_clients()
+            chosen_client = self.select_clients(seed=r)
             # Train a round
             updates = self.train_round(chosen_client)
             # Aggregate the parameters
