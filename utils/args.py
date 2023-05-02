@@ -23,4 +23,6 @@ def get_parser():
     # New Argument:
     parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
     parser.add_argument('--opt', type=str, choices=['SGD', 'adam'], default = 'SGD', help='Optimizer choice')
+    parser.add_argument('--sched', type=str, choices=['lin', 'step'], default = None, help='Scheduler choice')
+
     return parser

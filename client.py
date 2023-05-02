@@ -5,6 +5,7 @@ from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
 from utils.utils import HardNegativeMining, MeanReduction
+from torch.optim.lr_scheduler import StepLR, LinearLR 
 
 
 class Client:
@@ -47,7 +48,7 @@ class Client:
             return self.model(images)
         raise NotImplementedError
 
-    def run_epoch(self, cur_epoch, optimizer, metric):
+    def run_epoch(self, cur_epoch, optimizer):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
         :param cur_epoch: current epoch of training
@@ -63,28 +64,44 @@ class Client:
             loss.backward()
             # Update parameters
             optimizer.step()
-            #self.update_metric(metric, outputs, labels)
+            
 
         print(f"Loss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
 
+    def get_optimizer_and_scheduler(self):
+         # Optimizer chocie
+        if self.args.opt == 'SGD':
+            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
+        elif self.args.opt == 'adam':
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
+        else:
+            raise NotImplementedError
+        
+        # Scheduler choice
+        if self.args.scheduler == "lin":
+            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.5, total_iters=30)
+        elif self.args.scheduler == "step":
+            scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+        else:
+            scheduler = None
+
+        return optimizer, scheduler
+
     def train(self, metric):
-        # TODO: add a flag for eval_train, otherwise metric is not considered to speed up training 
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
         :return: length of the local dataset, copy of the model parameters
         """
-        if self.args.opt == 'SGD':
-            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
-        elif self.args.opt == 'adam':
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
+        
+        optimizer, scheduler = self.get_optimizer_and_scheduler()
 
         self.model.train()
-        metric.reset()
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
-            self.run_epoch(epoch, optimizer, metric)
-        #print(f"\n\t** Mean IoU obtained: {metric.get_results()['Mean IoU']} **")
+            self.run_epoch(epoch, optimizer, scheduler, metric)
+            if scheduler:
+                scheduler.step()
         print("-----------------------------------------------------")
 
         return len(self.dataset), self.model.state_dict()

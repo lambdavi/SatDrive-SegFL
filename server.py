@@ -31,7 +31,7 @@ class Server:
             print(f"Client: {c.name} turn. ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
-            update = c.train(self.metrics["eval_train"])
+            update = c.train()
             updates.append(update)
         return updates
 
@@ -64,6 +64,7 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
+
         for r in range(self.args.num_rounds):
             print("------------------")
             print(f"Round {r} started.")

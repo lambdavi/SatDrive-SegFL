@@ -191,7 +191,7 @@ def main():
     if args.centr:
             c = Client(args, train_datasets[0], model, False, test_datasets[1])
             print("### TRAIN ###")
-            c.train(metrics["eval_train"])
+            c.train()
             print("### TEST ###")
             c.test(metrics["test_same_dom"])
     else:
