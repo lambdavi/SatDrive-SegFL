@@ -101,9 +101,4 @@ class Client:
                 labels = labels.to(self.device)
                 # Forward pass
                 outputs = self._get_outputs(images) # Apply the loss
-                loss = self.reduction(self.criterion(outputs,labels),labels)
                 self.update_metric(metric, outputs, labels)
-            #print(f"Test: Loss value at step: {(len(self.test_loader) + i + 1)}: {loss.item()}")
-            res=metric.get_results()
-            print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
-

@@ -87,9 +87,12 @@ class Server:
         """
         This method handles the evaluation on the train clients
         """
-        evalutation_client = self.train_clients[0]
-        self.train_clients[0].model.load_state_dict(self.model_params_dict)
-        evalutation_client.test(self.metrics["eval_train"])
+        self.metrics["eval_train"].reset()
+        for c in self.train_clients:
+            c.model.load_state_dict(self.model_params_dict)
+            c.test(self.metrics["eval_train"])
+        res=self.metrics["eval_train"].get_results()
+        print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def test(self):
         """
@@ -100,6 +103,7 @@ class Server:
         print("------------------------------------")
         self.test_clients[0].model.load_state_dict(self.model_params_dict)
         self.test_clients[0].test(self.metrics["test_same_dom"])
+        
         print("------------------------------------")
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
