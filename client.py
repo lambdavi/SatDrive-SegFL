@@ -87,7 +87,7 @@ class Client:
 
         return optimizer, scheduler
 
-    def train(self, metric):
+    def train(self):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -99,7 +99,7 @@ class Client:
         self.model.train()
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
-            self.run_epoch(epoch, optimizer, scheduler, metric)
+            self.run_epoch(epoch, optimizer, scheduler)
             if scheduler:
                 scheduler.step()
         print("-----------------------------------------------------")
