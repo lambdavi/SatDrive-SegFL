@@ -5,19 +5,24 @@ from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
 from utils.utils import HardNegativeMining, MeanReduction
+from torch.optim.lr_scheduler import StepLR, LinearLR 
 
 
 class Client:
 
-    def __init__(self, args, dataset, model, test_client=False):
+    def __init__(self, args, dataset, model, test_client=False, dataset_test=None):
         self.args = args
         self.dataset = dataset
         self.name = self.dataset.client_name
         self.model = model
         self.device = "cuda"
-        self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
-            if not test_client else None
-        self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
+        if self.args.centr:
+            self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True)
+            self.test_loader = DataLoader(dataset_test, batch_size=1, shuffle=False)
+        else:
+            self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
+                if not test_client else None
+            self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
@@ -43,44 +48,44 @@ class Client:
             return self.model(images)
         raise NotImplementedError
 
-    def run_epoch(self, cur_epoch, optimizer, metric):
+    def run_epoch(self, cur_epoch, optimizer):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
 
-        # ADDED 
-        dict_all_epoch_losses = defaultdict(lambda: 0)
-        #self.loader.sampler.set_epoch(cur_epoch)
-
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-
             outputs = self._get_outputs(images)
             loss = self.reduction(self.criterion(outputs,labels),labels)
-            #loss.backward()
-            dict_calc_losses = {'loss_tot': loss}
-            dict_calc_losses['loss_tot'].backward()
-
-            """test_print_interval = 100
-            if (cur_step + 1) % test_print_interval == 0:
-                self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)"""
-            # Backward pass
-            # loss.backward()
+            loss.backward()
             # Update parameters
             optimizer.step()
+            
 
-            #optimizer.zero_grad()
+        print(f"Loss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
 
-            # To update metrics:
-            #self.update_metric(metric, outputs, labels)
+    def get_optimizer_and_scheduler(self):
+         # Optimizer chocie
+        if self.args.opt == 'SGD':
+            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
+        elif self.args.opt == 'adam':
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
+        else:
+            raise NotImplementedError
+        
+        # Scheduler choice
+        if self.args.sched == "lin":
+            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.5, total_iters=30)
+        elif self.args.sched == "step":
+            scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+        else:
+            scheduler = None
 
-        print(f"Epoch {cur_epoch} ended.")
-        #print(metric.get_results())
-        self.print_step_loss(dict_calc_losses, len(self.train_loader) * cur_epoch + cur_step + 1)
+        return optimizer, scheduler
 
     def train(self):
         """
@@ -88,11 +93,17 @@ class Client:
         (by calling the run_epoch method for each local epoch of training)
         :return: length of the local dataset, copy of the model parameters
         """
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, weight_decay=0.00001, momentum=0.9)
+        
+        optimizer, scheduler = self.get_optimizer_and_scheduler()
 
         self.model.train()
+        print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
+
+            if scheduler:
+                scheduler.step()
+        print("-----------------------------------------------------")
         return len(self.dataset), self.model.state_dict()
 
     def test(self, metric):
@@ -107,9 +118,4 @@ class Client:
                 labels = labels.to(self.device)
                 # Forward pass
                 outputs = self._get_outputs(images) # Apply the loss
-                loss = self.reduction(self.criterion(outputs,labels),labels)
-                _, prediction = outputs.max(dim=1)
-                labels = labels.cpu().numpy()
-                prediction = prediction.cpu().numpy()
-                metric.update(labels, prediction)
-            print(metric.get_results())
+                self.update_metric(metric, outputs, labels)

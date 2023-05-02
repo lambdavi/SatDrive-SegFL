@@ -6,15 +6,6 @@ from collections import defaultdict
 from torch.utils.data import DataLoader
 from utils.utils import HardNegativeMining, MeanReduction
 import torchvision.transforms as T
-# TO be deleted
-class_eval = [255, 2, 4, 255, 11, 5, 0, 0, 1, 8, 13, 3, 7, 6, 255, 255, 15, 14, 12, 9, 10]
-
-def get_mapping():
-        classes = class_eval
-        mapping = np.zeros((256,), dtype=np.int64) + 255
-        for i, cl in enumerate(classes):
-            mapping[i] = cl
-        return lambda x: torch.from_numpy(mapping[x])
 
 class ClientCentr:
 
@@ -38,6 +29,7 @@ class ClientCentr:
         labels = labels.cpu().numpy()
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
+
     # ADDED
     @staticmethod
     def print_step_loss(losses, step):
@@ -102,6 +94,9 @@ class ClientCentr:
         self.model.train()
         for epoch in range(self.args.num_epochs):
             self.run_epoch(epoch, optimizer)
+        
+        return len(self.dataset), self.model.state_dict()
+
 
     def test(self, metric):
         """
@@ -120,7 +115,7 @@ class ClientCentr:
                 labels = labels.cpu().numpy()
                 prediction = prediction.cpu().numpy()
                 metric.update(labels, prediction)
-
+        print(metric.get_results())
             
 
         
