@@ -70,7 +70,7 @@ class Server:
 
         for r in range(self.args.num_rounds):
             print("------------------")
-            print(f"Round {r} started.")
+            print(f"Round {r+1}/{self.args.num_rounds} started.")
             print("------------------")
 
             # Select random subset of clients
