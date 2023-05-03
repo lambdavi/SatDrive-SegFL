@@ -61,7 +61,7 @@ class Client:
             optimizer.step()
             
 
-        print(f"\tLoss value at epoch:{cur_epoch}/{self.args.num_epochs}: {loss.item()}")
+        print(f"\tLoss value at epoch {cur_epoch}/{self.args.num_epochs}: {loss.item()}")
 
     def get_optimizer_and_scheduler(self):
          # Optimizer chocie
