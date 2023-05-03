@@ -191,18 +191,29 @@ def main():
     metrics = set_metrics(args)
     if args.centr:
             c = Client(args, train_datasets[0], model, False)
+            
             print("### TRAIN ###")
             c.train()
+
             print("### TEST ###")
             ce = Client(args, train_datasets[0], c.model, test_client=True)
             ce.test(metrics["eval_train"])
             res=metrics["eval_train"].get_results()
             print(f'Eval_train: Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
+
             print("")
-            ct = Client(args, test_datasets[0], c.model, test_client=True)
-            ct.test(metrics["test_same_dom"])
+
+            ce.dataset = test_datasets[0]
+            ce.test(metrics["test_same_dom"])
             res=metrics["test_same_dom"].get_results()
             print(f'Test_same_dom: Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
+
+            print("")
+
+            ce.dataset = test_datasets[1]
+            ce.test(metrics["test_diff_dom"])
+            res=metrics["test_diff_dom"].get_results()
+            print(f'Test_diff_dom: Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
     else:
         train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
         server = Server(args, train_clients, test_clients, model, metrics)
