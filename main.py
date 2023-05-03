@@ -194,7 +194,7 @@ def main():
             print("### TRAIN ###")
             c.train()
             print("### TEST ###")
-            ce = Client(args, train_datasets, c.model, test_client=True)
+            ce = Client(args, train_datasets[0], c.model, test_client=True)
             ce.test(metrics["eval_train"])
             res=metrics["eval_train"].get_results()
             print(f'Eval_train: Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
