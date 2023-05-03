@@ -55,8 +55,8 @@ def get_transforms(args):
     # TODO: test your data augmentation by changing the transforms here!
     if args.model == 'deeplabv3_mobilenetv2':
         train_transforms = sstr.Compose([
-            sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
             sstr.RandomHorizontalFlip(),
+            sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
