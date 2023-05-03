@@ -66,7 +66,7 @@ class Client:
             optimizer.step()
             
 
-        print(f"Loss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
+        print(f"\tLoss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
 
     def get_optimizer_and_scheduler(self):
          # Optimizer chocie

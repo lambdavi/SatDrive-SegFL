@@ -195,6 +195,8 @@ def main():
             c.train()
             print("### TEST ###")
             c.test(metrics["test_same_dom"])
+            res=metrics["test_same_dom"].get_results()
+            print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
     else:
         train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
         server = Server(args, train_clients, test_clients, model, metrics)
