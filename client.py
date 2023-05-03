@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader
 from utils.utils import HardNegativeMining, MeanReduction
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 
-
 class Client:
 
     def __init__(self, args, dataset, model, test_client=False):
@@ -15,7 +14,7 @@ class Client:
         self.dataset = dataset
         self.name = self.dataset.client_name
         self.model = model
-        self.device = "cuda"
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
@@ -50,7 +49,7 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-
+        
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
@@ -62,20 +61,20 @@ class Client:
             optimizer.step()
             
 
-        print(f"\tLoss value at step: {(len(self.train_loader) * cur_epoch + cur_step + 1)}: {loss.item()}")
+        print(f"\tLoss value at epoch:{cur_epoch}/{self.args.num_epochs}: {loss.item()}")
 
     def get_optimizer_and_scheduler(self):
          # Optimizer chocie
         if self.args.opt == 'SGD':
-            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
+            optimizer = optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
         elif self.args.opt == 'adam':
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
         else:
             raise NotImplementedError
         
         # Scheduler choice
         if self.args.sched == "lin":
-            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.2, total_iters=9, verbose=True)
+            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.01, total_iters=10, verbose=True)
         elif self.args.sched == "step":
             scheduler = StepLR(optimizer, step_size=5, gamma=0.1, verbose=True)
         else:

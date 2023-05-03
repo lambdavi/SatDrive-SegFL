@@ -68,9 +68,14 @@ class Server:
         This method orchestrates the training the evals and tests at rounds level
         """
 
-        for r in range(self.args.num_rounds):
+        num_rounds = self.args.num_rounds
+
+        if self.args.centr:
+            num_rounds = 1
+        
+        for r in range(num_rounds):
             print("------------------")
-            print(f"Round {r+1}/{self.args.num_rounds} started.")
+            print(f"Round {r+1}/{num_rounds} started.")
             print("------------------")
 
             # Select random subset of clients
