@@ -74,7 +74,7 @@ class Client:
         
         # Scheduler choice
         if self.args.sched == "lin":
-            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.1, total_iters=10, verbose=True)
+            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.1, total_iters=self.args.num_epochs, verbose=True)
         elif self.args.sched == "step":
             scheduler = StepLR(optimizer, step_size=5, gamma=0.1, verbose=True)
         else:
