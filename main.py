@@ -61,7 +61,7 @@ def get_transforms(args):
         ]), 
             sstr.Compose([
                 sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
-                RandomApply(sstr.RandomHorizontalFlip(), 0.5),
+                #RandomApply(sstr.RandomHorizontalFlip(), 0.5),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ]), 
