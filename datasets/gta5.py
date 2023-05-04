@@ -32,8 +32,8 @@ class_map = {
    33: 15,  # bicycle
 }
 
-IMAGES_DIR = "/images"
-LABELS_DIR = "/labels"
+IMAGES_DIR = "images"
+LABELS_DIR = "labels"
 
 class GTA5Dataset(VisionDataset):
 
