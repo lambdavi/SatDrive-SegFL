@@ -2,6 +2,8 @@ import os
 import json
 from collections import defaultdict
 
+os.chdir("/kaggle/working/mldl23/")
+
 import torch
 import random
 
@@ -20,7 +22,6 @@ from datasets.idda import IDDADataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
-os.chdir("/kaggle/working/mldl23/")
 def set_seed(random_seed):
     random.seed(random_seed)
     np.random.seed(random_seed)
