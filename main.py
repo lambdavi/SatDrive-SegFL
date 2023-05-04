@@ -56,9 +56,8 @@ def model_init(args):
 def get_transforms(args):
     # TODO: test your data augmentation by changing the transforms here!
     if args.model == 'deeplabv3_mobilenetv2':
-        train_transforms = [sstr.Compose([
-            RandomApply(sstr.Lambda(lambda x: add_rain(x)), p=0.3)
-        ]), 
+        train_transforms = [
+            RandomApply(sstr.Lambda(lambda x: add_rain(x)), p=0.3), 
             sstr.Compose([
                 sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
                 #RandomApply(sstr.RandomHorizontalFlip(), 0.5),
