@@ -64,7 +64,7 @@ class Client:
         if self.args.opt == 'SGD':
             optimizer = optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
         elif self.args.opt == 'adam':
-            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-1), weight_decay=self.args.wd)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-8), weight_decay=self.args.wd)
         else:
             raise NotImplementedError
         
