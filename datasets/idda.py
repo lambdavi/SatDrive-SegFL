@@ -18,7 +18,7 @@ class IDDADataset(VisionDataset):
     def __init__(self,
                  root: str,
                  list_samples: list[str],
-                 transform: tr.Compose = None,
+                 transform: list[tr] = None,
                  client_name: str = None):
         super().__init__(root=root, transform=transform, target_transform=None)
         self.list_samples = list_samples
