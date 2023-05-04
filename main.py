@@ -2,8 +2,6 @@ import os
 import json
 from collections import defaultdict
 
-os.chdir("/kaggle/working/mldl23/")
-
 import torch
 import random
 
