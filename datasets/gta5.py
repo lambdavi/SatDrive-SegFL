@@ -32,6 +32,9 @@ class_map = {
    33: 15,  # bicycle
 }
 
+IMAGES_DIR = "/images"
+LABELS_DIR = "/labels"
+
 class GTA5Dataset(VisionDataset):
 
     def __init__(self,
@@ -52,8 +55,8 @@ class GTA5Dataset(VisionDataset):
         return lambda x: from_numpy(mapping[x])
 
     def __getitem__(self, index: int) -> Any:
-        image = Image.open(os.path.join(self.root, self.list_samples[index]+".png")).convert("RGB")
-        label = Image.open(os.path.join(self.root, self.list_samples[index]+".png"))
+        image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index]+".png")).convert("RGB")
+        label = Image.open(os.path.join(self.root, LABELS_DIR, self.list_samples[index]+".png"))
         if self.transform: # != None
             image, label = self.transform(image, label)
         if self.target_transform:
