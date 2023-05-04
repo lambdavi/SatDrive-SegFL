@@ -8,8 +8,8 @@ import random
 import numpy as np
 from torchvision.models import resnet18
 
-import kaggle.working.mldl23.datasets.ss_transforms as sstr
-import mldl23.datasets.np_transforms as nptr
+import datasets.ss_transforms as sstr
+import datasets.np_transforms as nptr
 
 from torch import nn
 from client import Client
@@ -20,7 +20,7 @@ from datasets.idda import IDDADataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
-
+os.chdir("/kaggle/working/mldl23/")
 def set_seed(random_seed):
     random.seed(random_seed)
     np.random.seed(random_seed)
