@@ -8,7 +8,7 @@ import random
 import numpy as np
 from torchvision.models import resnet18
 
-import mldl23.datasets.ss_transforms as sstr
+import kaggle.working.mldl23.datasets.ss_transforms as sstr
 import mldl23.datasets.np_transforms as nptr
 
 from torch import nn
