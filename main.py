@@ -22,6 +22,7 @@ from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
 from torchvision.transforms import RandomApply
 import cv2
+from PIL import Image
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -62,7 +63,7 @@ def get_transforms(args):
             ]),
             sstr.Compose([
                 sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
-                #RandomApply(sstr.RandomHorizontalFlip(), 0.5),
+                sstr.RandomHorizontalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ]), 
@@ -101,36 +102,51 @@ def get_transforms(args):
 #     return read_femnist_dir(train_data_dir), read_femnist_dir(test_data_dir)
 
 def generate_random_lines(imshape, slant, drop_length):
-    drops=[]    
-    for i in range(1500): ## If You want heavy rain, try increasing this        
-        if slant<0:            
-            x= np.random.randint(slant,imshape[1])        
-        else:            
-            x= np.random.randint(0,imshape[1]-slant)        
-        y= np.random.randint(0,imshape[0]-drop_length)        
-        drops.append((x,y))    
+    drops = []
+    num_drops = 1500
+    x = np.random.randint(0, imshape[1], size=(num_drops,))
+    y = np.random.randint(0, imshape[0]-drop_length, size=(num_drops,))
+    if slant < 0:
+        x += slant
+    else:
+        x -= slant
+    drops = np.column_stack((x, y)).tolist()
     return drops
-                
+
 def add_rain(pil_image):
-    #image from pil to cv2        
+    # Convert PIL image to OpenCV image
     open_cv_image = np.array(pil_image)
     image = open_cv_image[:, :, ::-1].copy()
-    imshape = image.shape    
-    slant_extreme=10    
-    slant= np.random.randint(-slant_extreme,slant_extreme)     
-    drop_length=20    
-    drop_width=2    
-    drop_color=(200,200,200)  
-    rain_drops= generate_random_lines(imshape,slant,drop_length)        
-    for rain_drop in rain_drops:        
-        cv2.line(image,(rain_drop[0],rain_drop[1]),(rain_drop[0]+slant,rain_drop[1]+drop_length),drop_color,drop_width)    
-        image= cv2.blur(image,(7,7)) ## rainy view are blurry        
-        brightness_coefficient = 0.7 ## rainy days are usually shady     
-        image_HLS = cv2.cvtColor(image,cv2.COLOR_RGB2HLS) ## Conversion to HLS    
-        image_HLS[:,:,1] = image_HLS[:,:,1]*brightness_coefficient ## scale pixel values down for channel 1(Lightness)    
-        image_RGB = cv2.cvtColor(image_HLS,cv2.COLOR_HLS2RGB) ## Conversion to RGB    
-    return image_RGB
-
+    
+    # Generate random lines using numpy functions
+    imshape = image.shape
+    slant_extreme = 10
+    slant = np.random.randint(-slant_extreme, slant_extreme)
+    drop_length = 20
+    drop_width = 2
+    drop_color = (200, 200, 200)
+    x = np.arange(0, imshape[1], 10)
+    y = np.random.randint(0, imshape[0], size=len(x))
+    rain_drops = np.column_stack((x, y))
+    
+    # Draw rain drops using OpenCV function
+    for rain_drop in rain_drops:
+        cv2.line(image, (rain_drop[0], rain_drop[1]), 
+                 (rain_drop[0]+slant, rain_drop[1]+drop_length), 
+                 drop_color, drop_width)
+    
+    # Blur the image using OpenCV function
+    image = cv2.blur(image, (7, 7))
+    
+    # Adjust the brightness of the image
+    brightness_coefficient = 0.7
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    image[:, :, 1] = image[:, :, 1] * brightness_coefficient
+    image = cv2.cvtColor(image, cv2.COLOR_HLS2RGB)
+    
+    # Convert OpenCV image to PIL image and return
+    im_pil = Image.fromarray(image)
+    return im_pil
 def get_datasets(args):
 
     train_datasets = []

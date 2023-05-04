@@ -37,8 +37,11 @@ class IDDADataset(VisionDataset):
         image = Image.open(os.path.join(self.root,IMG_DIR, self.list_samples[index]+".jpg")).convert("RGB")
         label = Image.open(os.path.join(self.root, LAB_DIR, self.list_samples[index]+".png"))
         if self.transform: # != None
-            image = self.transform[0](image)
-            image, label = self.transform[1](image, label)
+            if isinstance(self.transform, list):
+                image = self.transform[0](image)
+                image, label = self.transform[1](image, label)
+            else:
+                image, label = self.transform(image, label)
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
