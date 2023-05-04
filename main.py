@@ -20,6 +20,9 @@ from datasets.idda import IDDADataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
+from torchvision.transforms import RandomApply
+import cv2
+
 def set_seed(random_seed):
     random.seed(random_seed)
     np.random.seed(random_seed)
@@ -53,12 +56,16 @@ def model_init(args):
 def get_transforms(args):
     # TODO: test your data augmentation by changing the transforms here!
     if args.model == 'deeplabv3_mobilenetv2':
-        train_transforms = sstr.Compose([
-            sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
-            sstr.RandomHorizontalFlip(),
-            sstr.ToTensor(),
-            sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+        train_transforms = [sstr.Compose([
+            RandomApply(sstr.Lambda(lambda x: add_rain(x)), p=0.3)
+        ]), 
+            sstr.Compose([
+                sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
+                RandomApply(sstr.RandomHorizontalFlip(), 0.5),
+                sstr.ToTensor(),
+                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ]), 
+        ]
         test_transforms = sstr.Compose([
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -92,6 +99,36 @@ def get_transforms(args):
 # def read_femnist_data(train_data_dir, test_data_dir):
 #     return read_femnist_dir(train_data_dir), read_femnist_dir(test_data_dir)
 
+def generate_random_lines(imshape, slant, drop_length):
+    drops=[]    
+    for i in range(1500): ## If You want heavy rain, try increasing this        
+        if slant<0:            
+            x= np.random.randint(slant,imshape[1])        
+        else:            
+            x= np.random.randint(0,imshape[1]-slant)        
+        y= np.random.randint(0,imshape[0]-drop_length)        
+        drops.append((x,y))    
+    return drops
+                
+def add_rain(pil_image):
+    #image from pil to cv2        
+    open_cv_image = np.array(pil_image)
+    image = open_cv_image[:, :, ::-1].copy()
+    imshape = image.shape    
+    slant_extreme=10    
+    slant= np.random.randint(-slant_extreme,slant_extreme)     
+    drop_length=20    
+    drop_width=2    
+    drop_color=(200,200,200)  
+    rain_drops= generate_random_lines(imshape,slant,drop_length)        
+    for rain_drop in rain_drops:        
+        cv2.line(image,(rain_drop[0],rain_drop[1]),(rain_drop[0]+slant,rain_drop[1]+drop_length),drop_color,drop_width)    
+        image= cv2.blur(image,(7,7)) ## rainy view are blurry        
+        brightness_coefficient = 0.7 ## rainy days are usually shady     
+        image_HLS = cv2.cvtColor(image,cv2.COLOR_RGB2HLS) ## Conversion to HLS    
+        image_HLS[:,:,1] = image_HLS[:,:,1]*brightness_coefficient ## scale pixel values down for channel 1(Lightness)    
+        image_RGB = cv2.cvtColor(image_HLS,cv2.COLOR_HLS2RGB) ## Conversion to RGB    
+    return image_RGB
 
 def get_datasets(args):
 
