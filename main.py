@@ -8,8 +8,8 @@ import random
 import numpy as np
 from torchvision.models import resnet18
 
-import datasets.ss_transforms as sstr
-import datasets.np_transforms as nptr
+import mldl23.datasets.ss_transforms as sstr
+import mldl23.datasets.np_transforms as nptr
 
 from torch import nn
 from client import Client
