@@ -58,7 +58,7 @@ def get_transforms(args):
     if args.model == 'deeplabv3_mobilenetv2':
         train_transforms = [
             sstr.Compose([
-                RandomApply(torch.nn.ModuleList([sstr.Lambda(lambda x: add_rain(x))], p=0.3))
+                RandomApply(torch.nn.ModuleList([sstr.Lambda(lambda x: add_rain(x))]), p=0.3)
             ]),
             sstr.Compose([
                 sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
