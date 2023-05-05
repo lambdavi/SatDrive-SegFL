@@ -155,8 +155,12 @@ def get_datasets(args):
         all_data_train = []
         with open(os.path.join(root, 'train.txt'), 'r') as f:
             string = f.readline().strip()
+            """
             image_name = string.split(".")[0].split("/")[2]
             all_data_train.append(image_name)
+            """
+            all_data_train.append(string)
+
         f.close()
 
         if args.centr:
