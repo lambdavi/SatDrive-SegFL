@@ -22,8 +22,7 @@ from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
 from torchvision.transforms import RandomApply
-import cv2
-from PIL import Image
+
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -53,7 +52,6 @@ def model_init(args):
         # TODO: missing code here!
         raise NotImplementedError
     raise NotImplementedError
-
 
 def get_transforms(args):
     # TODO: test your data augmentation by changing the transforms here!
@@ -167,7 +165,6 @@ def set_metrics(args):
     else:
         raise NotImplementedError
     return metrics
-
 
 def gen_clients(args, train_datasets, test_datasets, model):
     clients = [[], []]
