@@ -14,3 +14,4 @@ mega.download(url)
 subprocess.call(["unzip", "data.zip"])
 
 os.remove("data.zip")
+os.rename("data/GTA5", "data/gta5")
