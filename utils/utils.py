@@ -4,6 +4,7 @@ import numpy as np
 # Internal function
 def split_list_numpy(lst, m):
     arr = np.array(lst)
+    print(len(lst))
     split_sizes = np.random.randint(1, len(lst), size=m-1)
     split_sizes.sort()
     return np.split(arr, split_sizes)
