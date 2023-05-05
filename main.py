@@ -18,6 +18,7 @@ from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
 from datasets.idda import IDDADataset
+from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
@@ -36,6 +37,8 @@ def set_seed(random_seed):
 def get_dataset_num_classes(dataset):
     if dataset == 'idda':
         return 16
+    if dataset == 'gta5':
+        return 20
     if dataset == 'femnist':
         return 62
     raise NotImplementedError
@@ -144,10 +147,58 @@ def get_datasets(args):
         for user, data in test_data.items():
             test_datasets.append(Femnist(data, test_transforms, user))
 
+    elif args.dataset == 'gta5':
+        root = 'data/gta5'
+
+        all_data_train = []
+        with open(os.path.join(root, 'train.txt'), 'r') as f:
+            string = f.readline().strip()
+            image_name = string.split(".")[0].split("/")[2]
+            all_data_train.append(image_name)
+        f.close()
+
+        if args.centr:
+            # If centralized we get all training data on one single client
+            print("Centralized mode set")
+            train_datasets.append(GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms,
+                                                client_name='centralized'))
+        else:
+            # Otherwise we divide data in multiple datasets.
+            print("Distributed Mode Set")
+
+            total_client_splits = split_list_numpy(all_data_train, args.client_per_round)
+            partial_client_splits = get_some(total_client_splits, round(args.client_per_round / 2))
+            
+            for i, samples in enumerate(partial_client_splits):
+                train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
+                                                client_name="client_"+i))
+                
+        test_data = []
+        with open(os.path.join(root, 'test.txt'), 'r') as f:
+            string = f.readline().strip()
+            image_name = string.split(".")[0].split("/")[2]
+            test_data.append(image_name)
+        f.close()
+
+        test_datasets = [GTA5Dataset(root=root, list_samples=test_data, transform=test_transforms,
+                                                client_name='client_test')]
+        
     else:
         raise NotImplementedError
 
     return train_datasets, test_datasets
+
+# Internal function
+def split_list_numpy(lst, m):
+    arr = np.array(lst)
+    split_sizes = np.random.randint(1, len(lst), size=m-1)
+    split_sizes.sort()
+    return np.split(arr, split_sizes)
+
+# Internal function
+def get_some(lst: np.ndarray, n: int):
+    indeces =  np.random.randint(1, len(lst), size=n)
+    return lst[indeces]
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
