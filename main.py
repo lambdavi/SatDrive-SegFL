@@ -155,9 +155,6 @@ def get_datasets(args):
         all_data_train = []
         with open(os.path.join(root, 'train.txt'), 'r') as f:
             all_data_train = f.read().splitlines()
-
-        print(all_data_train[0])
-        print(len(all_data_train))
         f.close()
         
 
