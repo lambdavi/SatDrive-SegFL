@@ -112,7 +112,7 @@ class Server:
         This method handles the evaluation on the train clients
         """
         self.metrics["eval_train"].reset()
-        self.validation_clients[0].load_state_dict(self.model_params_dict)
+        self.validation_clients[0].model.load_state_dict(self.model_params_dict)
         self.validation_clients[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Validation: Mean IoU: {res["Mean IoU"]}')
