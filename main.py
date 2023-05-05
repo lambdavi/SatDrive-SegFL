@@ -17,6 +17,7 @@ from client import Client
 from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
+from utils.utils import split_list_numpy, get_some
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
@@ -187,18 +188,6 @@ def get_datasets(args):
         raise NotImplementedError
 
     return train_datasets, test_datasets
-
-# Internal function
-def split_list_numpy(lst, m):
-    arr = np.array(lst)
-    split_sizes = np.random.randint(1, len(lst), size=m-1)
-    split_sizes.sort()
-    return np.split(arr, split_sizes)
-
-# Internal function
-def get_some(lst: np.ndarray, n: int):
-    indeces =  np.random.randint(1, len(lst), size=n)
-    return lst[indeces]
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)

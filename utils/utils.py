@@ -1,5 +1,17 @@
 import torch.nn as nn
+import numpy as np
 
+# Internal function
+def split_list_numpy(lst, m):
+    arr = np.array(lst)
+    split_sizes = np.random.randint(1, len(lst), size=m-1)
+    split_sizes.sort()
+    return np.split(arr, split_sizes)
+
+# Internal function
+def get_some(lst: np.ndarray, n: int):
+    indeces =  np.random.randint(1, len(lst), size=n)
+    return lst[indeces]
 
 class HardNegativeMining(nn.Module):
 
@@ -14,7 +26,6 @@ class HardNegativeMining(nn.Module):
         tk = loss.topk(dim=1, k=int(self.perc * p))
         loss = tk[0].mean()
         return loss
-
 
 class MeanReduction:
     def __call__(self, x, target):
