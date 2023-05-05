@@ -10,7 +10,7 @@ class Server:
         self.args = args
         self.train_clients = train_clients
         self.test_clients = test_clients
-        self.valid_clints = valid_clients
+        self.validation_clients = valid_clients
         self.model = model
         self.metrics = metrics
         self.activate_val = valid
