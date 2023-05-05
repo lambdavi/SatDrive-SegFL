@@ -154,14 +154,12 @@ def get_datasets(args):
         # Extract all data from train.txt
         all_data_train = []
         with open(os.path.join(root, 'train.txt'), 'r') as f:
-            image = f.readline()
-            """
-            image_name = string.split(".")[0].split("/")[2]
-            all_data_train.append(image_name)
-            """
-            all_data_train.append(image)
+            all_data_train = f.read().splitlines()
 
+        print(all_data_train[0])
+        print(len(all_data_train))
         f.close()
+        
 
         if args.centr:
             # If centralized we get all training data on one single client
