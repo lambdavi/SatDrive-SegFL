@@ -5,9 +5,6 @@ from PIL import Image
 from torch import from_numpy
 from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
-from torchvision.utils import save_image
-
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 class_eval = [255, 2, 4, 255, 11, 5, 0, 0, 1, 8, 13, 3, 7, 6, 255, 255, 15, 14, 12, 9, 10]
 IMG_DIR = "images"
