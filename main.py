@@ -179,11 +179,11 @@ def get_datasets(args):
                                                 client_name="client_"+str(i)))
         
         # Test on IDDA
-        with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
+        with open(os.path.join(root_idda, 'test_same_dom.txt'), 'r') as f:
             test_same_dom_data = f.read().splitlines()
             test_same_dom_dataset = IDDADataset(root=root_idda, list_samples=test_same_dom_data, transform=test_transforms,
                                                 client_name='test_same_dom')
-        with open(os.path.join(root, 'test_diff_dom.txt'), 'r') as f:
+        with open(os.path.join(root_idda, 'test_diff_dom.txt'), 'r') as f:
             test_diff_dom_data = f.read().splitlines()
             test_diff_dom_dataset = IDDADataset(root=root_idda, list_samples=test_diff_dom_data, transform=test_transforms,
                                                 client_name='test_diff_dom')
@@ -192,7 +192,7 @@ def get_datasets(args):
         # Setting up IDDA as validation set
         root_idda = "data/idda"
         validation_data = []
-        with open(os.path.join(root, 'train.txt'), 'r') as f:
+        with open(os.path.join(root_idda, 'train.txt'), 'r') as f:
             all_data = f.read().splitlines()
         validation_data.append(IDDADataset(root=root_idda, list_samples=all_data, transform=train_transforms,
                                              client_name='centralized'))
