@@ -4,7 +4,6 @@ import numpy as np
 # Internal function
 def split_list_numpy(lst, m):
     arr = np.array(lst)
-    print(len(lst))
     split_sizes = np.random.randint(1, len(lst), size=m-1)
     split_sizes.sort()
     return np.split(arr, split_sizes)
@@ -12,7 +11,6 @@ def split_list_numpy(lst, m):
 # Internal function
 def get_some(lst: np.ndarray, n: int):
     indeces =  np.random.randint(1, len(lst), size=n)
-    print(indeces)
     return lst[indeces]
 
 class HardNegativeMining(nn.Module):

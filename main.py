@@ -167,7 +167,6 @@ def get_datasets(args):
             print("Distributed Mode Set")
 
             total_client_splits = split_list_numpy(all_data_train, args.clients_per_round*2)
-            print(len(total_client_splits))
             #partial_client_splits = get_some(total_client_splits, round(args.clients_per_round / 2))
             
             for i, samples in enumerate(total_client_splits):
