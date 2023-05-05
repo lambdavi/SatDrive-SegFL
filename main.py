@@ -151,6 +151,7 @@ def get_datasets(args):
     elif args.dataset == 'gta5':
         root = 'data/gta5'
 
+        # Extract all data from train.txt
         all_data_train = []
         with open(os.path.join(root, 'train.txt'), 'r') as f:
             string = f.readline().strip()
@@ -173,21 +174,32 @@ def get_datasets(args):
             for i, samples in enumerate(partial_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
                                                 client_name="client_"+i))
-                
-        test_data = []
-        with open(os.path.join(root, 'test.txt'), 'r') as f:
-            string = f.readline().strip()
-            image_name = string.split(".")[0].split("/")[2]
-            test_data.append(image_name)
-        f.close()
-
-        test_datasets = [GTA5Dataset(root=root, list_samples=test_data, transform=test_transforms,
-                                                client_name='client_test')]
         
+        # Test on IDDA
+        with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
+            test_same_dom_data = f.read().splitlines()
+            test_same_dom_dataset = IDDADataset(root=root_idda, list_samples=test_same_dom_data, transform=test_transforms,
+                                                client_name='test_same_dom')
+        with open(os.path.join(root, 'test_diff_dom.txt'), 'r') as f:
+            test_diff_dom_data = f.read().splitlines()
+            test_diff_dom_dataset = IDDADataset(root=root_idda, list_samples=test_diff_dom_data, transform=test_transforms,
+                                                client_name='test_diff_dom')
+        test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
+        
+        # Setting up IDDA as validation set
+        root_idda = "data/idda"
+        validation_data = []
+        with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data = f.read().splitlines()
+        validation_data.append(IDDADataset(root=root_idda, list_samples=all_data, transform=train_transforms,
+                                             client_name='centralized'))
+        
+        return train_datasets, test_datasets, validation_data
+
     else:
         raise NotImplementedError
 
-    return train_datasets, test_datasets
+    return train_datasets, test_datasets, None
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
@@ -206,14 +218,15 @@ def set_metrics(args):
         raise NotImplementedError
     return metrics
 
-def gen_clients(args, train_datasets, test_datasets, model):
-    clients = [[], []]
+def gen_clients(args, train_datasets, test_datasets, validation_datasets, model):
+    clients = [[], [], []]
     for i, datasets in enumerate([train_datasets, test_datasets]):
         # For each dataset datasets (one for each client), create and append a client
         for ds in datasets:
             clients[i].append(Client(args, ds, model, test_client=i == 1))
-    return clients[0], clients[1]
-
+    if validation_datasets:
+        clients[2].append(Client(args, validation_datasets, model, test_client=True))
+    return clients[0], clients[1], clients[2]
 
 def main():
     parser = get_parser()
@@ -226,13 +239,18 @@ def main():
     print('Done.')
 
     print('Generate datasets...')
-    train_datasets, test_datasets = get_datasets(args)
+    train_datasets, test_datasets, validation_dataset = get_datasets(args)
     print('Done.')
 
     metrics = set_metrics(args)
     
-    train_clients, test_clients = gen_clients(args, train_datasets, test_datasets, model)
-    server = Server(args, train_clients, test_clients, model, metrics)
+    train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
+
+    if args.datataset == "gta5":
+        server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
+    else: 
+        server = Server(args, train_clients, test_clients, model, metrics)
+
     server.train()
 
 if __name__ == '__main__':
