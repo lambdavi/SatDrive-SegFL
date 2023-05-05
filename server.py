@@ -86,7 +86,8 @@ class Server:
             # Aggregate the parameters
             self.model_params_dict = self.aggregate(updates)
             self.model.load_state_dict(self.model_params_dict, strict=False)
-            self.eval_validation()
+            if self.activate_val:
+                self.eval_validation()
 
         print("------------------------------------")
         print(f"Evaluation of the trainset started.")
