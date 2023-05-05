@@ -10,3 +10,7 @@ print(mega.filename(url))
 
 # Downloading a file from url
 mega.download(url)
+
+subprocess.call(["unzip", "data.zip"])
+
+os.remove("data.zip")
