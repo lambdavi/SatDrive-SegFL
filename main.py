@@ -154,12 +154,12 @@ def get_datasets(args):
         # Extract all data from train.txt
         all_data_train = []
         with open(os.path.join(root, 'train.txt'), 'r') as f:
-            string = f.readline().strip()
+            image = f.readline()
             """
             image_name = string.split(".")[0].split("/")[2]
             all_data_train.append(image_name)
             """
-            all_data_train.append(string)
+            all_data_train.append(image)
 
         f.close()
 
