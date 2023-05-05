@@ -176,7 +176,7 @@ def get_datasets(args):
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
-                                                client_name="client_"+i))
+                                                client_name="client_"+str(i)))
         
         # Test on IDDA
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
