@@ -109,7 +109,7 @@ class Server:
 
     def eval_validation(self):
         """
-        This method handles the evaluation on the train clients
+        This method handles the evaluation on the validation client(s)
         """
         self.metrics["eval_train"].reset()
         self.validation_clients[0].model.load_state_dict(self.model_params_dict)
