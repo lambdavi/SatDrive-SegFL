@@ -177,7 +177,8 @@ def get_datasets(args):
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
                                                 client_name="client_"+str(i)))
-        
+        root_idda = "data/idda"
+
         # Test on IDDA
         with open(os.path.join(root_idda, 'test_same_dom.txt'), 'r') as f:
             test_same_dom_data = f.read().splitlines()
@@ -190,7 +191,6 @@ def get_datasets(args):
         test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
         
         # Setting up IDDA as validation set
-        root_idda = "data/idda"
         validation_data = []
         with open(os.path.join(root_idda, 'train.txt'), 'r') as f:
             all_data = f.read().splitlines()
