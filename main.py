@@ -228,7 +228,7 @@ def gen_clients(args, train_datasets, test_datasets, validation_datasets, model)
         for ds in datasets:
             clients[i].append(Client(args, ds, model, test_client=i == 1))
     if validation_datasets:
-        clients[2].append(Client(args, validation_datasets, model, test_client=True))
+        clients[2].append(Client(args, validation_datasets[0], model, test_client=True))
     return clients[0], clients[1], clients[2]
 
 def main():
