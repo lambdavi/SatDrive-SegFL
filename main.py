@@ -244,7 +244,6 @@ def main():
     print('Generate datasets...')
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
     print('Done.')
-    print(len(train_datasets), len(test_datasets), len(validation_dataset))
     metrics = set_metrics(args)
     
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
