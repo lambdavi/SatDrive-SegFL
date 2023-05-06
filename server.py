@@ -89,10 +89,11 @@ class Server:
             if self.activate_val:
                 self.eval_validation()
 
-        print("------------------------------------")
-        print(f"Evaluation of the trainset started.")
-        print("------------------------------------")   
-        if self.args.dataset != "gta5":     
+        
+        if self.args.dataset != "gta5":  
+            print("------------------------------------")
+            print(f"Evaluation of the trainset started.")
+            print("------------------------------------")      
             self.eval_train()
         self.test()
 
