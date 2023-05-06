@@ -18,8 +18,8 @@ class Client:
         self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
-        #self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
-        self.criterion = nn.MSELoss(reduction='none')
+        self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
+        #self.criterion = nn.MSELoss(rignore_index=255, eduction='none')
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
     def __str__(self):
