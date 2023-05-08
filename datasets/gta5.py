@@ -54,7 +54,7 @@ class GTA5Dataset(VisionDataset):
         return lambda x: from_numpy(mapping[x])
 
     def __getitem__(self, index: int) -> Any:
-        image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index]))
+        image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index])).convert("RGB")
         label = Image.open(os.path.join(self.root, LABELS_DIR, self.list_samples[index]))
         if self.transform: # != None
             if isinstance(self.transform, list):
