@@ -157,6 +157,8 @@ def get_datasets(args):
         with open(os.path.join(root, 'train.txt'), 'r') as f:
             all_data_train = f.read().splitlines()
         f.close()
+
+        print(f"Total number of images to be loaded: {len(all_data_train)}")
         
         if args.centr:
             # If centralized we get all training data on one single client
