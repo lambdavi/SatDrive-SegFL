@@ -46,7 +46,7 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        
+        loss = 1000.0
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
@@ -57,7 +57,6 @@ class Client:
             # Update parameters
             optimizer.step()
             
-
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
 
     def get_optimizer_and_scheduler(self):
