@@ -7,7 +7,6 @@ from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 from torchvision.utils import save_image
 
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 class_map = {
    1: 13,  # ego_vehicle : vehicle
@@ -55,13 +54,17 @@ class GTA5Dataset(VisionDataset):
         return lambda x: from_numpy(mapping[x])
 
     def __getitem__(self, index: int) -> Any:
-        image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index]+".png")).convert("RGB")
-        label = Image.open(os.path.join(self.root, LABELS_DIR, self.list_samples[index]+".png"))
+        image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index])).convert("RGB")
+        label = Image.open(os.path.join(self.root, LABELS_DIR, self.list_samples[index]))
         if self.transform: # != None
-            image, label = self.transform(image, label)
+            if isinstance(self.transform, list):
+                image = self.transform[0](image)
+                image, label = self.transform[1](image, label)
+            else:
+                image, label = self.transform(image, label)
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
-
+    
     def __len__(self) -> int:
         return len(self.list_samples)

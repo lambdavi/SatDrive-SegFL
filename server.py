@@ -6,13 +6,14 @@ import torch
 
 
 class Server:
-
-    def __init__(self, args, train_clients, test_clients, model, metrics):
+    def __init__(self, args, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
         self.train_clients = train_clients
         self.test_clients = test_clients
+        self.validation_clients = valid_clients
         self.model = model
         self.metrics = metrics
+        self.activate_val = valid
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
 
     def select_clients(self, seed=None):
@@ -31,7 +32,7 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
-            print(f"Client: {c.name} turn. ({i+1}/{len(clients)})")
+            print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
             update = c.train()
@@ -85,11 +86,15 @@ class Server:
             # Aggregate the parameters
             self.model_params_dict = self.aggregate(updates)
             self.model.load_state_dict(self.model_params_dict, strict=False)
+            if self.activate_val:
+                self.eval_validation()
 
-        print("------------------------------------")
-        print(f"Evaluation of the trainset started.")
-        print("------------------------------------")            
-        self.eval_train()
+        
+        if self.args.dataset != "gta5":  
+            print("------------------------------------")
+            print(f"Evaluation of the trainset started.")
+            print("------------------------------------")      
+            self.eval_train()
         self.test()
 
     def eval_train(self):
@@ -102,6 +107,16 @@ class Server:
             c.test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
+
+    def eval_validation(self):
+        """
+        This method handles the evaluation on the validation client(s)
+        """
+        self.metrics["eval_train"].reset()
+        self.validation_clients[0].model.load_state_dict(self.model_params_dict)
+        self.validation_clients[0].test(self.metrics["eval_train"])
+        res=self.metrics["eval_train"].get_results()
+        print(f'Validation: Mean IoU: {res["Mean IoU"]}')
 
     def test(self):
         """

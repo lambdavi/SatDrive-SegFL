@@ -19,6 +19,7 @@ class Client:
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
+        #self.criterion = nn.MSELoss(rignore_index=255, eduction='none')
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
     def __str__(self):
@@ -45,7 +46,6 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        
         for cur_step, (images, labels) in enumerate(self.train_loader):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
@@ -56,7 +56,6 @@ class Client:
             # Update parameters
             optimizer.step()
             
-
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
 
     def get_optimizer_and_scheduler(self):
@@ -70,9 +69,9 @@ class Client:
         
         # Scheduler choice
         if self.args.sched == "lin":
-            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.1, total_iters=self.args.num_epochs, verbose=True)
+            scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.1, total_iters=self.args.num_epochs)
         elif self.args.sched == "step":
-            scheduler = StepLR(optimizer, step_size=5, gamma=0.1, verbose=True)
+            scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
         else:
             scheduler = None
 

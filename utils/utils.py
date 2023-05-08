@@ -2,16 +2,36 @@ import torch.nn as nn
 import numpy as np
 
 # Internal function
-def split_list_numpy(lst, m):
-    arr = np.array(lst)
-    split_sizes = np.random.randint(1, len(lst), size=m-1)
-    split_sizes.sort()
-    return np.split(arr, split_sizes)
+def split_list_random(lst, m):
+    n = len(lst)
+    if m <= 0 or n <= 0:
+        return []
+    elif m >= n:
+        return [lst[i:i+1] for i in range(n)]
+    else:
+        sizes = np.random.choice(n - m + 1, size=m-1, replace=False)
+        sizes.sort()
+        sizes = np.concatenate(([sizes[0]], sizes[1:] - sizes[:-1], [n - sizes[-1]]))
+        return [lst[sum(sizes[:i]):sum(sizes[:i+1])] for i in range(m)]
 
-# Internal function
-def get_some(lst: np.ndarray, n: int):
-    indeces =  np.random.randint(1, len(lst), size=n)
-    return lst[indeces]
+def split_list_balanced(lst, m):
+    n = len(lst)
+    if m <= 0 or n <= 0:
+        return []
+    elif m >= n:
+        return [lst[i:i+1] for i in range(n)]
+    else:
+        # Compute the size of each sublist
+        sublist_size = n // m
+        sizes = np.full(m, sublist_size, dtype=np.int32)
+        remainder = n % m
+        if remainder != 0:
+            # Add the remaining elements to the first few sublists
+            sizes[:remainder] += 1
+
+        # Create the sublists by slicing the input list
+        sublists = [lst[sum(sizes[:i]):sum(sizes[:i+1])] for i in range(m)]
+        return sublists
 
 class HardNegativeMining(nn.Module):
 
