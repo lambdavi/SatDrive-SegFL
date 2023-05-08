@@ -17,7 +17,7 @@ from client import Client
 from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
-from utils.utils import split_list_numpy
+from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
@@ -169,7 +169,7 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print("Distributed Mode Set")
 
-            total_client_splits = split_list_numpy(all_data_train, args.clients_per_round*2)
+            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
