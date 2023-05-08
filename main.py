@@ -17,7 +17,7 @@ from client import Client
 from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
-from utils.utils import split_list_numpy, get_some
+from utils.utils import split_list_numpy
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
