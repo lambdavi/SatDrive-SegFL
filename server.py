@@ -32,7 +32,7 @@ class Server:
         """
         updates = []
         for i, c in enumerate(clients):
-            print(f"Client: {c.name} turn: n_samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
+            print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
             update = c.train()
