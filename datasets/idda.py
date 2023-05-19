@@ -24,6 +24,7 @@ class IDDADataset(VisionDataset):
         self.style_tf_fn = None
 
     def set_style_tf_fn(self, style_tf_fn):
+        print("applied idda")
         self.style_tf_fn = style_tf_fn
 
     def reset_style_tf_fn(self):
