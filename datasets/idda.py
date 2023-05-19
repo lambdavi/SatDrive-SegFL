@@ -21,6 +21,7 @@ class IDDADataset(VisionDataset):
         self.client_name = client_name
         self.target_transform = self.get_mapping()
         self.style_tf_fn = None
+        self.return_unprocessed_image = False
 
     def set_style_tf_fn(self, style_tf_fn):
         print("applied idda")
@@ -41,6 +42,9 @@ class IDDADataset(VisionDataset):
         image = Image.open(os.path.join(self.root,IMG_DIR, self.list_samples[index]+".jpg")).convert("RGB")
         label = Image.open(os.path.join(self.root, LAB_DIR, self.list_samples[index]+".png"))
 
+        if self.return_unprocessed_image:
+            return image
+        
         if self.style_tf_fn is not None:
             image = self.style_tf_fn(image)
 

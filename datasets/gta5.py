@@ -47,6 +47,7 @@ class GTA5Dataset(VisionDataset):
         self.target_transform = self.get_mapping()
         # Setup for style transfer
         self.style_tf_fn = None
+        self.return_unprocessed_image = False
     
     def set_style_tf_fn(self, style_tf_fn):
         self.style_tf_fn = style_tf_fn
@@ -65,6 +66,8 @@ class GTA5Dataset(VisionDataset):
         image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index])).convert("RGB")
         label = Image.open(os.path.join(self.root, LABELS_DIR, self.list_samples[index]))
 
+        if self.return_unprocessed_image:
+            return image
         # Apply style transfer
         if self.style_tf_fn is not None:
             image = self.style_tf_fn(image)
