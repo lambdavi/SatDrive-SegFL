@@ -256,7 +256,7 @@ def main():
 
     print('Generate datasets...')
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
-    source_dataset = get_source_dataset
+    source_dataset = get_source_dataset(args)
     print('Done.')
     metrics = set_metrics(args)
     
