@@ -16,6 +16,7 @@ from torch import nn
 from client import Client
 from datasets.femnist import Femnist
 from server import Server
+from fda_server import FdaServer
 from utils.args import get_parser
 from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
@@ -194,12 +195,27 @@ def get_datasets(args):
         validation_data.append(IDDADataset(root=root_idda, list_samples=all_data, transform=train_transforms,
                                              client_name='centralized'))
         
+        
         return train_datasets, test_datasets, validation_data
 
     else:
         raise NotImplementedError
 
     return train_datasets, test_datasets, None
+
+def get_source_dataset(args):
+    train_transforms, _ = get_transforms(args)
+    if args.dataset == "idda" and args.fda:
+        root = 'data/gta5'
+        # Extract all data from train.txt
+        all_data_train = []
+        with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data_train = f.read().splitlines()
+        f.close()
+        return [GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms,
+                                                client_name='centralized')]
+    else:
+        return None
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
@@ -240,15 +256,18 @@ def main():
 
     print('Generate datasets...')
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
+    source_dataset = get_source_dataset
     print('Done.')
     metrics = set_metrics(args)
     
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
-
-    if args.dataset == "gta5":
-        server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
-    else: 
-        server = Server(args, train_clients, test_clients, model, metrics)
+    if args.fda == False:
+        if args.dataset == "gta5":
+            server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
+        else: 
+            server = Server(args, train_clients, test_clients, model, metrics)
+    else:
+        server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics, True, valid_clients)
 
     server.train()
 

@@ -5,10 +5,9 @@ import numpy as np
 import torch
 from utils.style_transfer import StyleAugment
 
-class FdaServer:
-    def __init__(self, args, source_dataset, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
+class Server:
+    def __init__(self, args, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
-        self.source_dataset = source_dataset
         self.train_clients = train_clients
         self.test_clients = test_clients
         self.validation_clients = valid_clients
@@ -18,9 +17,10 @@ class FdaServer:
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
 
         # Style transfer
-        self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b) 
-        self.extract_styles()
-        print(len(self.styleaug.styles))
+        self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b)
+        self.styleaug.add_style(self.validation_clients[0]) 
+        self.styleaug.add_style(self.test_clients[0]) 
+        self.styleaug.add_style(self.test_clients[1]) 
         
     def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
@@ -30,10 +30,6 @@ class FdaServer:
             np.random.seed(self.args.seed)
         return np.random.choice(self.train_clients, num_clients, replace=False)
 
-    def extract_styles(self):
-        for c in self.train_clients:
-            self.styleaug.add_style(c)
-        
     def train_round(self, clients):
         """
             This method trains the model with the dataset of the clients. It handles the training at single round level
@@ -93,8 +89,10 @@ class FdaServer:
             print(f"Round {r+1}/{num_rounds} started.")
             print("------------------")
 
+            # Select random subset of clients
+            chosen_client = self.select_clients(seed=r)
             # Train a round
-            updates = self.train_round(self.source_dataset) # must be a list of 1 client
+            updates = self.train_round(chosen_client)
             # Aggregate the parameters
             self.model_params_dict = self.aggregate(updates)
             self.model.load_state_dict(self.model_params_dict, strict=False)

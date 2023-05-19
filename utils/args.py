@@ -26,6 +26,8 @@ def get_parser():
     parser.add_argument('--test_interval', type=int, default=10, help='test interval')
     # New Argument:
     parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
+    parser.add_argument('--fda', action='store_true', default=False, help='FDA mode activated')
+
     parser.add_argument('--opt', type=str, choices=['SGD', 'adam'], default = 'SGD', help='Optimizer choice')
     parser.add_argument('--sched', type=str, choices=['lin', 'step'], default = None, help='Scheduler choice')
     parser.add_argument('--n_images_per_style', type=int, default=1000, help='number of images to extract style (avg is performed)')

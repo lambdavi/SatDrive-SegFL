@@ -11,7 +11,6 @@ IMG_DIR = "images"
 LAB_DIR = "labels"
 
 class IDDADataset(VisionDataset):
-
     def __init__(self,
                  root: str,
                  list_samples: list[str],
