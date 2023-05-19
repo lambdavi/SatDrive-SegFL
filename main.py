@@ -261,12 +261,14 @@ def main():
     metrics = set_metrics(args)
     
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
+    
     if args.fda == False:
         if args.dataset == "gta5":
             server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
     else:
+        print("fda activated..")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics, True, valid_clients)
 
     server.train()
