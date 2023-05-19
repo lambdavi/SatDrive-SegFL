@@ -203,7 +203,7 @@ def get_datasets(args):
 
     return train_datasets, test_datasets, None
 
-def get_source_client(args):
+def get_source_client(args, model):
     train_transforms, _ = get_transforms(args)
     if args.dataset == "idda" and args.fda:
         root = 'data/gta5'
