@@ -17,9 +17,10 @@ class Server:
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
 
         # Style transfer
-        #self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b)
-        #self.styleaug.add_style(self.validation_clients[0]) 
-
+        self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b)
+        self.styleaug.add_style(self.validation_clients[0]) 
+        self.styleaug.add_style(self.test_clients[0]) 
+        self.styleaug.add_style(self.test_clients[1]) 
         
     def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
