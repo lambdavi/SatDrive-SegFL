@@ -45,7 +45,15 @@ class GTA5Dataset(VisionDataset):
         self.list_samples = list_samples
         self.client_name = client_name
         self.target_transform = self.get_mapping()
-        
+        # Setup for style transfer
+        self.style_tf_fn = None
+    
+    def set_style_tf_fn(self, style_tf_fn):
+        self.style_tf_fn = style_tf_fn
+
+    def reset_style_tf_fn(self):
+        self.style_tf_fn = None
+
     @staticmethod
     def get_mapping():
         mapping = np.zeros((256,), dtype=np.int64) + 255
@@ -56,12 +64,18 @@ class GTA5Dataset(VisionDataset):
     def __getitem__(self, index: int) -> Any:
         image = Image.open(os.path.join(self.root, IMAGES_DIR, self.list_samples[index])).convert("RGB")
         label = Image.open(os.path.join(self.root, LABELS_DIR, self.list_samples[index]))
-        if self.transform: # != None
+
+        # Apply style transfer
+        if self.style_tf_fn is not None:
+            image = self.style_tf_fn(image)
+
+        if self.transform is not None:
             if isinstance(self.transform, list):
                 image = self.transform[0](image)
                 image, label = self.transform[1](image, label)
             else:
                 image, label = self.transform(image, label)
+
         if self.target_transform:
             label = self.target_transform(label)
         return image, label

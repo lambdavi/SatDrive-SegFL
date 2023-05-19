@@ -18,9 +18,8 @@ class Server:
 
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b)
-        self.styleaug.add_style()
-
-
+        self.styleaug.add_style(self.train_clients[0]) # this has to be the source_dataset, try to run in centralized mode
+        
     def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
         if seed:
@@ -39,7 +38,9 @@ class Server:
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
+            c.set_set_style_tf_fn(self.styleaug)
             c.model.load_state_dict(self.model_params_dict)
+            # Temp line. setup train
             update = c.train()
             updates.append(update)
         return updates
