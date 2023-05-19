@@ -31,9 +31,7 @@ class FdaServer:
         return np.random.choice(self.train_clients, num_clients, replace=False)
 
     def extract_styles(self):
-        print(f"N-clients: {len(self.train_clients)}")
         for c in self.train_clients:
-            print(type(c))
             self.styleaug.add_style(c.dataset)
         
     def train_round(self, clients):
