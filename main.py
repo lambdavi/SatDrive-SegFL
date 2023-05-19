@@ -15,8 +15,8 @@ import datasets.weather as weather
 from torch import nn
 from client import Client
 from datasets.femnist import Femnist
-#from server import Server
-from fda_server_backup import Server
+from server import Server
+from fda_server import FdaServer
 from utils.args import get_parser
 from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
@@ -269,7 +269,7 @@ def main():
             server = Server(args, train_clients, test_clients, model, metrics)
     else:
         print("fda activated..")
-        #server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
+        server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
 
     server.train()
 
