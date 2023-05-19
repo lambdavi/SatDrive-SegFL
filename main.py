@@ -203,7 +203,7 @@ def get_datasets(args):
 
     return train_datasets, test_datasets, None
 
-def get_source_dataset(args):
+def get_source_client(args):
     train_transforms, _ = get_transforms(args)
     if args.dataset == "idda" and args.fda:
         root = 'data/gta5'
@@ -212,8 +212,8 @@ def get_source_dataset(args):
         with open(os.path.join(root, 'train.txt'), 'r') as f:
             all_data_train = f.read().splitlines()
         f.close()
-        return [GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms,
-                                                client_name='centralized')]
+        sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)
+        return []
     else:
         return None
 
@@ -256,7 +256,7 @@ def main():
 
     print('Generate datasets...')
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
-    source_dataset = get_source_dataset(args)
+    source_dataset = get_source_client(args, model)
     print('Done.')
     metrics = set_metrics(args)
     
