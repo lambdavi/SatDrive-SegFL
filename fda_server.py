@@ -42,7 +42,7 @@ class Server:
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
-            #c.set_set_style_tf_fn(self.styleaug)
+            c.set_set_style_tf_fn(self.styleaug)
             c.model.load_state_dict(self.model_params_dict)
             # Temp line. setup train
             update = c.train()
