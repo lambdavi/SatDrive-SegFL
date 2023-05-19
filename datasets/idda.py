@@ -21,6 +21,13 @@ class IDDADataset(VisionDataset):
         self.list_samples = list_samples
         self.client_name = client_name
         self.target_transform = self.get_mapping()
+        self.style_tf_fn = None
+
+    def set_style_tf_fn(self, style_tf_fn):
+        self.style_tf_fn = style_tf_fn
+
+    def reset_style_tf_fn(self):
+        self.style_tf_fn = None
 
     @staticmethod
     def get_mapping():
@@ -33,7 +40,11 @@ class IDDADataset(VisionDataset):
     def __getitem__(self, index: int) -> Any:
         image = Image.open(os.path.join(self.root,IMG_DIR, self.list_samples[index]+".jpg")).convert("RGB")
         label = Image.open(os.path.join(self.root, LAB_DIR, self.list_samples[index]+".png"))
-        if self.transform: # != None
+
+        if self.style_tf_fn is not None:
+            image = self.style_tf_fn(image)
+
+        if self.transform is not None: 
             if isinstance(self.transform, list):
                 image = self.transform[0](image)
                 image, label = self.transform[1](image, label)
