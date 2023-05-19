@@ -34,7 +34,7 @@ class FdaServer:
         print(f"N-clients: {len(self.train_clients)}")
         for c in self.train_clients:
             print(type(c))
-            self.styleaug.add_style(c.train_loader)
+            self.styleaug.add_style(c)
         
     def train_round(self, clients):
         """
