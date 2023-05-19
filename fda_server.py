@@ -32,7 +32,7 @@ class FdaServer:
 
     def extract_styles(self):
         for c in self.train_clients:
-            self.styleaug.add_style(c.dataset)
+            self.styleaug.add_style(c.train_loader)
         
     def train_round(self, clients):
         """
