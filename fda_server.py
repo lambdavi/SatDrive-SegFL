@@ -15,7 +15,7 @@ class Server:
         self.metrics = metrics
         self.activate_val = valid
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
-        
+
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b)
         self.styleaug.add_style()
