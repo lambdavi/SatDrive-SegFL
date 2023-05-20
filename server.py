@@ -93,16 +93,17 @@ class Server:
                 if self.activate_val:
                     self.eval_validation()
 
-            
-            if self.args.dataset != "gta5":  
-                print("------------------------------------")
-                print(f"Evaluation of the trainset started.")
-                print("------------------------------------")      
-                self.eval_train()
-            self.test()
-
             if self.args.save:
-                torch.save(self.model.state_dict(), 'path_to_save_model.pth')
+                torch.save(self.model.state_dict(), 'model_saved.pth')
+                
+        if self.args.dataset != "gta5":  
+            print("------------------------------------")
+            print(f"Evaluation of the trainset started.")
+            print("------------------------------------")      
+            self.eval_train()
+        self.test()
+
+            
 
 
     def eval_train(self):
