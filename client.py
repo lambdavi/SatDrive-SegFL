@@ -5,6 +5,7 @@ from torch import optim, nn
 from collections import defaultdict
 from torch.utils.data import DataLoader
 from utils.utils import HardNegativeMining, MeanReduction
+from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 
 class Client:
@@ -22,6 +23,7 @@ class Client:
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
         self.styleaug = None
+        self.early_stopper = EarlyStopper(2, 0.05) # to be tuned
 
     def __str__(self):
         return self.name
@@ -58,6 +60,7 @@ class Client:
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
+        return self.early_stopper.early_stop(loss.item())
 
     def get_optimizer_and_scheduler(self):
          # Optimizer chocie
@@ -94,9 +97,14 @@ class Client:
         self.model.train()
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
-            self.run_epoch(epoch, optimizer)
+            stop_condition = self.run_epoch(epoch, optimizer)
             if scheduler:
                 scheduler.step()
+
+            if(stop_condition):
+                print(f"Training stopped at epoch {epoch}: Stopping condition satisfied")
+                break
+            
         print("-----------------------------------------------------")
         return len(self.dataset), self.model.state_dict()
 
