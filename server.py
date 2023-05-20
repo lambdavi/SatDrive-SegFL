@@ -76,8 +76,8 @@ class Server:
             num_rounds = 1
         
         if self.args.load:
-            print("Loading model...")
             self.model.load_state_dict(torch.load('model_saved.pth'))
+            print("Model Loaded!")
         else:
             for r in range(num_rounds):
                 print("------------------")
