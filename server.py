@@ -76,7 +76,8 @@ class Server:
             num_rounds = 1
         
         if self.args.load:
-            self.model.load_state_dict(torch.load('path_to_saved_model.pth'))
+            print("Loading model...")
+            self.model.load_state_dict(torch.load('model_saved.pth'))
         else:
             for r in range(num_rounds):
                 print("------------------")
@@ -94,8 +95,9 @@ class Server:
                     self.eval_validation()
 
             if self.args.save:
+                print("Saving model...")
                 torch.save(self.model.state_dict(), 'model_saved.pth')
-                
+
         if self.args.dataset != "gta5":  
             print("------------------------------------")
             print(f"Evaluation of the trainset started.")
