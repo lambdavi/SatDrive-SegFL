@@ -23,7 +23,7 @@ class Client:
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
         self.styleaug = None
-        self.early_stopper = EarlyStopper(5, 0.005) # to be tuned
+        self.early_stopper = EarlyStopper(5, 0.05) # to be tuned
 
     def __str__(self):
         return self.name
