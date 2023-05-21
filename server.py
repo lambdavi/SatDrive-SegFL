@@ -178,8 +178,6 @@ class Server:
 
         predicted_labels = np.argmax(normalized_output, axis=0)
 
-        print(predicted_labels.shape)
-
         # Normalize the predicted labels to the range [0, 1]
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
