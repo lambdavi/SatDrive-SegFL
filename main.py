@@ -268,7 +268,7 @@ def main():
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
     else:
-        print("fda activated..")
+        print("Fda Mode activated.")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
 
     server.train()
