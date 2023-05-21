@@ -274,7 +274,7 @@ def main():
 
     server.train()
 
-    server.predict("gta5_testimage.jpg")
+    server.predict("data/gta5_testimage.jpg")
 
 if __name__ == '__main__':
     main()
