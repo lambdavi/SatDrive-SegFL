@@ -187,20 +187,21 @@ class Server:
         # Normalize the predicted labels to the range [0, 1]
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
-        """# Create the predicted image with colors
+        # Create the predicted image with colors
         predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
         
         # Save the predicted image
-        predicted_image.save('test_semantic.png')"""
+        predicted_image.save('test_semantic.png')
         class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
         # Create a legend
         legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
 
         # Plot the legend
         plt.figure()
+        plt.imshow(predicted_image)
         plt.legend(legend_elements, class_names)
         plt.axis('off')
-        plt.savefig('image_legend.png')
+        plt.savefig('image_fin.png')
 
 
 
