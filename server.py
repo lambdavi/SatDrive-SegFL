@@ -177,12 +177,14 @@ class Server:
         predicted_labels = np.argmax(output.cpu().numpy(), axis=1).mean(axis=0).astype(np.uint8)
         print(predicted_labels.shape)
 
-        # Define a color map for visualization
-        colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
+        # Normalize the predicted labels to the range [0, 1]
+        normalized_labels = predicted_labels / predicted_labels.max()
 
         # Create the predicted image with colors
-        predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
+        predicted_image = Image.fromarray((plt.colormap(normalized_labels) * 255).astype(np.uint8))
 
+        # Save the predicted image as PNG format
+        predicted_image.save('path/to/save/predicted_image.png')
         # Save the predicted image
         predicted_image.save('test_semantic.jpg')
 
