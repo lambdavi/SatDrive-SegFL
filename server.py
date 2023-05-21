@@ -81,7 +81,8 @@ class Server:
             self.model_params_dict = saved_params
             self.model.load_state_dict(saved_params)
             self.model.eval()
-            print("Model Loaded!")
+            to_print = " from checkpoints." if self.args.chp else "."
+            print(f"Model loaded{to_print}")
         else:
             for r in range(num_rounds):
                 print("------------------")
