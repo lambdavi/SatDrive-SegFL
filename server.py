@@ -179,7 +179,7 @@ class Server:
 
         # Normalize the predicted labels to the range [0, 1]
         normalized_labels = predicted_labels / predicted_labels.max()
-        colormap = plt.cm.get_cmap('tab20', normalized_labels.max() + 1)
+        colormap = plt.cm.get_cmap('tab20', normalized_labels.astype(np.uint8).max() + 1)
 
         # Create the predicted image with colors
         predicted_image = Image.fromarray((colormap(normalized_labels) * 255).astype(np.uint8))
