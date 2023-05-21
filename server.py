@@ -180,7 +180,7 @@ class Server:
         _, class_labels = torch.max(probs, dim=0)
 
         # Optional: Convert class labels to a colored segmentation mask
-        color_map = self.model.classifier[-1].weight.squeeze().numpy()
+        color_map = self.model.classifier[-1].weight.squeeze().cpu().numpy()
         segmentation_mask = color_map[class_labels.cpu().numpy()]
 
         # Save the segmentation mask as an image
