@@ -16,6 +16,7 @@ from torch import nn
 from client import Client
 from datasets.femnist import Femnist
 from server import Server
+from fda_server import FdaServer
 from utils.args import get_parser
 from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
@@ -63,7 +64,7 @@ def get_transforms(args):
         train_transforms = [
             sstr.Compose([
                 RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2),
-                #RandomApply([sstr.ColorJitter(0.1, 0.1, 0.1, 0.1)], p=0.5)
+                RandomApply([sstr.ColorJitter(0.5, 0.5, 0.1, 0.1)], p=0.5)
             ]),
             sstr.Compose([
                 sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
@@ -194,12 +195,28 @@ def get_datasets(args):
         validation_data.append(IDDADataset(root=root_idda, list_samples=all_data, transform=train_transforms,
                                              client_name='centralized'))
         
+        
         return train_datasets, test_datasets, validation_data
 
     else:
         raise NotImplementedError
 
     return train_datasets, test_datasets, None
+
+def get_source_client(args, model):
+    train_transforms, _ = get_transforms(args)
+    if args.dataset == "idda" and args.fda:
+        root = 'data/gta5'
+        # Extract all data from train.txt
+        all_data_train = []
+        with open(os.path.join(root, 'train.txt'), 'r') as f:
+            all_data_train = f.read().splitlines()
+        f.close()
+        sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)
+        print("here")
+        return [sc]
+    else:
+        return None
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
@@ -240,17 +257,24 @@ def main():
 
     print('Generate datasets...')
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
+    source_dataset = get_source_client(args, model)
     print('Done.')
     metrics = set_metrics(args)
     
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
-
-    if args.dataset == "gta5":
-        server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
-    else: 
-        server = Server(args, train_clients, test_clients, model, metrics)
+    
+    if args.fda == False:
+        if args.dataset == "gta5":
+            server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
+        else: 
+            server = Server(args, train_clients, test_clients, model, metrics)
+    else:
+        print("fda activated..")
+        server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
 
     server.train()
+
+    server.predict("data/gta5_testimage.jpg")
 
 if __name__ == '__main__':
     main()

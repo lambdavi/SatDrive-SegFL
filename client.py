@@ -19,8 +19,9 @@ class Client:
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
-        #self.criterion = nn.MSELoss(rignore_index=255, eduction='none')
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
+
+        self.styleaug = None
 
     def __str__(self):
         return self.name
@@ -76,6 +77,10 @@ class Client:
             scheduler = None
 
         return optimizer, scheduler
+
+    def set_set_style_tf_fn(self, styleaug):
+        self.styleaug = styleaug
+        self.train_loader.dataset.set_style_tf_fn(self.styleaug.apply_style)
 
     def train(self):
         """

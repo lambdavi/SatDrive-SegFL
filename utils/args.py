@@ -1,12 +1,16 @@
 import argparse
 
+def str2tuple(tp=int):
+
+    def convert(s):
+        return tuple(tp(i) for i in s.split(','))
+    return convert
 
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument('--dataset', type=str, choices=['idda', 'femnist', 'gta5'], required=True, help='dataset name')
-    parser.add_argument('--niid', action='store_true', default=False,
-                        help='Run the experiment with the non-IID partition (IID by default). Only on FEMNIST dataset.')
+    parser.add_argument('--niid', action='store_true', default=False,  help='Run the experiment with the non-IID partition (IID by default). Only on FEMNIST dataset.')
     parser.add_argument('--model', type=str, choices=['deeplabv3_mobilenetv2', 'resnet18', 'cnn'], help='model name')
     parser.add_argument('--num_rounds', type=int, help='number of rounds')
     parser.add_argument('--num_epochs', type=int, help='number of local epochs')
@@ -22,7 +26,15 @@ def get_parser():
     parser.add_argument('--test_interval', type=int, default=10, help='test interval')
     # New Argument:
     parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
+    parser.add_argument('--fda', action='store_true', default=False, help='FDA mode activated')
     parser.add_argument('--opt', type=str, choices=['SGD', 'adam'], default = 'SGD', help='Optimizer choice')
     parser.add_argument('--sched', type=str, choices=['lin', 'step'], default = None, help='Scheduler choice')
+    parser.add_argument('--n_images_per_style', type=int, default=1000, help='number of images to extract style (avg is performed)')
+    parser.add_argument('--fda_L', type=float, default=0.01, help='to control size of amplitude window')
+    parser.add_argument('--fda_b', type=int, default=None, help='if != None it is used instead of fda_L:' 'b == 0 --> 1x1, b == 1 --> 3x3, b == 2 --> 5x5, ...')
+    parser.add_argument('--fda_size', type=str2tuple(int), default='1024,512', help='size (W,H) to which resize images before style transfer')
+    parser.add_argument('--save', action='store_true', default=False, help='Model saved at the end (training performed)')
+    parser.add_argument('--load', action='store_true', default=False, help='Load saved model')
+    parser.add_argument('--chp', action='store_true', default=False, help='Model checkpoints saved during training')
 
     return parser
