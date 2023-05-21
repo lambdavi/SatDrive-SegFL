@@ -23,7 +23,7 @@ class Client:
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
         self.styleaug = None
-        self.early_stopper = EarlyStopper(5, 0.05) # to be tuned
+        self.early_stopper = EarlyStopper(5, 0.01) # to be tuned
 
     def __str__(self):
         return self.name
@@ -102,7 +102,7 @@ class Client:
                 scheduler.step()
 
             if(stop_condition):
-                print(f"Training stopped at epoch {epoch}: Stopping condition satisfied")
+                print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
                 break
             
         print("-----------------------------------------------------")
