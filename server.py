@@ -173,14 +173,10 @@ class Server:
         with torch.no_grad():
             output = self.model(input_tensor)['out']  # Get the output logits
         output = output.squeeze(0).cpu().numpy()
-        print(output.shape)
-        print(output[0][0].shape)
-        print(np.unique(output[0][0]))
+    
         normalized_output = (output - output.min()) / (output.max() - output.min())
 
-
         predicted_labels = np.argmax(normalized_output, axis=0)
-        #predicted_labels = np.argmax(normalized_output, axis=0).astype(np.uint8)
 
         print(predicted_labels.shape)
 
@@ -191,7 +187,6 @@ class Server:
         predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
         
         # Save the predicted image
-        predicted_image.save('test_semantic.png')
         class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
         # Create a legend
         legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
