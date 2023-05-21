@@ -111,9 +111,6 @@ class Server:
             self.eval_train()
         self.test()
 
-            
-
-
     def eval_train(self):
         """
         This method handles the evaluation on the train clients
