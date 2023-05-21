@@ -9,9 +9,7 @@ class EarlyStopper:
         self.prev_loss = np.inf
 
         if self.args.es:
-            print("found arg es")
             settings = self.args.es
-            print(settings)
             self.patience = int(settings[0])
             self.min_delta=settings[1]
 
