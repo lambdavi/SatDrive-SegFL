@@ -59,7 +59,6 @@ def model_init(args):
     raise NotImplementedError
 
 def get_transforms(args):
-    # TODO: test your data augmentation by changing the transforms here!
     if args.model == 'deeplabv3_mobilenetv2':
         train_transforms = [
             sstr.Compose([
