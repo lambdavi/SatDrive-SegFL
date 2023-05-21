@@ -184,6 +184,9 @@ class Server:
             segmentation_mask = color_map[class_labels.cpu().numpy()]
 
             # Save the segmentation mask as an image
+            IMIR = IMIR.reshape(1280, 720) #let M and N be the dimensions of your image
+
+
             output_image = Image.fromarray(segmentation_mask.astype('uint8'))
             output_image.save('saved_ouput.png')
 
