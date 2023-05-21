@@ -60,7 +60,11 @@ class Client:
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
-        return self.early_stopper.early_stop(loss.item())
+        
+        if self.args.es:
+            return self.early_stopper.early_stop(loss.item())
+        
+        return False
 
     def get_optimizer_and_scheduler(self):
          # Optimizer chocie
