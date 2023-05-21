@@ -175,7 +175,7 @@ class Server:
         arr = output.cpu().numpy()
         print(arr.shape)
         predicted_labels = np.argmax(output.cpu().numpy(), axis=1).mean(axis=0).astype(np.uint8)
-        print(arr.shape)
+        print(predicted_labels.shape)
 
         # Define a color map for visualization
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
