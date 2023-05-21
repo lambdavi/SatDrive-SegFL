@@ -10,10 +10,8 @@ class EarlyStopper:
     def early_stop(self, validation_loss):
         if (validation_loss - self.prev_validation_loss) > self.min_delta:
             self.counter = 0
-        elif (validation_loss - self.prev_validation_loss) < 0:
-                self.counter += 1
-                
-        if abs(validation_loss - self.prev_validation_loss) < self.min_delta:
+        elif abs(validation_loss - self.prev_validation_loss) < self.min_delta or\
+            (validation_loss - self.prev_validation_loss) < 0:
             self.counter += 1
             if self.counter >= self.patience:
                 return True
