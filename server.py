@@ -76,7 +76,7 @@ class Server:
             num_rounds = 1
         
         if self.args.load:
-            pth = "models/checkpoints/checkpoint.pth" if self.args.chp else "models/best_model.pth"
+            pth = "models/checkpoints/checkpoint.pth" if self.args.chp else "model_saved.pth"
             self.model.load_state_dict(torch.load(pth))
             self.model.eval()
             print("Model Loaded!")
