@@ -196,12 +196,23 @@ class Server:
         # Create a legend
         legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
 
-        # Plot the legend
-        plt.figure()
-        plt.imshow(predicted_image)
-        plt.legend(legend_elements, class_names)
-        plt.axis('off')
-        plt.savefig('image_fin.png')
+       # Create a figure and axes
+        fig, ax = plt.subplots()
+
+        # Display the predicted image
+        ax.imshow(predicted_image)
+        ax.axis('off')
+
+        # Create the legend outside the image
+        legend = ax.legend(legend_elements, class_names, loc='center left', bbox_to_anchor=(1, 0.5))
+        # Adjust the positioning and appearance of the legend
+        legend.set_title('Legend')
+        frame = legend.get_frame()
+        frame.set_edgecolor('black')
+        frame.set_facecolor('white')
+
+        # Save the figure
+        plt.savefig('image_fin.png', bbox_inches='tight', dpi=300)
 
 
 
