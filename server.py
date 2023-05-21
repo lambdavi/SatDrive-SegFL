@@ -77,7 +77,9 @@ class Server:
         
         if self.args.load:
             pth = "models/checkpoints/checkpoint.pth" if self.args.chp else "models/best_model.pth"
-            self.model.load_state_dict(torch.load(pth))
+            saved_params = torch.load(pth)
+            self.model_params_dict = saved_params
+            self.model.load_state_dict(saved_params)
             self.model.eval()
             print("Model Loaded!")
         else:
