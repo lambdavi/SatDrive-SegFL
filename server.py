@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from PIL import Image
 import datasets.ss_transforms as sstr
-
+import matplotlib.pyplot as plt
 class Server:
     def __init__(self, args, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
@@ -173,21 +173,16 @@ class Server:
         with torch.no_grad():
             output = self.model(input_tensor)['out']  # Get the output logits
 
-            # Convert logits to class probabilities
-            probs = torch.softmax(output, dim=1)[0]
+        predicted_labels = np.argmax(output, axis=0)
 
-            # Retrieve predicted class labels
-            _, class_labels = torch.max(probs, dim=0)
+        # Define a color map for visualization
+        colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
-            # Optional: Convert class labels to a colored segmentation mask
-            color_map = self.model.classifier[-1].weight.squeeze().cpu().detach().numpy()
-            segmentation_mask = color_map[class_labels.cpu().numpy()]
+        # Create the predicted image with colors
+        predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
 
-            # Save the segmentation mask as an image
-            segmentation_mask = segmentation_mask.reshape(1280, 720) #let M and N be the dimensions of your image
+        # Save the predicted image
+        predicted_image.save('test_semantic.jpg')
 
-
-            output_image = Image.fromarray(segmentation_mask.astype('uint8'))
-            output_image.save('saved_ouput.png')
 
 
