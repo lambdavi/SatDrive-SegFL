@@ -173,18 +173,18 @@ class Server:
         with torch.no_grad():
             output = self.model(input_tensor)['out']  # Get the output logits
 
-        # Convert logits to class probabilities
-        probs = torch.softmax(output, dim=1)[0]
+            # Convert logits to class probabilities
+            probs = torch.softmax(output, dim=1)[0]
 
-        # Retrieve predicted class labels
-        _, class_labels = torch.max(probs, dim=0)
+            # Retrieve predicted class labels
+            _, class_labels = torch.max(probs, dim=0)
 
-        # Optional: Convert class labels to a colored segmentation mask
-        color_map = self.model.classifier[-1].weight.squeeze().cpu().numpy()
-        segmentation_mask = color_map[class_labels.cpu().numpy()]
+            # Optional: Convert class labels to a colored segmentation mask
+            color_map = self.model.classifier[-1].weight.squeeze().cpu().detach().numpy()
+            segmentation_mask = color_map[class_labels.cpu().numpy()]
 
-        # Save the segmentation mask as an image
-        output_image = Image.fromarray(segmentation_mask.astype('uint8'))
-        output_image.save('saved_ouput.png')
+            # Save the segmentation mask as an image
+            output_image = Image.fromarray(segmentation_mask.astype('uint8'))
+            output_image.save('saved_ouput.png')
 
 
