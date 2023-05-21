@@ -71,12 +71,13 @@ class Server:
         """
 
         num_rounds = self.args.num_rounds
-
+        eval_miou_base = 0  # used to save checkpoints if needed
         if self.args.centr:
             num_rounds = 1
         
         if self.args.load:
-            self.model.load_state_dict(torch.load('model_saved.pth'))
+            pth = "models/checkpoints/checkpoint.pth" if self.args.chp else "models/best_model.pth"
+            self.model.load_state_dict(torch.load(pth))
             self.model.eval()
             print("Model Loaded!")
         else:
@@ -93,11 +94,15 @@ class Server:
                 self.model_params_dict = self.aggregate(updates)
                 self.model.load_state_dict(self.model_params_dict, strict=False)
                 if self.activate_val:
-                    self.eval_validation()
-
-            if self.args.save:
+                    eval_miou=self.eval_validation()
+                    if self.args.chp and (eval_miou>eval_miou_base):
+                        eval_miou_base = eval_miou
+                        torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
+                        print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
+            
+            if self.args.save and (self.args.chp == False):
                 print("Saving model...")
-                torch.save(self.model.state_dict(), 'model_saved.pth')
+                torch.save(self.model.state_dict(), 'models/best_model.pth')
 
         if self.args.dataset != "gta5":  
             print("------------------------------------")
@@ -129,6 +134,7 @@ class Server:
         self.validation_clients[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Validation: Mean IoU: {res["Mean IoU"]}')
+        return res["Mean IoU"]
 
     def test(self):
         """
