@@ -172,21 +172,23 @@ class Server:
         # Perform inference
         with torch.no_grad():
             output = self.model(input_tensor)['out']  # Get the output logits
-        arr = output.cpu().numpy()
-        print(arr.shape)
-        print(arr[0][0].shape)
-        print(np.unique(arr[0][0]))
+        output = output.squeeze(0).cpu().numpy()
+        print(output.shape)
+        print(output[0][0].shape)
+        print(np.unique(output[0][0]))
+        normalized_output = (output - output.min()) / (output.max() - output.min())
 
 
-        predicted_labels = np.argmax(output.cpu().numpy(), axis=1).mean(axis=0).astype(np.uint8)
+        predicted_labels = np.argmax(normalized_output, axis=0)
+        #predicted_labels = np.argmax(normalized_output, axis=0).astype(np.uint8)
+
         print(predicted_labels.shape)
 
         # Normalize the predicted labels to the range [0, 1]
-        normalized_labels = predicted_labels / predicted_labels.max()
-        colormap = plt.cm.get_cmap('tab20', normalized_labels.astype(np.uint8).max() + 1)
+        colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
         # Create the predicted image with colors
-        predicted_image = Image.fromarray((colormap(normalized_labels) * 255).astype(np.uint8))
+        predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
 
         # Save the predicted image
         predicted_image.save('test_semantic.png')
