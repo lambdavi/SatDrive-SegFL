@@ -28,7 +28,6 @@ def get_parser():
     # New Argument:
     parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
     parser.add_argument('--fda', action='store_true', default=False, help='FDA mode activated')
-
     parser.add_argument('--opt', type=str, choices=['SGD', 'adam'], default = 'SGD', help='Optimizer choice')
     parser.add_argument('--sched', type=str, choices=['lin', 'step'], default = None, help='Scheduler choice')
     parser.add_argument('--n_images_per_style', type=int, default=1000, help='number of images to extract style (avg is performed)')
@@ -36,5 +35,8 @@ def get_parser():
     parser.add_argument('--fda_b', type=int, default=None, help='if != None it is used instead of fda_L:' 'b == 0 --> 1x1, b == 1 --> 3x3, b == 2 --> 5x5, ...')
     parser.add_argument('--fda_size', type=str2tuple(int), default='1024,512', help='size (W,H) to which resize images before style transfer')
     parser.add_argument('--es', type=str2tuple(float), default='0,0', help='patience,tol')
+    parser.add_argument('--save', action='store_true', default=False, help='Model saved at the end (training performed)')
+    parser.add_argument('--load', action='store_true', default=False, help='Load saved model')
+    parser.add_argument('--chp', action='store_true', default=False, help='Model checkpoints saved during training')
 
     return parser
