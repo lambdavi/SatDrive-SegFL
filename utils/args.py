@@ -6,6 +6,7 @@ def str2tuple(tp=int):
         return tuple(tp(i) for i in s.split(','))
     return convert
 
+
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0, help='random seed')
@@ -34,4 +35,6 @@ def get_parser():
     parser.add_argument('--fda_L', type=float, default=0.01, help='to control size of amplitude window')
     parser.add_argument('--fda_b', type=int, default=None, help='if != None it is used instead of fda_L:' 'b == 0 --> 1x1, b == 1 --> 3x3, b == 2 --> 5x5, ...')
     parser.add_argument('--fda_size', type=str2tuple(int), default='1024,512', help='size (W,H) to which resize images before style transfer')
+    parser.add_argument('--es', type=str2tuple(float), default='0,0', help='patience,tol')
+
     return parser

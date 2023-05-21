@@ -1,19 +1,26 @@
 import numpy as np
 
 class EarlyStopper:
-    def __init__(self, patience=3, min_delta=0.05):
+    def __init__(self, args, patience=3, min_delta=0.05):
+        self.args = args
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
-        self.prev_validation_loss = np.inf
+        self.prev_loss = np.inf
 
-    def early_stop(self, validation_loss):
-        if (validation_loss - self.prev_validation_loss) > self.min_delta:
+        if self.args.es:
+            print("found arg es")
+            settings = self.args.es
+            self.patience = int(settings[0])
+            self.min_delta=settings[1]
+
+    def early_stop(self, loss):
+        if (loss - self.prev_loss) > self.min_delta:
             self.counter = 0
-        elif abs(validation_loss - self.prev_validation_loss) < self.min_delta or\
-            (validation_loss - self.prev_validation_loss) < 0:
+        elif abs(loss - self.prev_loss) < self.min_delta or\
+            (loss - self.prev_loss) < 0:
             self.counter += 1
             if self.counter >= self.patience:
                 return True
-        self.prev_validation_loss = validation_loss
+        self.prev_loss = loss
         return False
