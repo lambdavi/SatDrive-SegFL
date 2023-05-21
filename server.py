@@ -175,6 +175,8 @@ class Server:
         arr = output.cpu().numpy()
         print(arr.shape)
         print(arr[0][0].shape)
+        print(np.unique(arr[0][0]))
+
 
         predicted_labels = np.argmax(output.cpu().numpy(), axis=1).mean(axis=0).astype(np.uint8)
         print(predicted_labels.shape)
