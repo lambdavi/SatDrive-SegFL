@@ -274,7 +274,8 @@ def main():
 
     server.train()
 
-    server.predict("data/idda/images/28560_T03_CS_J.jpg")
+    # Code to predict an image
+    # server.predict("data/idda/images/28560_T03_CS_J.jpg")
 
 if __name__ == '__main__':
     main()
