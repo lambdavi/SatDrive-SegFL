@@ -173,6 +173,7 @@ class Server:
         with torch.no_grad():
             output = self.model(input_tensor)['out']  # Get the output logits
         arr = output.cpu().numpy()
+        print(np.unique(arr))
         print(arr.shape)
         predicted_labels = np.argmax(output.cpu().numpy(), axis=1).mean(axis=0).astype(np.uint8)
         print(predicted_labels.shape)
