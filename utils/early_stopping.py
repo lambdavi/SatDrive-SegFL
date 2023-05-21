@@ -10,6 +10,7 @@ class EarlyStopper:
 
         if self.args.es:
             settings = self.args.es
+            print(f"Early Stopping activated with settings: {settings}")
             self.patience = int(settings[0])
             self.min_delta=settings[1]
 
