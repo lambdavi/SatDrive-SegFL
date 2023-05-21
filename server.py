@@ -110,8 +110,8 @@ class Server:
             print("------------------------------------")
             print(f"Evaluation of the trainset started.")
             print("------------------------------------")      
-            self.eval_train()
-        self.test()
+            #self.eval_train()
+        #self.test()
 
     def eval_train(self):
         """
@@ -174,7 +174,7 @@ class Server:
             output = self.model(input_tensor)['out']  # Get the output logits
         arr = output.cpu().numpy()
         print(arr.shape)
-        predicted_labels = np.argmax(output.cpu().numpy(), axis=0)
+        predicted_labels = np.argmax(output.cpu().numpy(), axis=1)
 
         # Define a color map for visualization
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
