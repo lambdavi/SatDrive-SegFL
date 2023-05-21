@@ -155,6 +155,7 @@ class Server:
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def predict(self, image_path):
+
         # Load and preprocess the input image
         input_image = Image.open(image_path)
 
@@ -165,7 +166,7 @@ class Server:
         ])
 
         input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
-
+        input_tensor.to("cuda")
         self.model.eval()
 
         # Perform inference
