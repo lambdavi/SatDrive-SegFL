@@ -174,7 +174,7 @@ class Server:
             output = self.model(input_tensor)['out']  # Get the output logits
         arr = output.cpu().numpy()
         print(arr.shape)
-        predicted_labels = np.argmax(output.cpu().numpy(), axis=1)
+        predicted_labels = np.argmax(output.cpu().numpy(), axis=1).mean(axis=0)
 
         # Define a color map for visualization
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
