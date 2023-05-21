@@ -166,14 +166,14 @@ class Server:
         ])
 
         input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
-        input_tensor = input_tensor.cpu()
+        input_tensor = input_tensor.cuda()
         self.model.eval()
 
         # Perform inference
         with torch.no_grad():
             output = self.model(input_tensor)['out']  # Get the output logits
 
-        predicted_labels = np.argmax(output, axis=0)
+        predicted_labels = np.argmax(output.cpu().numpy(), axis=0)
 
         # Define a color map for visualization
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
