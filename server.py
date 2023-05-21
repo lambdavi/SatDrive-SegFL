@@ -184,10 +184,8 @@ class Server:
         # Create the predicted image with colors
         predicted_image = Image.fromarray((colormap(normalized_labels) * 255).astype(np.uint8))
 
-        # Save the predicted image as PNG format
-        predicted_image.save('path/to/save/predicted_image.png')
         # Save the predicted image
-        predicted_image.save('test_semantic.jpg')
+        predicted_image.save('test_semantic.png')
 
 
 
