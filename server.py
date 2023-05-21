@@ -166,7 +166,7 @@ class Server:
         ])
 
         input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
-        input_tensor = input_tensor.to("cuda")
+        input_tensor = input_tensor.cpu()
         self.model.eval()
 
         # Perform inference
