@@ -51,7 +51,7 @@ class FdaServer:
             :return: model updates gathered from the clients, to be aggregated
         """
         # Test client augmetation
-        print(f"Client: {client[0].name} turn: Num. of samples: {len(client[0].dataset)}")
+        print(f"\n Training on source dataset starting.. Num. of samples: {len(client[0].dataset)}")
         #Update parameters of the client model
         client[0].set_set_style_tf_fn(self.styleaug)
         client[0].model.load_state_dict(self.model_params_dict)
