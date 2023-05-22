@@ -52,7 +52,7 @@ class Client:
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=self.args.lambda_selftrain, **shared_kwargs)
+        criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=1, **shared_kwargs)
         
         if hasattr(loss_fn, 'requires_reduction') and not loss_fn.requires_reduction:
             reduction = lambda x, y: x
