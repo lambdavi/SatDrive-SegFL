@@ -46,7 +46,7 @@ class FdaServer:
         if self.args.load:
             pth = "models/checkpoints/source_checkpoint.pth" if self.args.chp else "models/source_best_model.pth"
             saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
+            #self.model_params_dict = saved_params
             self.model.load_state_dict(saved_params)
             to_print = " from checkpoints." if self.args.chp else "."
             print(f"Source model loaded{to_print}")
