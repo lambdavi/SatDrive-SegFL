@@ -26,6 +26,7 @@ from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 
 from torchvision.transforms import RandomApply
 
+import timeit
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -271,8 +272,9 @@ def main():
         print("Fda Mode activated.")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
 
-    server.train()
-
+    #server.train()
+    execution_time = timeit.timeit(server.train, number=1)
+    print(f"Execution time: {execution_time} seconds")
     # Code to predict an image
     if args.pred:
         print("Predicting "+args.pred)
