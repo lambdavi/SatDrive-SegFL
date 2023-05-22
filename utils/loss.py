@@ -40,7 +40,7 @@ class SelfTrainingLoss(nn.Module):
         self.lambda_selftrain = lambda_selftrain
 
     def set_teacher(self, model):
-        self.teacher = model
+        self.teacher = model.cuda()
 
     def get_image_mask(self, prob, pseudo_lab):
         max_prob = prob.detach().clone().max(0)[0]
