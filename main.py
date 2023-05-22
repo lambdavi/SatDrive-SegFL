@@ -249,12 +249,12 @@ def main():
     args = parser.parse_args()
     set_seed(args.seed)
 
-    print(f'Initializing model...')
+    print(f'Initializing model...\t', end="")
     model = model_init(args)
     model.cuda()
     print('Done.')
 
-    print('Generate datasets...')
+    print('Generate datasets...\t', end="")
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
     source_dataset = get_source_client(args, model)
     print('Done.')
@@ -268,12 +268,13 @@ def main():
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
     else:
-        print("FDA mode activated.")
+        print("Activating FDA mode...\t", end="")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
+        print('Done.')
 
-    #server.train()
     execution_time = timeit.timeit(server.train, number=1)
     print(f"Execution time: {execution_time} seconds")
+    
     # Code to predict an image
     if args.pred:
         print("Predicting "+args.pred)
