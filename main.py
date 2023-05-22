@@ -249,32 +249,36 @@ def main():
     args = parser.parse_args()
     set_seed(args.seed)
 
-    print(f'Initializing model...\t', end="")
+    print('Initializing model...', end=" ")
     model = model_init(args)
     model.cuda()
     print('Done.')
 
-    print('Generate datasets...\t', end="")
+    print('Generate datasets...', end=" ")
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
-    source_dataset = get_source_client(args, model)
     print('Done.')
+    source_dataset = get_source_client(args, model)
     metrics = set_metrics(args)
-    
+
+    print('Generate clients...', end=" ")
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
-    
+    print('Done.')
+
+    print('Setup server...', end=" ")
     if args.fda == False:
         if args.dataset == "gta5":
             server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
+        print('Done.')
     else:
-        print("Activating FDA mode...\t", end="")
+        print("\nActivating FDA mode...\t", end="")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
         print('Done.')
 
     execution_time = timeit.timeit(server.train, number=1)
     print(f"Execution time: {execution_time} seconds")
-    
+
     # Code to predict an image
     if args.pred:
         print("Predicting "+args.pred)
