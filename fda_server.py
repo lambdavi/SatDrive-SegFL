@@ -220,7 +220,7 @@ class FdaServer:
             # Save the figure
             plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
 
-            self.__predict_image()
+            #self.__predict_image()
 
     def __predict_image(self):
         # Temp function to save image of the style transfer (FDA)
