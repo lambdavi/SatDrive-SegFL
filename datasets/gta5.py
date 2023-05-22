@@ -68,9 +68,10 @@ class GTA5Dataset(VisionDataset):
 
         if self.return_unprocessed_image:
             return image
+        
         # Apply style transfer
         if self.style_tf_fn is not None:
-            image = self.style_tf_fn(image)
+            image = self.style_tf_fn(image)            
 
         if self.transform is not None:
             if isinstance(self.transform, list):
