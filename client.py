@@ -57,7 +57,7 @@ class Client:
         def pseudo(outs):
             return outs.max(1)[1]
         
-        for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
+        for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
             images = images.to(self.device, dtype=torch.float32)
             pseudo_labels = self.teacher(images)["out"]
             optimizer.zero_grad()
