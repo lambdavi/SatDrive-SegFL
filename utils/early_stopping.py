@@ -14,10 +14,11 @@ class EarlyStopper:
             self.min_delta=settings[1]
 
     def early_stop(self, loss):
-        if (loss - self.prev_loss) > self.min_delta:
+        print(self.prev_loss - loss)
+        if (self.prev_loss - loss) > self.min_delta:
             self.counter = 0
         elif abs(loss - self.prev_loss) < self.min_delta or\
-            (loss - self.prev_loss) < 0:
+            (self.prev_loss - loss) < 0:
             self.counter += 1
             if self.counter >= self.patience:
                 return True
