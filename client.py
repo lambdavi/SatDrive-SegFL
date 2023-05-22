@@ -54,12 +54,15 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
+        def pseudo(outs):
+            return outs.max(1)[1]
+        
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             images = images.to(self.device, dtype=torch.float32)
             pseudo_labels = self.teacher(images)["out"]
             optimizer.zero_grad()
             outputs = self._get_outputs(images)
-            loss = self.reduction(self.criterion(outputs,pseudo_labels),pseudo_labels)
+            loss = self.reduction(self.criterion(outputs,pseudo_labels),pseudo(pseudo_labels))
             loss.backward()
             optimizer.step()
             
