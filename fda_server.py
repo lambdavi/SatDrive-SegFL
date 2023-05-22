@@ -58,7 +58,7 @@ class FdaServer:
         update = client[0].train()
         return update
     
-    def train_round(self, client):
+    def train_round(self, clients):
         """
             This method trains the model with the dataset of the clients. It handles the training at single round level
             :param clients: list of all the clients to train
@@ -66,7 +66,7 @@ class FdaServer:
         """
         updates = []
         # Test client augmetation
-        for i, c in enumerate(client):
+        for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
             student_params = copy.deepcopy(self.student_model.state_dict())
