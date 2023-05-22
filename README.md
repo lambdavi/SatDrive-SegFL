@@ -5,25 +5,33 @@ Code for the Federated Learning project.
 
 #### Datasets
 The repository supports experiments on the following datasets:
-1. **FEMNIST** (Federated Extended MNIST) from LEAF benchmark [1]
-   - Task: image classification on 62 classes
-   - 3,500 users
-   - Instructions for download and preprocessing in ```data/femnist/``` 
-2. Reduced **Federated IDDA** from FedDrive [2]
+1. Reduced **Federated IDDA** from FedDrive [2]
    - Task: semantic segmentation for autonomous driving
    - 24 users
+2. Reduced **GTA5**
+   - Task: semantic segmentation for autonomous driving
+   - downloadGta.py available to download it.
 
 ## How to run
 The ```main.py``` orchestrates training. All arguments need to be specified through the ```args``` parameter (options can be found in ```utils/args.py```).
-Example of FedAvg experiment (**NB** training hyperparameters need to explicitly specified by the students):
+Example of experiments:
 
-- **FEMNIST** (Image Classification)
-```bash
-python main.py --dataset femnist --model resnet18 --num_rounds 1000 --num_epochs 5 --clients_per_round 10 
-```
+### Centralized mode: 
 - **IDDA** (Semantic Segmentation)
 ```bash
-python main.py --dataset idda --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8 
+python main.py --dataset idda --centr --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 20 --clients_per_round 8 
+```
+
+### Distributed mode: 
+- **GTA** (Semantic Segmentation)
+```bash
+python main.py --dataset gta5 --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8 
+```
+
+### FDA mode: 
+- **GTA** (Semantic Segmentation)
+```bash
+python main.py --dataset idda --fda --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8 
 ```
 
 ## References
