@@ -50,7 +50,7 @@ class Client:
             return self.model(images)
         raise NotImplementedError
     
-    def __get_criterion_and_reduction_rules(self, use_labels=False):
+    def get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=self.args.lambda_selftrain, **shared_kwargs)
         
@@ -70,7 +70,7 @@ class Client:
         def pseudo(outs):
             return outs.max(1)[1]
         
-        crit, red = self.__get_criterion_and_reduction_rules(self, use_labels=False)
+        crit, red = self.get_criterion_and_reduction_rules(self, use_labels=False)
 
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
             kwargs = {}
