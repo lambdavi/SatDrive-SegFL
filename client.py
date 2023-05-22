@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from utils.utils import HardNegativeMining, MeanReduction
 from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
+from tqdm import tqdm
 
 class Client:
 
@@ -53,7 +54,7 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
-        for cur_step, (images, _) in enumerate(self.train_loader):
+        for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             images = images.to(self.device, dtype=torch.float32)
             pseudo_labels = self.teacher(images)["out"]
             optimizer.zero_grad()
