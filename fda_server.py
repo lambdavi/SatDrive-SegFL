@@ -86,6 +86,7 @@ class FdaServer:
             student_params = copy.deepcopy(self.student_model.state_dict())
             c.model.load_state_dict(student_params)
             c.set_teacher(self.teacher_model)
+            c.early_stopper.reset_counter()
             # Temp line. setup train
             update = c.train()
             updates.append(update)

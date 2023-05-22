@@ -23,3 +23,6 @@ class EarlyStopper:
                 return True
         self.prev_loss = loss
         return False
+    
+    def reset_counter(self):
+        self.counter = 0
