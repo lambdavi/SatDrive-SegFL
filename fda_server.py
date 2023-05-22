@@ -227,7 +227,7 @@ class FdaServer:
         # Load and preprocess the input image
         dataset = self.source_dataset[0].dataset
         dataset.return_unprocessed_image = True
-        input_image = dataset.style_tf_fn(dataset[0])
+        input_image = self.styleaug.apply_style(dataset[0])
         # Create the predicted image with colors
     
         fig, ax = plt.subplots()
