@@ -74,7 +74,7 @@ class Client:
 
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
             kwargs = {}
-            kwargs["img"]=images
+            kwargs["imgs"]=images
             images = images.to(self.device, dtype=torch.float32)
             pseudo_labels = self.teacher(images)["out"]
             optimizer.zero_grad()
