@@ -71,7 +71,10 @@ class Client:
             return outs.max(1)[1]
         
         crit, red = self.__get_criterion_and_reduction_rules(self)
+        crit.cuda()
+
         crit.set_teacher(self.teacher)
+        
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             kwargs = {}
             kwargs["imgs"]=images
