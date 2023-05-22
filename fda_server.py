@@ -217,7 +217,7 @@ class FdaServer:
             frame.set_facecolor('white')
 
             # Save the figure
-            plt.savefig('image_fin.png', bbox_inches='tight', dpi=300)
+            plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
 
 
 
