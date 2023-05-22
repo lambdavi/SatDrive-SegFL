@@ -83,7 +83,7 @@ class StyleAugment:
         if self.sizes is None:
             self.sizes = self.compute_size(fft_np)
         h1, h2, w1, w2 = self.sizes
-        style = fft_np[:, h1:h2, w1:w2]
+        style = fft_np[:, h1:h2, w1:w2].copy()  # Create a copy to avoid modifying the original array
         return style
 
     def compute_size(self, amp_shift):
