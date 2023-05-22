@@ -125,34 +125,6 @@ class StyleAugment:
 
         return img_with_style
     
-    """def _apply_style(self, img):
-        if self.n_images_per_style < 0 or len(self.styles) == 0:
-            return img
-
-        style = random.choice(self.styles)
-
-        if isinstance(img, np.ndarray):
-            H, W = img.shape[0:2]
-        else:
-            W, H = img.size
-        img_np = self.preprocess(img)
-
-        fft_np = np.fft.fftshift(np.fft.fft2(img_np, axes=(-2, -1)), axes=(-2, -1))
-        amp = np.abs(fft_np)
-        pha = np.angle(fft_np)
-        h1, h2, w1, w2 = self.sizes
-        amp_shift = fft_np.copy()
-        amp_shift[:, h1:h2, w1:w2] = style
-        amp_ = np.fft.ifftshift(amp_shift, axes=(-2, -1))
-
-        fft_ = amp_ * np.exp(1j * pha)
-        img_np_ = np.fft.ifft2(fft_, axes=(-2, -1))
-        img_np_ = np.real(img_np_)
-        img_np__ = np.clip(np.round(img_np_), 0., 255.)
-
-        img_with_style = self.deprocess(img_np__, (W, H))
-
-        return img_with_style"""
     
     def test(self, images_np, images_target_np=None, size=None):
 
