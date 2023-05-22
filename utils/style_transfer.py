@@ -68,7 +68,7 @@ class StyleAugment:
 
         loader.return_unprocessed_image = False
 
-    def _extract_style(self, img_np):
+    """def _extract_style(self, img_np):
         fft_np = np.fft.fft2(img_np, axes=(-2, -1))
         amp = np.abs(fft_np)
         amp_shift = np.fft.fftshift(amp, axes=(-2, -1))
@@ -76,6 +76,14 @@ class StyleAugment:
             self.sizes = self.compute_size(amp_shift)
         h1, h2, w1, w2 = self.sizes
         style = amp_shift[:, h1:h2, w1:w2]
+        return style"""
+    
+    def _extract_style(self, img_np):
+        fft_np = np.fft.fftshift(np.fft.fft2(img_np, axes=(-2, -1)), axes=(-2, -1))
+        if self.sizes is None:
+            self.sizes = self.compute_size(fft_np)
+        h1, h2, w1, w2 = self.sizes
+        style = fft_np[:, h1:h2, w1:w2]
         return style
 
     def compute_size(self, amp_shift):
