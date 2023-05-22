@@ -8,6 +8,7 @@ from utils.utils import HardNegativeMining, MeanReduction
 from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
+from utils.loss import SelfTrainingLoss
 
 class Client:
 
@@ -20,6 +21,7 @@ class Client:
         self.train_loader = DataLoader(self.dataset, batch_size=self.args.bs, shuffle=True, drop_last=True) \
             if not test_client else None
         self.test_loader = DataLoader(self.dataset, batch_size=1, shuffle=False)
+        
         self.criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='none')
         self.reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
@@ -57,12 +59,16 @@ class Client:
         def pseudo(outs):
             return outs.max(1)[1]
         
+        crit, red = __get_criterion_and_reduction_rules()
+
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
+            kwargs = {}
+            kwargs["img"]=images
             images = images.to(self.device, dtype=torch.float32)
             pseudo_labels = self.teacher(images)["out"]
             optimizer.zero_grad()
             outputs = self._get_outputs(images)
-            loss = self.reduction(self.criterion(outputs,pseudo_labels),pseudo(pseudo_labels))
+            loss = red(crit(outputs,**kwargs),pseudo(pseudo_labels))
             loss.backward()
             optimizer.step()
             
@@ -158,3 +164,14 @@ class Client:
                 # Forward pass
                 outputs = self._get_outputs(images) # Apply the loss
                 self.update_metric(metric, outputs, labels)
+
+def __get_criterion_and_reduction_rules(self, use_labels=False):
+        shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
+        criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=self.args.lambda_selftrain, **shared_kwargs)
+       
+        if hasattr(loss_fn, 'requires_reduction') and not loss_fn.requires_reduction:
+            reduction = lambda x, y: x
+        else:
+            reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
+
+        return criterion, reduction
