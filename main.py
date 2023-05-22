@@ -254,8 +254,8 @@ def main():
     model.cuda()
     print('Done.')
 
-    print('Generate datasets...', end=" ")
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
+    print('Generate datasets...', end=" ")
     print('Done.')
     source_dataset = get_source_client(args, model)
     metrics = set_metrics(args)
