@@ -49,6 +49,17 @@ class Client:
         if self.args.model == 'resnet18':
             return self.model(images)
         raise NotImplementedError
+    
+    def __get_criterion_and_reduction_rules(self, use_labels=False):
+        shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
+        criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=self.args.lambda_selftrain, **shared_kwargs)
+        
+        if hasattr(loss_fn, 'requires_reduction') and not loss_fn.requires_reduction:
+            reduction = lambda x, y: x
+        else:
+            reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
+
+        return criterion, reduction
 
     def run_epoch_pseudo(self, cur_epoch, optimizer):
         """
@@ -59,7 +70,7 @@ class Client:
         def pseudo(outs):
             return outs.max(1)[1]
         
-        crit, red = self.__get_criterion_and_reduction_rules()
+        crit, red = self.__get_criterion_and_reduction_rules(self, use_labels=False)
 
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
             kwargs = {}
@@ -165,13 +176,3 @@ class Client:
                 outputs = self._get_outputs(images) # Apply the loss
                 self.update_metric(metric, outputs, labels)
 
-def __get_criterion_and_reduction_rules(self, use_labels=False):
-        shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=self.args.lambda_selftrain, **shared_kwargs)
-       
-        if hasattr(loss_fn, 'requires_reduction') and not loss_fn.requires_reduction:
-            reduction = lambda x, y: x
-        else:
-            reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
-
-        return criterion, reduction
