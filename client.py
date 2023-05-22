@@ -72,7 +72,7 @@ class Client:
         
         crit, red = self.__get_criterion_and_reduction_rules(self)
 
-        for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
+        for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             kwargs = {}
             kwargs["imgs"]=images
             images = images.to(self.device, dtype=torch.float32)
