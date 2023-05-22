@@ -213,7 +213,6 @@ def get_source_client(args, model):
             all_data_train = f.read().splitlines()
         f.close()
         sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)
-        print("here")
         return [sc]
     else:
         return None
