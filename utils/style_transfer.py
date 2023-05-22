@@ -92,7 +92,7 @@ class StyleAugment:
     def apply_style(self, image):
         return self._apply_style(image)
 
-    """def _apply_style(self, img):
+    def _apply_style(self, img):
 
         if self.n_images_per_style < 0:
             return img
@@ -123,9 +123,9 @@ class StyleAugment:
 
         img_with_style = self.deprocess(img_np__, (W, H))
 
-        return img_with_style"""
+        return img_with_style
     
-    def _apply_style(self, img):
+    """def _apply_style(self, img):
         if self.n_images_per_style < 0 or len(self.styles) == 0:
             return img
 
@@ -152,7 +152,7 @@ class StyleAugment:
 
         img_with_style = self.deprocess(img_np__, (W, H))
 
-        return img_with_style
+        return img_with_style"""
     
     def test(self, images_np, images_target_np=None, size=None):
 
