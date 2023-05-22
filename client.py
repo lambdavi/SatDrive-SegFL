@@ -42,6 +42,7 @@ class Client:
 
     def set_teacher(self, teacher_model):
         self.teacher = copy.deepcopy(teacher_model)
+        self.teacher = self.teacher.cuda()
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -71,7 +72,6 @@ class Client:
             return outs.max(1)[1]
         
         crit, red = self.__get_criterion_and_reduction_rules(self)
-        crit.cuda()
 
         crit.set_teacher(self.teacher)
         
