@@ -59,7 +59,7 @@ class Client:
         def pseudo(outs):
             return outs.max(1)[1]
         
-        crit, red = __get_criterion_and_reduction_rules()
+        crit, red = self.__get_criterion_and_reduction_rules()
 
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)*self.args.bs):
             kwargs = {}
