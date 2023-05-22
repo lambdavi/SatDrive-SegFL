@@ -222,6 +222,7 @@ class FdaServer:
             self.__predict_image()
 
     def __predict_image(self):
+        # Temp function to save image of the style transfer (FDA)
         # Load and preprocess the input image
         dataset = self.source_dataset[0].dataset
         dataset.return_unprocessed_image = True
