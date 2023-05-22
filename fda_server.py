@@ -228,12 +228,11 @@ class FdaServer:
         dataset.return_unprocessed_image = True
         input_image = dataset.style_tf_fn(dataset[0])
         # Create the predicted image with colors
-        image = Image.fromarray(input_image)
     
         fig, ax = plt.subplots()
 
         # Display the predicted image
-        ax.imshow(image)
+        ax.imshow(input_image)
         ax.axis('off')
         # Save the figure
         plt.savefig('fda_transform.png', bbox_inches='tight', dpi=300)
