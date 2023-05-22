@@ -274,7 +274,8 @@ def main():
     server.train()
 
     # Code to predict an image
-    server.predict("data/gta5/images/07545.png")
+    if args.pred:
+        server.predict(args.pred)
 
 if __name__ == '__main__':
     main()
