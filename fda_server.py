@@ -223,8 +223,9 @@ class FdaServer:
 
     def __predict_image(self):
         # Load and preprocess the input image
-        self.source_dataset.return_unprocessed_image = True
-        input_image = self.source_dataset.style_tf_fn(self.source_dataset[0])
+        dataset = self.source_dataset[0].dataset
+        dataset.return_unprocessed_image = True
+        input_image = dataset.style_tf_fn(dataset[0])
 
         # Apply necessary transformations
         transforms= sstr.Compose([
