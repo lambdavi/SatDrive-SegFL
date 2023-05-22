@@ -226,52 +226,14 @@ class FdaServer:
         dataset = self.source_dataset[0].dataset
         dataset.return_unprocessed_image = True
         input_image = dataset.style_tf_fn(dataset[0])
-
-        # Apply necessary transformations
-        transforms= sstr.Compose([
-            sstr.ToTensor(),
-            sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-
-        input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
-        input_tensor = input_tensor.cuda()
-        self.model.eval()
-
-        # Perform inference
-        with torch.no_grad():
-            output = self.model(input_tensor)['out']  # Get the output logits
-        output = output.squeeze(0).cpu().numpy()
-    
-        normalized_output = (output - output.min()) / (output.max() - output.min())
-
-        predicted_labels = np.argmax(normalized_output, axis=0)
-
-        # Normalize the predicted labels to the range [0, 1]
-        colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
-
         # Create the predicted image with colors
-        predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
-        
-        # Save the predicted image
-        class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
-        # Create a legend
-        legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
-
-    # Create a figure and axes
+        image = Image.fromarray(input_image)
+    
         fig, ax = plt.subplots()
 
         # Display the predicted image
-        ax.imshow(predicted_image)
+        ax.imshow(image)
         ax.axis('off')
-
-        # Create the legend outside the image
-        legend = ax.legend(legend_elements, class_names, loc='center left', bbox_to_anchor=(1, 0.5))
-        # Adjust the positioning and appearance of the legend
-        legend.set_title('Legend')
-        frame = legend.get_frame()
-        frame.set_edgecolor('black')
-        frame.set_facecolor('white')
-
         # Save the figure
         plt.savefig('fda_transform.png', bbox_inches='tight', dpi=300)
 
