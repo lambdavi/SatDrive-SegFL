@@ -4,7 +4,9 @@ from collections import OrderedDict
 import numpy as np
 import torch
 from utils.style_transfer import StyleAugment
-
+from PIL import Image
+import datasets.ss_transforms as sstr
+import matplotlib.pyplot as plt
 class FdaServer:
     def __init__(self, args, source_dataset, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
@@ -83,23 +85,39 @@ class FdaServer:
         """
 
         num_rounds = self.args.num_rounds
-
+        eval_miou_base = 0 
         if self.args.centr:
             num_rounds = 1
         
-        for r in range(num_rounds):
-            print("------------------")
-            print(f"Round {r+1}/{num_rounds} started.")
-            print("------------------")
+        if self.args.load:
+            pth = "models/checkpoints/fda_checkpoint.pth" if self.args.chp else "models/fda_best_model.pth"
+            saved_params = torch.load(pth)
+            self.model_params_dict = saved_params
+            self.model.load_state_dict(saved_params)
+            self.model.eval()
+            to_print = " from checkpoints." if self.args.chp else "."
+            print(f"Model loaded{to_print}")
+        else:
+            for r in range(num_rounds):
+                print("------------------")
+                print(f"Round {r+1}/{num_rounds} started.")
+                print("------------------")
 
-            # Train a round
-            updates = self.train_round(self.source_dataset) # must be a list of 1 client
-            # Aggregate the parameters
-            self.model_params_dict = self.aggregate(updates)
-            self.model.load_state_dict(self.model_params_dict, strict=False)
-            if self.activate_val:
-                self.eval_validation()
+                # Train a round
+                updates = self.train_round(self.source_dataset) # must be a list of 1 client
+                # Aggregate the parameters
+                self.model_params_dict = self.aggregate(updates)
+                self.model.load_state_dict(self.model_params_dict, strict=False)
+                if self.activate_val:
+                    eval_miou=self.eval_validation()
+                    if self.args.chp and (eval_miou>eval_miou_base):
+                        eval_miou_base = eval_miou
+                        torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
+                        print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
 
+        if self.args.save and (self.args.chp == False):
+                print("Saving model...")
+                torch.save(self.model_params_dict, 'models/fda_best_model.pth')
         
         if self.args.dataset != "gta5":  
             print("------------------------------------")
@@ -148,4 +166,60 @@ class FdaServer:
         res=self.metrics["test_diff_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
+    def predict(self, image_path):
+
+            # Load and preprocess the input image
+            input_image = Image.open(image_path)
+
+            # Apply necessary transformations
+            transforms= sstr.Compose([
+                sstr.ToTensor(),
+                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+
+            input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
+            input_tensor = input_tensor.cuda()
+            self.model.eval()
+
+            # Perform inference
+            with torch.no_grad():
+                output = self.model(input_tensor)['out']  # Get the output logits
+            output = output.squeeze(0).cpu().numpy()
         
+            normalized_output = (output - output.min()) / (output.max() - output.min())
+
+            predicted_labels = np.argmax(normalized_output, axis=0)
+
+            # Normalize the predicted labels to the range [0, 1]
+            colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
+
+            # Create the predicted image with colors
+            predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
+            
+            # Save the predicted image
+            class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
+            # Create a legend
+            legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
+
+        # Create a figure and axes
+            fig, ax = plt.subplots()
+
+            # Display the predicted image
+            ax.imshow(predicted_image)
+            ax.axis('off')
+
+            # Create the legend outside the image
+            legend = ax.legend(legend_elements, class_names, loc='center left', bbox_to_anchor=(1, 0.5))
+            # Adjust the positioning and appearance of the legend
+            legend.set_title('Legend')
+            frame = legend.get_frame()
+            frame.set_edgecolor('black')
+            frame.set_facecolor('white')
+
+            # Save the figure
+            plt.savefig('image_fin.png', bbox_inches='tight', dpi=300)
+
+
+
+
+            
