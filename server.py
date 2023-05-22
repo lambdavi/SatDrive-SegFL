@@ -90,9 +90,9 @@ class Server:
                 print("------------------")
 
                 # Select random subset of clients
-                chosen_client = self.select_clients(seed=r)
+                chosen_clients = self.select_clients(seed=r)
                 # Train a round
-                updates = self.train_round(chosen_client)
+                updates = self.train_round(chosen_clients)
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
                 self.model.load_state_dict(self.model_params_dict, strict=False)

@@ -41,8 +41,21 @@ class FdaServer:
             self.styleaug.add_style(c.dataset)
     
     def train_source(self):
-        _, model_dict = self.train_round_source(self.source_dataset)
-        self.model.load_state_dict(model_dict)
+
+        if self.args.load:
+            pth = "models/checkpoints/source_checkpoint.pth" if self.args.chp else "models/source_best_model.pth"
+            saved_params = torch.load(pth)
+            self.model_params_dict = saved_params
+            self.model.load_state_dict(saved_params)
+            to_print = " from checkpoints." if self.args.chp else "."
+            print(f"Source model loaded{to_print}")
+        else:
+            _, model_dict = self.train_round_source(self.source_dataset)
+            self.model.load_state_dict(model_dict)
+
+        if self.args.save:
+                print("Saving training source...")
+                torch.save(self.model_params_dict, 'models/source_best_model.pth')
 
     def train_round_source(self, client):
         """
@@ -113,55 +126,57 @@ class FdaServer:
         if self.args.centr:
             num_rounds = 1
         
-        if self.args.load:
+        """if self.args.load:
             pth = "models/checkpoints/fda_checkpoint.pth" if self.args.chp else "models/fda_best_model.pth"
             saved_params = torch.load(pth)
             self.model_params_dict = saved_params
             self.model.load_state_dict(saved_params)
             to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Model loaded{to_print}")
-        else:
-            # Centralized train on source dataset
-            self.train_source()
+            print(f"Model loaded{to_print}")"""
+        #else:
 
-            # Setup teacher and student
-            self.teacher_model = copy.deepcopy(self.model)
-            self.student_model = copy.deepcopy(self.model)
+        # Centralized train on source dataset
+        self.train_source()
 
-            # Start of distributed train
-            for r in range(num_rounds):                
-                print("------------------")
-                print(f"Round {r+1}/{num_rounds} started.")
-                print("------------------")
+        # Setup teacher and student
+        self.teacher_model = copy.deepcopy(self.model)
+        self.student_model = copy.deepcopy(self.model)
 
-                # Select random subset of clients
-                chosen_clients = self.select_clients(seed=r)
+        # Start of distributed train
+        for r in range(num_rounds):                
+            print("------------------")
+            print(f"Round {r+1}/{num_rounds} started.")
+            print("------------------")
 
-                # Train a round
-                updates = self.train_round(chosen_clients)
+            # Select random subset of clients
+            chosen_clients = self.select_clients(seed=r)
 
-                # Aggregate the parameters
-                self.model_params_dict = self.aggregate(updates)
+            # Train a round
+            updates = self.train_round(chosen_clients)
 
-                # Save in the student model the aggregated weights
-                self.student_model.load_state_dict(self.model_params_dict, strict=False)
-                
-                """if self.activate_val:
-                    eval_miou=self.eval_validation()
-                    if self.args.chp and (eval_miou>eval_miou_base):
-                        eval_miou_base = eval_miou
-                        torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
-                        print(f"Changed checkpoint at round {r} with miou:{eval_miou}")"""
+            # Aggregate the parameters
+            self.model_params_dict = self.aggregate(updates)
+
+            # Save in the student model the aggregated weights
+            self.student_model.load_state_dict(self.model_params_dict, strict=False)
+            
+            """if self.activate_val:
+                eval_miou=self.eval_validation()
+                if self.args.chp and (eval_miou>eval_miou_base):
+                    eval_miou_base = eval_miou
+                    torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
+                    print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
 
         if self.args.save and (self.args.chp == False):
                 print("Saving model...")
                 torch.save(self.model_params_dict, 'models/fda_best_model.pth')
-        
-        """if self.args.dataset != "gta5":  
+    
+        if self.args.dataset != "gta5":  
             print("------------------------------------")
             print(f"Evaluation of the trainset started.")
             print("------------------------------------")      
             self.eval_train()"""
+            
         self.test()
 
     def eval_train(self):
