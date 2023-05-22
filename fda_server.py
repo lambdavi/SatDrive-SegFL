@@ -26,7 +26,7 @@ class FdaServer:
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b) 
         
-        self.extract_styles()
+        #self.extract_styles()
         
     def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
@@ -176,7 +176,7 @@ class FdaServer:
             print(f"Evaluation of the trainset started.")
             print("------------------------------------")      
             self.eval_train()"""
-            
+
         self.test()
 
     def eval_train(self):
