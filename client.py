@@ -24,6 +24,8 @@ class Client:
 
         self.styleaug = None
         self.early_stopper = EarlyStopper(args)
+        
+        self.teacher = None
 
     def __str__(self):
         return self.name
@@ -35,6 +37,8 @@ class Client:
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
 
+    def set_teacher(self, teacher_model):
+        self.teacher = copy.deepcopy(teacher_model)
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -43,6 +47,28 @@ class Client:
             return self.model(images)
         raise NotImplementedError
 
+    def run_epoch_pseudo(self, cur_epoch, optimizer):
+        """
+        This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
+        :param cur_epoch: current epoch of training
+        :param optimizer: optimizer used for the local training
+        """
+        for cur_step, (images, _) in enumerate(self.train_loader):
+            images = images.to(self.device, dtype=torch.float32)
+            pseudo_labels = self.teacher(images)["out"]
+            optimizer.zero_grad()
+            outputs = self._get_outputs(images)
+            loss = self.reduction(self.criterion(outputs,pseudo_labels),pseudo_labels)
+            loss.backward()
+            optimizer.step()
+            
+        print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
+        
+        if self.args.es:
+            return self.early_stopper.early_stop(loss.item())
+        
+        return False
+    
     def run_epoch(self, cur_epoch, optimizer):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
@@ -101,7 +127,10 @@ class Client:
         self.model.train()
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
-            stop_condition = self.run_epoch(epoch, optimizer)
+            if self.teacher:
+                stop_condition = self.run_epoch_pseudo(epoch, optimizer)
+            else:
+                stop_condition = self.run_epoch(epoch, optimizer)
             if scheduler:
                 scheduler.step()
 
