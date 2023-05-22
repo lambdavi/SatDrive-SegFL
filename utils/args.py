@@ -38,6 +38,6 @@ def get_parser():
     parser.add_argument('--save', action='store_true', default=False, help='Model saved at the end (training performed)')
     parser.add_argument('--load', action='store_true', default=False, help='Load saved model')
     parser.add_argument('--chp', action='store_true', default=False, help='Model checkpoints saved during training')
-    parser.add_argument('--predict', type=str, default = None, help='Path of image to predict')
+    parser.add_argument('--pred', type=str, default = None, help='Path of image to predict')
 
     return parser
