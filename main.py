@@ -275,6 +275,7 @@ def main():
 
     # Code to predict an image
     if args.pred:
+        print("Predicting "+args.pred)
         server.predict(args.pred)
 
 if __name__ == '__main__':
