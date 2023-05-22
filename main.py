@@ -163,12 +163,12 @@ def get_datasets(args):
         
         if args.centr:
             # If centralized we get all training data on one single client
-            print("Centralized mode set")
+            print("\n\tCentralized mode set.")
             train_datasets.append(GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms,
                                                 client_name='centralized'))
         else:
             # Otherwise we divide data in multiple datasets.
-            print("Distributed Mode Set")
+            print("\n\tDistributed Mode Set.")
 
             total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
             
@@ -270,11 +270,10 @@ def main():
             server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
-        print('Done.')
     else:
-        print("\nActivating FDA mode...\t", end="")
+        print("\n\tActivating FDA mode...\t", end="")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
-        print('Done.')
+    print('Done.')
 
     execution_time = timeit.timeit(server.train, number=1)
     print(f"Execution time: {execution_time} seconds")
