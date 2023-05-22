@@ -21,8 +21,8 @@ class FdaServer:
 
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b) 
-        if not self.args.load:
-            self.extract_styles()
+        
+        self.extract_styles()
         
     def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
