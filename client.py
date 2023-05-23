@@ -177,6 +177,6 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs = self._get_outputs(images) # Apply the loss
+                outputs = self._get_outputs(images)
                 self.update_metric(metric, outputs, labels)
 
