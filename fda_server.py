@@ -85,7 +85,7 @@ class FdaServer:
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
-            student_params = copy.deepcopy(self.student_model.state_dict())
+            student_params = copy.deepcopy(self.model_params_dict)
             c.model.load_state_dict(student_params)
             c.set_teacher(self.teacher_model)
             c.early_stopper.reset_counter()
@@ -202,7 +202,7 @@ class FdaServer:
         print(f"Test on SAME DOMAIN DATA started.")
         print("------------------------------------")
         self.metrics["test_same_dom"].reset()
-        self.test_clients[0].model.load_state_dict(self.student_model.state_dict())
+        self.test_clients[0].model.load_state_dict(self.model_params_dict)
         self.test_clients[0].test(self.metrics["test_same_dom"])
         res=self.metrics["test_same_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
@@ -210,7 +210,7 @@ class FdaServer:
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
         self.metrics["test_diff_dom"].reset()
-        self.test_clients[1].model.load_state_dict(self.student_model.state_dict())
+        self.test_clients[1].model.load_state_dict(self.model_params_dict)
         self.test_clients[1].test(self.metrics["test_diff_dom"])
         res=self.metrics["test_diff_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')

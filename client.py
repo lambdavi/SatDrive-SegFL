@@ -42,6 +42,7 @@ class Client:
 
     def set_teacher(self, teacher_model):
         self.teacher = teacher_model
+        self.teacher.eval()
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -69,7 +70,8 @@ class Client:
         """
         def pseudo(outs):
             return outs.max(1)[1]
-                
+        
+        self.model.train()
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             torch.cuda.empty_cache()
             optimizer.zero_grad()
