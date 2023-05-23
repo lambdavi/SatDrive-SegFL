@@ -27,7 +27,38 @@ def weight_test_loss(losses):
         tot_loss = tot_loss + v['loss'] * v['num_samples']
         weights = weights + v['num_samples']
     return tot_loss / weights
+class IW_MaxSquareloss(nn.Module):
+    requires_reduction = False
 
+    def __init__(self, ignore_index=255, ratio=0.2, **kwargs):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.ratio = ratio
+
+    def forward(self, pred, **kwargs):
+        prob = F.softmax(pred, dim=1)
+        N, C, H, W = prob.size()
+        mask = (prob != self.ignore_index)
+        maxpred, argpred = torch.max(prob, 1)
+        mask_arg = (maxpred != self.ignore_index)
+        argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long) * self.ignore_index)
+        label = argpred
+        weights = []
+        batch_size = prob.size(0)
+        for i in range(batch_size):
+            hist = torch.histc(label[i].cpu().data.float(),
+                               bins=C + 1, min=-1,
+                               max=C - 1).float()
+            hist = hist[1:]
+            weight = \
+            (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
+                argpred.device)[argpred[i]].detach()
+            weights.append(weight)
+        weights = torch.stack(weights, dim=0).unsqueeze(1)
+        mask = mask_arg.unsqueeze(1).expand_as(prob)
+        prior = torch.mean(prob, (2, 3), True).detach()
+        loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
+        return loss
 class SelfTrainingLoss(nn.Module):
     requires_reduction = False
 
