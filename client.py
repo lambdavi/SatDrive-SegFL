@@ -55,7 +55,7 @@ class Client:
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         #criterion = SelfTrainingLossEntropy(lambda_selftrain=1, **shared_kwargs)
         #criterion.set_teacher(self.teacher)
-        criterion = EntropyLoss(num_classes=16, **shared_kwargs)
+        criterion = EntropyLoss(num_classes=16)
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:
