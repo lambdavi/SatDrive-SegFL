@@ -8,7 +8,7 @@ from utils.utils import HardNegativeMining, MeanReduction
 from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
-from utils.loss import SelfTrainingLoss, SelfTrainingLossEntropy
+from utils.loss import SelfTrainingLoss, SelfTrainingLossEntropy, EntropyLoss
 
 class Client:
 
@@ -41,8 +41,8 @@ class Client:
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
-        self.teacher = teacher_model
-        self.teacher.eval()
+        self.teacher = copy.deepcopy(self.model).load_state_dict(teacher_model.state_dict())
+
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -53,8 +53,9 @@ class Client:
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        criterion = SelfTrainingLossEntropy(lambda_selftrain=1, **shared_kwargs)
-        criterion.set_teacher(self.teacher)
+        #criterion = SelfTrainingLossEntropy(lambda_selftrain=1, **shared_kwargs)
+        #criterion.set_teacher(self.teacher)
+        criterion = EntropyLoss(num_classes=16, **shared_kwargs)
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:
@@ -149,6 +150,7 @@ class Client:
 
         if self.teacher:
             crit, red = self.__get_criterion_and_reduction_rules()
+
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             if self.teacher:

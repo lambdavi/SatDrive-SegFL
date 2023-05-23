@@ -85,7 +85,7 @@ class FdaServer:
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
-            student_params = copy.deepcopy(self.model_params_dict)
+            student_params = copy.deepcopy(self.student_model.state_dict())
             c.model.load_state_dict(student_params)
             c.set_teacher(self.teacher_model)
             c.early_stopper.reset_counter()
@@ -133,7 +133,7 @@ class FdaServer:
         self.train_source()
 
         # Setup teacher and student
-        self.teacher_model = self.source_model
+        self.teacher_model = copy.deepcopy(self.source_model)
         self.student_model = copy.deepcopy(self.source_model)
 
         # Start of distributed train
