@@ -133,7 +133,7 @@ class FdaServer:
         self.train_source()
 
         # Setup teacher and student
-        self.teacher_model = copy.deepcopy(self.source_model)
+        self.teacher_model = self.source_model
         self.student_model = copy.deepcopy(self.source_model)
 
         # Start of distributed train
@@ -152,7 +152,7 @@ class FdaServer:
             self.model_params_dict = self.aggregate(updates)
 
             # Save in the student model the aggregated weights
-            self.student_model.load_state_dict(self.model_params_dict, strict=False)
+            self.student_model.load_state_dict(self.model_params_dict)
             
             """if self.activate_val:
                 eval_miou=self.eval_validation()
