@@ -41,7 +41,7 @@ class Client:
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
-        self.teacher = copy.deepcopy(teacher_model)
+        self.teacher = teacher_model
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -72,13 +72,13 @@ class Client:
                 
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             torch.cuda.empty_cache()
+            optimizer.zero_grad()
             kwargs = {}
             images = images.to(self.device, dtype=torch.float32)
             kwargs["imgs"]=images
-            pseudo_labels = self.teacher(images)["out"]
-            optimizer.zero_grad()
-            outputs = self._get_outputs(images)
-            loss = red(crit(outputs,**kwargs),pseudo(pseudo_labels))
+            #pseudo_labels = self.teacher(images)["out"]
+            outputs = self.model(images)['out']
+            loss = red(crit(outputs,**kwargs),pseudo(outputs))
             loss.backward()
             optimizer.step()
             
