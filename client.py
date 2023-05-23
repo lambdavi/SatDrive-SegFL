@@ -53,7 +53,7 @@ class Client:
     def __get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         criterion = SelfTrainingLoss(lambda_selftrain=1, **shared_kwargs)
-        criterion.set_teacher(self.teacher)
+        #criterion.set_teacher(self.teacher)
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:
@@ -76,7 +76,6 @@ class Client:
             kwargs = {}
             images = images.to(self.device, dtype=torch.float32)
             kwargs["imgs"]=images
-            #pseudo_labels = self.teacher(images)["out"]
             outputs = self.model(images)['out']
             loss = red(crit(outputs,**kwargs),pseudo(outputs))
             loss.backward()
@@ -151,7 +150,6 @@ class Client:
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             if self.teacher:
-
                 stop_condition = self.run_epoch_pseudo(epoch, optimizer, crit, red)
             else:
                 stop_condition = self.run_epoch(epoch, optimizer)
