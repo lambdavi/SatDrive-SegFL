@@ -74,6 +74,7 @@ class Client:
         crit, red = self.__get_criterion_and_reduction_rules(self)
         
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
+            torch.cuda.empty_cache()
             kwargs = {}
             images = images.to(self.device, dtype=torch.float32)
             kwargs["imgs"]=images
