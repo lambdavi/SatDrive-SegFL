@@ -54,7 +54,7 @@ class Client:
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         criterion = SelfTrainingLoss(lambda_selftrain=1, **shared_kwargs)
         criterion.set_teacher(self.teacher)
-        if hasattr(criterion, 'requires_reduction') and not loss_fn.requires_reduction:
+        if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:
             reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
