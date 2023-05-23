@@ -41,7 +41,7 @@ class Client:
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
-        self.teacher = teacher_model.state_dict()
+        self.teacher = teacher_model
 
 
     def _get_outputs(self, images):
