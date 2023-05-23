@@ -117,6 +117,7 @@ class FdaServer:
             if total_weight != 0:
                 averaged_sol_n[key] = value.to('cuda') / total_weight
 
+        print(averaged_sol_n)
         return averaged_sol_n
 
     def train(self):

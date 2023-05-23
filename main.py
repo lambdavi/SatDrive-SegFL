@@ -271,7 +271,7 @@ def main():
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
     else:
-        print("\n\tActivating FDA mode...\t", end="")
+        print("\nActivating FDA mode...\t", end="")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
     print('Done.')
 
