@@ -15,10 +15,10 @@ class FdaServer:
         self.train_clients = train_clients
         self.test_clients = test_clients
         self.validation_clients = valid_clients
-        self.model = model
+        self.source_model = model
         self.metrics = metrics
         self.activate_val = valid
-        self.model_params_dict = copy.deepcopy(self.model.state_dict())
+        self.model_params_dict = copy.deepcopy(self.source_model.state_dict())
 
         self.teacher_model = None
         self.student_model = None
@@ -46,13 +46,14 @@ class FdaServer:
         if self.args.load:
             pth = "models/checkpoints/source_checkpoint.pth" if self.args.chp else "models/source_best_model.pth"
             saved_params = torch.load(pth)
-            #self.model_params_dict = saved_params
-            self.model.load_state_dict(saved_params)
+            self.model_params_dict = saved_params
+            self.source_model.load_state_dict(saved_params)
             to_print = " from checkpoints." if self.args.chp else "."
             print(f"Source model loaded{to_print}")
         else:
             _, model_dict = self.train_round_source(self.source_dataset)
-            self.model.load_state_dict(model_dict)
+            self.model_params_dict = model_dict
+            self.source_model.load_state_dict(self.model_params_dict)
 
         if self.args.save:
                 print("Saving training source...")
@@ -127,22 +128,13 @@ class FdaServer:
         eval_miou_base = 0 
         if self.args.centr:
             num_rounds = 1
-        
-        """if self.args.load:
-            pth = "models/checkpoints/fda_checkpoint.pth" if self.args.chp else "models/fda_best_model.pth"
-            saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
-            self.model.load_state_dict(saved_params)
-            to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Model loaded{to_print}")"""
-        #else:
 
         # Centralized train on source dataset
         self.train_source()
 
         # Setup teacher and student
-        self.teacher_model = copy.deepcopy(self.model)
-        self.student_model = copy.deepcopy(self.model)
+        self.teacher_model = copy.deepcopy(self.source_model)
+        self.student_model = copy.deepcopy(self.source_model)
 
         # Start of distributed train
         for r in range(num_rounds):                
@@ -166,7 +158,7 @@ class FdaServer:
                 eval_miou=self.eval_validation()
                 if self.args.chp and (eval_miou>eval_miou_base):
                     eval_miou_base = eval_miou
-                    torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
+                    torch.save(self.source_model.state_dict(), "models/checkpoints/checkpoint.pth")
                     print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
 
         if self.args.save and (self.args.chp == False):
@@ -234,11 +226,11 @@ class FdaServer:
 
             input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
             input_tensor = input_tensor.cuda()
-            self.model.eval()
+            self.source_model.eval()
 
             # Perform inference
             with torch.no_grad():
-                output = self.model(input_tensor)['out']  # Get the output logits
+                output = self.source_model(input_tensor)['out']  # Get the output logits
             output = output.squeeze(0).cpu().numpy()
         
             normalized_output = (output - output.min()) / (output.max() - output.min())
