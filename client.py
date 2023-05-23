@@ -53,9 +53,8 @@ class Client:
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        #criterion = SelfTrainingLossEntropy(lambda_selftrain=1, **shared_kwargs)
-        #criterion.set_teacher(self.teacher)
-        criterion = EntropyLoss(num_classes=16)
+        criterion = SelfTrainingLossEntropy(lambda_selftrain=1, **shared_kwargs)
+        #criterion = EntropyLoss(num_classes=16)
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:
