@@ -52,17 +52,16 @@ class Client:
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        criterion = loss_fn = SelfTrainingLoss(lambda_selftrain=1, **shared_kwargs)
+        criterion = SelfTrainingLoss(lambda_selftrain=1, **shared_kwargs)
         criterion.set_teacher(self.teacher)
-        loss_fn.set_teacher(self.teacher)
-        if hasattr(loss_fn, 'requires_reduction') and not loss_fn.requires_reduction:
+        if hasattr(criterion, 'requires_reduction') and not loss_fn.requires_reduction:
             reduction = lambda x, y: x
         else:
             reduction = HardNegativeMining() if self.args.hnm else MeanReduction()
 
         return criterion, reduction
 
-    def run_epoch_pseudo(self, cur_epoch, optimizer):
+    def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
         """
         This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
         :param cur_epoch: current epoch of training
@@ -70,9 +69,7 @@ class Client:
         """
         def pseudo(outs):
             return outs.max(1)[1]
-        
-        crit, red = self.__get_criterion_and_reduction_rules(self)
-        
+                
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             torch.cuda.empty_cache()
             kwargs = {}
@@ -148,10 +145,14 @@ class Client:
         optimizer, scheduler = self.get_optimizer_and_scheduler()
 
         self.model.train()
+
+        if self.teacher:
+            crit, red = self.__get_criterion_and_reduction_rules()
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             if self.teacher:
-                stop_condition = self.run_epoch_pseudo(epoch, optimizer)
+
+                stop_condition = self.run_epoch_pseudo(epoch, optimizer, crit, red)
             else:
                 stop_condition = self.run_epoch(epoch, optimizer)
             if scheduler:
