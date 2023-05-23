@@ -27,6 +27,8 @@ from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 from torchvision.transforms import RandomApply
 
 import timeit
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def set_seed(random_seed):
     random.seed(random_seed)

@@ -208,15 +208,6 @@ class FdaServer:
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
         print("------------------------------------")
-        print(f"Test on SAME DOMAIN DATA started.")
-        print("------------------------------------")
-        self.metrics["test_same_dom"].reset()
-        self.test_clients[0].model.load_state_dict(self.student_model.state_dict())
-        self.test_clients[0].test(self.metrics["test_same_dom"])
-        res=self.metrics["test_same_dom"].get_results()
-        print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
-       
-        print("------------------------------------")
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
         self.metrics["test_diff_dom"].reset()

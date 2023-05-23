@@ -9,7 +9,6 @@ from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
 from utils.loss import SelfTrainingLoss, SelfTrainingLossEntropy, EntropyLoss
-
 class Client:
 
     def __init__(self, args, dataset, model, test_client=False):
@@ -41,8 +40,7 @@ class Client:
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
-        self.teacher = teacher_model
-
+        self.teacher = copy.deepcopy(teacher_model)
 
     def _get_outputs(self, images):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -53,8 +51,8 @@ class Client:
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        criterion = SelfTrainingLoss(lambda_selftrain=1, **shared_kwargs)
-        criterion.set_teacher(self.teacher)
+        criterion = SelfTrainingLoss(lambda_selftrain=1,  **shared_kwargs)
+        criterion.set_teacher(copy.deepcopy(self.teacher))
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:
@@ -63,11 +61,7 @@ class Client:
         return criterion, reduction
 
     def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
-        """
-        This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
-        :param cur_epoch: current epoch of training
-        :param optimizer: optimizer used for the local training
-        """
+
         def pseudo(outs):
             return outs.max(1)[1]
         
@@ -75,12 +69,11 @@ class Client:
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             torch.cuda.empty_cache()
             optimizer.zero_grad()
-            kwargs = {}
             images = images.to(self.device, dtype=torch.float32)
-            kwargs["imgs"]=images
-            outputs = self.model(images)['out']
-            loss = red(crit(outputs,**kwargs),pseudo(outputs))
-            loss.backward()
+            outputs = self.model(images)["out"]
+            c = crit(outputs, images)
+            p = pseudo(outputs)
+            loss = red(c, p)
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
