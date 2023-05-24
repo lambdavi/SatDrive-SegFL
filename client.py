@@ -142,7 +142,7 @@ class Client:
         """
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
-        best_miou = 0 if self.eval else None
+        best_miou = 0 if eval_metric else None
         self.model.train()
 
         if self.teacher:
