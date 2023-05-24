@@ -217,7 +217,7 @@ class Client:
     def plot_loss_miou(self):
 
         # Sample data
-        epochs = range(self.args.num_epochs)
+        epochs = range(len(self.mious[0]))
         
         # Create a line chart with two y-values
         plt.plot(epochs, self.losses, label='train_loss')
