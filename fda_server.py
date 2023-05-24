@@ -22,6 +22,7 @@ class FdaServer:
 
         self.teacher_model = None
         self.student_model = None
+        self.teacher_counter = 0
 
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b) 
@@ -85,6 +86,10 @@ class FdaServer:
             :return: model updates gathered from the clients, to be aggregated
         """
         updates = []
+        
+        # Update teacher
+        if self.args.teacher_step == 1:
+
         # Test client augmetation
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
@@ -149,7 +154,7 @@ class FdaServer:
 
             # Select random subset of clients
             chosen_clients = self.select_clients(seed=r)
-
+            
             # Train a round
             updates = self.train_round(chosen_clients)
 

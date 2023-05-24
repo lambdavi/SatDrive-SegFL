@@ -1,5 +1,6 @@
 import argparse
 
+INF = 999
 def str2tuple(tp=int):
 
     def convert(s):
@@ -41,6 +42,6 @@ def get_parser():
     parser.add_argument('--pred', type=str, default = None, help='Path of image to predict')
     parser.add_argument('--loss', type=str, choices=['self', 'iw'], default = "self", help='Loss choice')
     parser.add_argument('--val', action='store_true', default=False, help='Activate validation during training')
-
+    parser.add_argument('--teacher_step', type=int, default = INF, help='How often change the teacher model in FDA settings')
 
     return parser
