@@ -52,6 +52,9 @@ class FdaServer:
             print(f"Source model loaded{to_print}")
         else:
             _, model_dict = self.train_round_source(self.source_dataset)
+            if self.args.chp:
+                pth = "models/checkpoints/source_checkpoint.pth"
+                model_dict = torch.load(pth)
             self.model_params_dict = model_dict
             self.source_model.load_state_dict(self.model_params_dict)
 
