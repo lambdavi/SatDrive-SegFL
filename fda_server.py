@@ -88,7 +88,9 @@ class FdaServer:
         updates = []
         
         # Update teacher
-        if self.args.teacher_step == 1:
+        self.teacher_counter += 1
+        if (self.teacher_counter % self.args.teacher_step) == 0:
+            self.teacher_model.load_state_dict(copy.deepcopy(self.model_params_dict))
 
         # Test client augmetation
         for i, c in enumerate(clients):
