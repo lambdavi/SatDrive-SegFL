@@ -160,7 +160,7 @@ class Client:
 
             if eval_metric and eval_dataset:
                 eval_miou=self.test(eval_metric, True, eval_dataset)
-                print(f"Validation MioU at epoch {epoch}: {eval_miou}")
+                print(f"\tValidation MioU at epoch {epoch}: {eval_miou}")
 
             if(stop_condition):
                 print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
