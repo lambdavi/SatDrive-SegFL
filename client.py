@@ -8,7 +8,7 @@ from utils.utils import HardNegativeMining, MeanReduction
 from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
-from utils.loss import SelfTrainingLoss, IW_MaxSquareloss
+from utils.loss import SelfTrainingLoss, IW_MaxSquareloss, KnowledgeDistillationLoss
 class Client:
 
     def __init__(self, args, dataset, model, test_client=False):
@@ -50,10 +50,14 @@ class Client:
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
+
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
-        #criterion = SelfTrainingLoss(lambda_selftrain=1,  **shared_kwargs)
-        #criterion.set_teacher(copy.deepcopy(self.teacher))
-        criterion = IW_MaxSquareloss()
+        if self.args.loss == "self":
+            criterion = SelfTrainingLoss(lambda_selftrain=1,  **shared_kwargs)
+            criterion.set_teacher(copy.deepcopy(self.teacher))
+        elif self.args.loss == "iw":
+            criterion = IW_MaxSquareloss()
+            
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
         else:

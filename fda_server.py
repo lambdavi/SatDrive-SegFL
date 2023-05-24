@@ -133,7 +133,7 @@ class FdaServer:
         self.train_source()
 
         self.test()
-        
+
         # Setup teacher and student
         self.teacher_model = copy.deepcopy(self.source_model)
         self.student_model = copy.deepcopy(self.source_model)

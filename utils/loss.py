@@ -27,6 +27,7 @@ def weight_test_loss(losses):
         tot_loss = tot_loss + v['loss'] * v['num_samples']
         weights = weights + v['num_samples']
     return tot_loss / weights
+
 class IW_MaxSquareloss(nn.Module):
     requires_reduction = False
 
@@ -175,6 +176,31 @@ class EntropyLoss(nn.Module):
         loss = self.entropy_loss(pred)*self.lambda_entropy
         return loss
 
+class KnowledgeDistillationLoss(nn.Module):
+
+    def __init__(self, reduction='mean', alpha=1.):
+        super().__init__()
+        self.reduction = reduction
+        self.alpha = alpha
+
+    def forward(self, inputs, targets, pred_labels=None, mask=None):
+        inputs = inputs.narrow(1, 0, targets.shape[1])
+        outputs = torch.log_softmax(inputs, dim=1)
+        labels = torch.softmax(targets * self.alpha, dim=1)
+        loss = (outputs * labels).mean(dim=1)
+
+        if pred_labels is not None:
+            loss = loss * pred_labels.float()
+        if mask is not None:
+            loss = loss * mask
+        if self.reduction == 'mean':
+            outputs = -torch.mean(loss)
+        elif self.reduction == 'sum':
+            outputs = -torch.sum(loss)
+        else:
+            outputs = -loss
+        return outputs
+    
 class KnowledgeDistillationLoss(nn.Module):
 
     def __init__(self, reduction='mean', alpha=1.):
