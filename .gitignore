@@ -2,3 +2,6 @@ data/gta5
 data/Cityscapes
 .DS_store
 .vscode/launch.json
+datasets/__pycache__
+models/__pycache__
+utils/__pycache__
