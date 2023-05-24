@@ -163,8 +163,9 @@ class Client:
                 print(f"\tValidation MioU at epoch {epoch}: {eval_miou}")
                 if self.args.chp and (eval_miou>best_miou):
                         best_miou = eval_miou
-                        torch.save(self.source_model.state_dict(), "models/checkpoints/checkpoint.pth")
+                        torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
                         print(f"Saved checkpoint at epoch {epoch}.")
+                self.model.train()
 
             if(stop_condition):
                 print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
@@ -181,6 +182,7 @@ class Client:
         self.model.eval()
         if eval and eval_dataset:
             test_loader = eval_dataset
+            metric.reset()
         else:
             test_loader = self.test_loader
 
