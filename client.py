@@ -186,7 +186,8 @@ class Client:
         print("-----------------------------------------------------")
 
         # save graph
-        self.plot_loss_miou()
+        if self.val:
+            self.plot_loss_miou()
 
         return len(self.dataset), self.model.state_dict()
 
