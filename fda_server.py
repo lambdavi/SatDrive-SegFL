@@ -72,7 +72,7 @@ class FdaServer:
         client[0].model.load_state_dict(self.model_params_dict)
         # Temp line. setup train
         self.metrics["eval_train"].reset()
-        update = client[0].train(self.metrics["eval_train"])
+        update = client[0].train(self.metrics["eval_train"], self.test_clients[0].test_loader)
         return update
     
     def train_round(self, clients):

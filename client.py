@@ -134,7 +134,7 @@ class Client:
         self.styleaug = styleaug
         self.train_loader.dataset.set_style_tf_fn(self.styleaug.apply_style)
 
-    def train(self, eval_metric=None):
+    def train(self, eval_metric=None, eval_dataset=None):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -158,8 +158,8 @@ class Client:
             if scheduler:
                 scheduler.step()
 
-            if eval_metric:
-                eval_miou=self.test(eval_metric, True)
+            if eval_metric and eval_dataset:
+                eval_miou=self.test(eval_metric, True, eval_dataset)
                 print(f"Validation MioU at epoch {epoch}: {eval_miou}")
 
             if(stop_condition):
@@ -169,14 +169,19 @@ class Client:
         print("-----------------------------------------------------")
         return len(self.dataset), self.model.state_dict()
 
-    def test(self, metric, eval=None):
+    def test(self, metric, eval=None, eval_dataset=None):
         """
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
         """
         self.model.eval()
+        if eval and eval_dataset:
+            test_loader = eval_dataset
+        else:
+            test_loader = self.test_loader
+
         with torch.no_grad():
-            for i, (images, labels) in enumerate(self.test_loader):
+            for i, (images, labels) in enumerate(test_loader):
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
