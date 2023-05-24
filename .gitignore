@@ -5,3 +5,4 @@ data/Cityscapes
 datasets/__pycache__
 models/__pycache__
 utils/__pycache__
+models/checkpoints
