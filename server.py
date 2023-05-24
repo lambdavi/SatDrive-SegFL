@@ -81,7 +81,7 @@ class Server:
             num_rounds = 1
         
         if self.args.load:
-            pth = "models/checkpoints/checkpoint.pth" if self.args.chp else "models/best_model.pth"
+            pth = f"models/checkpoints/{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.dataset}_best_model.pth"
             saved_params = torch.load(pth)
             self.model_params_dict = saved_params
             self.model.load_state_dict(saved_params)
@@ -103,9 +103,9 @@ class Server:
                 self.model_params_dict = self.aggregate(updates)
                 self.model.load_state_dict(self.model_params_dict, strict=False) 
             
-            if self.args.save and (self.args.chp == False):
+            if self.args.save:
                 print("Saving model...")
-                torch.save(self.model_params_dict, 'models/best_model.pth')
+                torch.save(self.model_params_dict, f'models/{self.args.dataset}_best_model.pth')
 
         if self.args.dataset != "gta5":  
             print("------------------------------------")
