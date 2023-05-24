@@ -36,7 +36,7 @@ class Server:
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
-            if self.centr:
+            if self.args.centr:
                 self.metrics["eval_train"].reset()
                 update = c.train(self.metrics["eval_train"], self.test_clients[0].test_loader)
             updates.append(update)
