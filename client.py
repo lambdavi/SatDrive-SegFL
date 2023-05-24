@@ -9,6 +9,9 @@ from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
 from utils.loss import SelfTrainingLoss, IW_MaxSquareloss, KnowledgeDistillationLoss
+
+import matplotlib.pyplot as plt
+
 class Client:
 
     def __init__(self, args, dataset, model, test_client=False, val=False):
@@ -28,6 +31,9 @@ class Client:
         self.early_stopper = EarlyStopper(args)
         
         self.teacher = None
+
+        self.losses = []
+        self.mious = []
 
     def __str__(self):
         return self.name
@@ -105,7 +111,7 @@ class Client:
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
-        
+        self.losses.append(loss.item())
         if self.args.es:
             return self.early_stopper.early_stop(loss.item())
         
@@ -161,6 +167,7 @@ class Client:
             if eval_metric and eval_dataset:
                 eval_miou=self.test(eval_metric, True, eval_dataset)
                 print(f"\tValidation MioU: {eval_miou}")
+                self.mious.append(eval_miou)
                 if self.args.chp and (eval_miou>best_miou):
                         best_miou = eval_miou
                         if self.args.fda:
@@ -175,6 +182,10 @@ class Client:
                 break
             
         print("-----------------------------------------------------")
+
+        # save graph
+        self.plot_loss_miou()
+        
         return len(self.dataset), self.model.state_dict()
 
     def test(self, metric, eval=None, eval_dataset=None):
@@ -199,3 +210,22 @@ class Client:
         
         if eval:
             return metric.get_results()["Mean IoU"]
+    
+    def plot_loss_miou(self):
+
+        # Sample data
+        epochs = range(self.args.num_epochs)
+        
+        # Create a line chart with two y-values
+        plt.plot(epochs, self.losses, label='train_loss')
+        plt.plot(epochs, self.mious, label='val_miou')
+
+        # Add labels and title
+        plt.xlabel('epochs')
+        plt.title('Training loss vs Validation Miou')
+
+        # Add legend
+        plt.legend()
+
+        # Display the chart
+        plt.savefig('loss_vs_miou.png')
