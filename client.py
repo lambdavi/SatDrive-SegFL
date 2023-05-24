@@ -178,7 +178,7 @@ class Client:
                             print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
                 if self.args.es:
-                    return self.early_stopper.early_stop(eval_miou)
+                    stop_condition = self.early_stopper.early_stop(eval_miou)
                 if(stop_condition):
                     print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
                     break
@@ -220,7 +220,7 @@ class Client:
         epochs = range(self.args.num_epochs)
         
         # Create a line chart with two y-values
-        #plt.plot(epochs, self.losses, label='train_loss')
+        plt.plot(epochs, self.losses, label='train_loss')
         plt.plot(epochs, self.mious[2], label='train_miou')
         plt.plot(epochs, self.mious[0], label='val_miou_same')
         plt.plot(epochs, self.mious[1], label='val_miou_diff')
