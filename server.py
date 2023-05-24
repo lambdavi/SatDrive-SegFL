@@ -194,7 +194,8 @@ class Server:
         fig, ax = plt.subplots()
 
         # Display the predicted image
-        ax.imshow(predicted_image)
+        ax.imshow(np.array(input_image))
+        ax.imshow(predicted_image, alpha=0.7)
         ax.axis('off')
 
         # Create the legend outside the image
