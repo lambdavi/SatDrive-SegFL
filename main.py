@@ -165,12 +165,12 @@ def get_datasets(args):
         
         if args.centr:
             # If centralized we get all training data on one single client
-            print("\n\tCentralized mode set.")
+            print("Centralized mode set.")
             train_datasets.append(GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms,
                                                 client_name='centralized'))
         else:
             # Otherwise we divide data in multiple datasets.
-            print("\n\tDistributed Mode Set.")
+            print("Distributed Mode Set.")
 
             total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
             
