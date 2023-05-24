@@ -104,7 +104,7 @@ class Server:
                 print("Saving model...")
                 torch.save(self.model_params_dict, f'models/{self.args.dataset}_best_model.pth')
 
-        if self.val == False:
+        if self.args.val == False:
             if self.args.dataset != "gta5":  
                 print("------------------------------------")
                 print(f"Evaluation of the trainset started.")
