@@ -11,7 +11,7 @@ from tqdm import tqdm
 from utils.loss import SelfTrainingLoss, IW_MaxSquareloss, KnowledgeDistillationLoss
 class Client:
 
-    def __init__(self, args, dataset, model, test_client=False):
+    def __init__(self, args, dataset, model, test_client=False, val=False):
         self.args = args
         self.dataset = dataset
         self.name = self.dataset.client_name
@@ -134,7 +134,7 @@ class Client:
         self.styleaug = styleaug
         self.train_loader.dataset.set_style_tf_fn(self.styleaug.apply_style)
 
-    def train(self):
+    def train(self, eval_metric=None):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -154,8 +154,13 @@ class Client:
                 stop_condition = self.run_epoch_pseudo(epoch, optimizer, crit, red)
             else:
                 stop_condition = self.run_epoch(epoch, optimizer)
+
             if scheduler:
                 scheduler.step()
+
+            if eval_metric:
+                eval_miou=self.test(eval_metric, True)
+                print(f"Validation MioU at epoch {epoch}: {eval_miou}")
 
             if(stop_condition):
                 print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
@@ -164,7 +169,7 @@ class Client:
         print("-----------------------------------------------------")
         return len(self.dataset), self.model.state_dict()
 
-    def test(self, metric):
+    def test(self, metric, eval=None):
         """
         This method tests the model on the local dataset of the client.
         :param metric: StreamMetric object
@@ -177,4 +182,6 @@ class Client:
                 # Forward pass
                 outputs = self._get_outputs(images)
                 self.update_metric(metric, outputs, labels)
-
+        
+        if eval:
+            return metric.get_results()["Mean IoU"]

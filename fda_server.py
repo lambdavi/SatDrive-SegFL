@@ -71,7 +71,8 @@ class FdaServer:
         client[0].set_set_style_tf_fn(self.styleaug)
         client[0].model.load_state_dict(self.model_params_dict)
         # Temp line. setup train
-        update = client[0].train()
+        self.metrics["eval_train"].reset()
+        update = client[0].train(self.metrics["eval_train"])
         return update
     
     def train_round(self, clients):
