@@ -160,7 +160,7 @@ class Client:
 
             if eval_metric and eval_dataset:
                 eval_miou=self.test(eval_metric, True, eval_dataset)
-                print(f"\tValidation MioU at epoch {epoch}: {eval_miou}")
+                print(f"\tValidation MioU: {eval_miou}")
                 if self.args.chp and (eval_miou>best_miou):
                         best_miou = eval_miou
                         torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
