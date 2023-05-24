@@ -163,7 +163,10 @@ class Client:
                 print(f"\tValidation MioU: {eval_miou}")
                 if self.args.chp and (eval_miou>best_miou):
                         best_miou = eval_miou
-                        torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
+                        if self.args.fda:
+                            torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
+                        else:
+                            torch.save(self.model.state_dict(), f"models/checkpoints/{self.args.dataset}_checkpoint.pth")
                         print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
 
