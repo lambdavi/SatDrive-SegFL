@@ -164,7 +164,7 @@ class Client:
                 if self.args.chp and (eval_miou>best_miou):
                         best_miou = eval_miou
                         torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
-                        print(f"\tSaved checkpoint at epoch {epoch}.")
+                        print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
 
             if(stop_condition):
