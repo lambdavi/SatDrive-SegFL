@@ -112,11 +112,8 @@ class Client:
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
         self.losses.append(loss.item())
-        if self.args.es:
-            return self.early_stopper.early_stop(loss.item())
         
-        return False
-
+    
     def get_optimizer_and_scheduler(self):
          # Optimizer chocie
         if self.args.opt == 'SGD':
@@ -153,16 +150,16 @@ class Client:
         if eval_datasets:
             eval_datasets.append(self.train_loader)
         self.model.train()
-
+        stop_condition = False
         if self.teacher:
             crit, red = self.__get_criterion_and_reduction_rules()
 
         print("-----------------------------------------------------")
         for epoch in range(self.args.num_epochs):
             if self.teacher:
-                stop_condition = self.run_epoch_pseudo(epoch, optimizer, crit, red)
+                self.run_epoch_pseudo(epoch, optimizer, crit, red)
             else:
-                stop_condition = self.run_epoch(epoch, optimizer)
+                self.run_epoch(epoch, optimizer)
 
             if scheduler:
                 scheduler.step()
@@ -180,10 +177,11 @@ class Client:
                                 torch.save(self.model.state_dict(), f"models/checkpoints/{self.args.dataset}_checkpoint.pth")
                             print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
-
-            if(stop_condition):
-                print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
-                break
+                if self.args.es:
+                    return self.early_stopper.early_stop(eval_miou)
+                if(stop_condition):
+                    print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
+                    break
             
         print("-----------------------------------------------------")
 
@@ -222,7 +220,7 @@ class Client:
         epochs = range(self.args.num_epochs)
         
         # Create a line chart with two y-values
-        plt.plot(epochs, self.losses, label='train_loss')
+        #plt.plot(epochs, self.losses, label='train_loss')
         plt.plot(epochs, self.mious[2], label='train_miou')
         plt.plot(epochs, self.mious[0], label='val_miou_same')
         plt.plot(epochs, self.mious[1], label='val_miou_diff')
