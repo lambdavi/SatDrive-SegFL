@@ -36,7 +36,12 @@ class Server:
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
-            update = c.train()
+            if self.args.centr:
+                self.metrics["eval_train"].reset()
+                if self.args.dataset == "idda":
+                    update = c.train(self.metrics["eval_train"], self.test_clients[1].test_loader)
+                else:
+                    update = c.train(self.metrics["eval_train"], self.test_clients[0].test_loader)
             updates.append(update)
         return updates
 
@@ -91,17 +96,12 @@ class Server:
 
                 # Select random subset of clients
                 chosen_clients = self.select_clients(seed=r)
+                
                 # Train a round
                 updates = self.train_round(chosen_clients)
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
-                self.model.load_state_dict(self.model_params_dict, strict=False)
-                if self.activate_val:
-                    eval_miou=self.eval_validation()
-                    if self.args.chp and (eval_miou>eval_miou_base):
-                        eval_miou_base = eval_miou
-                        torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
-                        print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
+                self.model.load_state_dict(self.model_params_dict, strict=False) 
             
             if self.args.save and (self.args.chp == False):
                 print("Saving model...")
