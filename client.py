@@ -142,7 +142,7 @@ class Client:
         """
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
-
+        best_miou = 0 if self.eval else None
         self.model.train()
 
         if self.teacher:
@@ -161,6 +161,10 @@ class Client:
             if eval_metric and eval_dataset:
                 eval_miou=self.test(eval_metric, True, eval_dataset)
                 print(f"\tValidation MioU at epoch {epoch}: {eval_miou}")
+                if self.args.chp and (eval_miou>best_miou):
+                        best_miou = eval_miou
+                        torch.save(self.source_model.state_dict(), "models/checkpoints/checkpoint.pth")
+                        print(f"Saved checkpoint at epoch {epoch}.")
 
             if(stop_condition):
                 print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")

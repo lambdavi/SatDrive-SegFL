@@ -126,7 +126,6 @@ class FdaServer:
         """
 
         num_rounds = self.args.num_rounds
-        eval_miou_base = 0 
         if self.args.centr:
             num_rounds = 1
 
@@ -156,23 +155,6 @@ class FdaServer:
 
             # Save in the student model the aggregated weights
             self.student_model.load_state_dict(self.model_params_dict)
-            
-            """if self.activate_val:
-                eval_miou=self.eval_validation()
-                if self.args.chp and (eval_miou>eval_miou_base):
-                    eval_miou_base = eval_miou
-                    torch.save(self.source_model.state_dict(), "models/checkpoints/checkpoint.pth")
-                    print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
-
-        if self.args.save and (self.args.chp == False):
-                print("Saving model...")
-                torch.save(self.model_params_dict, 'models/fda_best_model.pth')
-    
-        if self.args.dataset != "gta5":  
-            print("------------------------------------")
-            print(f"Evaluation of the trainset started.")
-            print("------------------------------------")      
-            self.eval_train()"""
 
         self.test()
 
