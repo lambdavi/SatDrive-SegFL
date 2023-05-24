@@ -33,7 +33,7 @@ class Client:
         self.teacher = None
 
         self.losses = []
-        self.mious = []
+        self.mious = [[], []]
 
     def __str__(self):
         return self.name
@@ -140,7 +140,7 @@ class Client:
         self.styleaug = styleaug
         self.train_loader.dataset.set_style_tf_fn(self.styleaug.apply_style)
 
-    def train(self, eval_metric=None, eval_dataset=None):
+    def train(self, eval_metric=None, eval_datasets=None):
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
@@ -149,6 +149,7 @@ class Client:
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
         best_miou = 0 if eval_metric else None
+        m = ["same_domain", "diff_domain"]
         self.model.train()
 
         if self.teacher:
@@ -164,17 +165,18 @@ class Client:
             if scheduler:
                 scheduler.step()
 
-            if eval_metric and eval_dataset:
-                eval_miou=self.test(eval_metric, True, eval_dataset)
-                print(f"\tValidation MioU: {eval_miou}")
-                self.mious.append(eval_miou)
-                if self.args.chp and (eval_miou>best_miou):
-                        best_miou = eval_miou
-                        if self.args.fda:
-                            torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
-                        else:
-                            torch.save(self.model.state_dict(), f"models/checkpoints/{self.args.dataset}_checkpoint.pth")
-                        print(f"\tSaved checkpoint at epoch {epoch+1}.")
+            if eval_metric and eval_datasets and self.args.val:
+                for i, eval_dataset in enumerate(eval_datasets):
+                    eval_miou=self.test(eval_metric, True, eval_dataset)
+                    print(f"\tValidation MioU on {m[i]}: {eval_miou}")
+                    self.mious[i].append(eval_miou)
+                    if self.args.chp and (eval_miou>best_miou) and i == 0:
+                            best_miou = eval_miou
+                            if self.args.fda:
+                                torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
+                            else:
+                                torch.save(self.model.state_dict(), f"models/checkpoints/{self.args.dataset}_checkpoint.pth")
+                            print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
 
             if(stop_condition):
@@ -185,7 +187,7 @@ class Client:
 
         # save graph
         self.plot_loss_miou()
-        
+
         return len(self.dataset), self.model.state_dict()
 
     def test(self, metric, eval=None, eval_dataset=None):
@@ -218,7 +220,9 @@ class Client:
         
         # Create a line chart with two y-values
         plt.plot(epochs, self.losses, label='train_loss')
-        plt.plot(epochs, self.mious, label='val_miou')
+        plt.plot(epochs, self.mious[0], label='val_miou_same')
+        plt.plot(epochs, self.mious[1], label='val_miou_diff')
+
 
         # Add labels and title
         plt.xlabel('epochs')

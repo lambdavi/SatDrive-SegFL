@@ -25,7 +25,7 @@ def get_parser():
     parser.add_argument('--print_test_interval', type=int, default=10, help='client print test interval')
     parser.add_argument('--eval_interval', type=int, default=10, help='eval interval')
     parser.add_argument('--test_interval', type=int, default=10, help='test interval')
-    # New Argument:
+    # New Argument:s
     parser.add_argument('--centr', action='store_true', default=False, help='Only one client will be used if set True')
     parser.add_argument('--fda', action='store_true', default=False, help='FDA mode activated')
     parser.add_argument('--opt', type=str, choices=['SGD', 'adam'], default = 'SGD', help='Optimizer choice')
@@ -40,5 +40,7 @@ def get_parser():
     parser.add_argument('--chp', action='store_true', default=False, help='Model checkpoints saved during training')
     parser.add_argument('--pred', type=str, default = None, help='Path of image to predict')
     parser.add_argument('--loss', type=str, choices=['self', 'iw'], default = "self", help='Loss choice')
+    parser.add_argument('--val', action='store_true', default=False, help='Activate validation during training')
+
 
     return parser

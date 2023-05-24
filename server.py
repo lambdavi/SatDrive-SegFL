@@ -38,10 +38,7 @@ class Server:
             c.model.load_state_dict(self.model_params_dict)
             if self.args.centr:
                 self.metrics["eval_train"].reset()
-                if self.args.dataset == "idda":
-                    update = c.train(self.metrics["eval_train"], self.test_clients[1].test_loader)
-                else:
-                    update = c.train(self.metrics["eval_train"], self.test_clients[0].test_loader)
+            update = c.train(self.metrics["eval_train"], [self.test_clients[0].test_loader, self.test_clients[1].test_loader])    
             updates.append(update)
         return updates
 
@@ -111,8 +108,8 @@ class Server:
             print("------------------------------------")
             print(f"Evaluation of the trainset started.")
             print("------------------------------------")      
-            self.eval_train()
-        self.test()
+        #    self.eval_train()
+        #self.test()
 
     def eval_train(self):
         """
