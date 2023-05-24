@@ -33,7 +33,7 @@ class Client:
         self.teacher = None
 
         self.losses = []
-        self.mious = [[], []]
+        self.mious = [[], [], []]
 
     def __str__(self):
         return self.name
@@ -149,7 +149,9 @@ class Client:
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
         best_miou = 0 if eval_metric else None
-        m = ["same_domain", "diff_domain"]
+        m = ["same_domain", "diff_domain", "train"]
+        if eval_datasets:
+            eval_datasets.append(self.train_loader)
         self.model.train()
 
         if self.teacher:
@@ -186,7 +188,7 @@ class Client:
         print("-----------------------------------------------------")
 
         # save graph
-        if self.val:
+        if self.args.val:
             self.plot_loss_miou()
 
         return len(self.dataset), self.model.state_dict()
@@ -220,17 +222,17 @@ class Client:
         epochs = range(self.args.num_epochs)
         
         # Create a line chart with two y-values
-        plt.plot(epochs, self.losses, label='train_loss')
+        plt.plot(epochs, self.mioua[2], label='train_miou')
         plt.plot(epochs, self.mious[0], label='val_miou_same')
         plt.plot(epochs, self.mious[1], label='val_miou_diff')
 
 
         # Add labels and title
         plt.xlabel('epochs')
-        plt.title('Training loss vs Validation Miou')
+        plt.title('Training mioU vs Validation mIoU')
 
         # Add legend
         plt.legend()
 
         # Display the chart
-        plt.savefig('loss_vs_miou.png')
+        plt.savefig('miou_vs_miou.png')
