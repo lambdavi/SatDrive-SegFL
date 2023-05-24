@@ -1,6 +1,6 @@
 import argparse
 
-INF = 999
+INF = 9999
 def str2tuple(tp=int):
 
     def convert(s):
