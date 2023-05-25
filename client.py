@@ -146,9 +146,12 @@ class Client:
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
         best_miou = 0 if eval_metric else None
-        m = ["same_domain", "diff_domain", "train"]
         if eval_datasets:
-            eval_datasets.append(self.train_loader)
+            if len(eval_datasets)>1:
+                m = ["same_domain", "diff_domain", "train"]
+                eval_datasets.append(self.train_loader)
+            else:
+                m = ["same_domain"]
         self.model.train()
         stop_condition = False
         if self.teacher:

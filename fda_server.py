@@ -76,7 +76,7 @@ class FdaServer:
         client[0].model.load_state_dict(self.model_params_dict)
         # Temp line. setup train
         self.metrics["eval_train"].reset()
-        update = client[0].train(self.metrics["eval_train"], self.test_clients[0].test_loader)
+        update = client[0].train(self.metrics["eval_train"], [self.test_clients[0].test_loader])
         return update
     
     def train_round(self, clients):
@@ -90,13 +90,14 @@ class FdaServer:
         # Update teacher
         self.teacher_counter += 1
         if (self.teacher_counter % self.args.teacher_step) == 0:
+            print(f"Updating teacher at step {self.teacher_counter}")
             self.teacher_model.load_state_dict(copy.deepcopy(self.model_params_dict))
 
+        student_params = copy.deepcopy(self.student_model.state_dict())
         # Test client augmetation
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
-            student_params = copy.deepcopy(self.student_model.state_dict())
             c.model.load_state_dict(student_params)
             c.set_teacher(self.teacher_model)
             c.early_stopper.reset_counter()
