@@ -28,6 +28,38 @@ def weight_test_loss(losses):
         weights = weights + v['num_samples']
     return tot_loss / weights
 
+class IW_MaxSquareloss(nn.Module):
+    requires_reduction = False
+
+    def __init__(self, ignore_index=255, ratio=0.2, **kwargs):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.ratio = ratio
+
+    def forward(self, pred, **kwargs):
+        prob = F.softmax(pred, dim=1)
+        N, C, H, W = prob.size()
+        mask = (prob != self.ignore_index)
+        maxpred, argpred = torch.max(prob, 1)
+        mask_arg = (maxpred != self.ignore_index)
+        argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long) * self.ignore_index)
+        label = argpred
+        weights = []
+        batch_size = prob.size(0)
+        for i in range(batch_size):
+            hist = torch.histc(label[i].cpu().data.float(),
+                               bins=C + 1, min=-1,
+                               max=C - 1).float()
+            hist = hist[1:]
+            weight = \
+            (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
+                argpred.device)[argpred[i]].detach()
+            weights.append(weight)
+        weights = torch.stack(weights, dim=0).unsqueeze(1)
+        mask = mask_arg.unsqueeze(1).expand_as(prob)
+        prior = torch.mean(prob, (2, 3), True).detach()
+        loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
+        return loss
 class SelfTrainingLoss(nn.Module):
     requires_reduction = False
 
@@ -144,6 +176,31 @@ class EntropyLoss(nn.Module):
         loss = self.entropy_loss(pred)*self.lambda_entropy
         return loss
 
+class KnowledgeDistillationLoss(nn.Module):
+
+    def __init__(self, reduction='mean', alpha=1.):
+        super().__init__()
+        self.reduction = reduction
+        self.alpha = alpha
+
+    def forward(self, inputs, targets, pred_labels=None, mask=None):
+        inputs = inputs.narrow(1, 0, targets.shape[1])
+        outputs = torch.log_softmax(inputs, dim=1)
+        labels = torch.softmax(targets * self.alpha, dim=1)
+        loss = (outputs * labels).mean(dim=1)
+
+        if pred_labels is not None:
+            loss = loss * pred_labels.float()
+        if mask is not None:
+            loss = loss * mask
+        if self.reduction == 'mean':
+            outputs = -torch.mean(loss)
+        elif self.reduction == 'sum':
+            outputs = -torch.sum(loss)
+        else:
+            outputs = -loss
+        return outputs
+    
 class KnowledgeDistillationLoss(nn.Module):
 
     def __init__(self, reduction='mean', alpha=1.):

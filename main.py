@@ -27,6 +27,8 @@ from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 from torchvision.transforms import RandomApply
 
 import timeit
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -163,12 +165,12 @@ def get_datasets(args):
         
         if args.centr:
             # If centralized we get all training data on one single client
-            print("Centralized mode set")
+            print("Centralized mode set.")
             train_datasets.append(GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms,
                                                 client_name='centralized'))
         else:
             # Otherwise we divide data in multiple datasets.
-            print("Distributed Mode Set")
+            print("Distributed Mode Set.")
 
             total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
             
@@ -249,31 +251,35 @@ def main():
     args = parser.parse_args()
     set_seed(args.seed)
 
-    print(f'Initializing model...')
+    print('Initializing model...', end=" ")
     model = model_init(args)
     model.cuda()
     print('Done.')
 
-    print('Generate datasets...')
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
-    source_dataset = get_source_client(args, model)
+    print('Generate datasets...', end=" ")
     print('Done.')
+    source_dataset = get_source_client(args, model)
     metrics = set_metrics(args)
-    
+
+    print('Generate clients...', end=" ")
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
-    
+    print('Done.')
+
+    print('Setup server...', end=" ")
     if args.fda == False:
         if args.dataset == "gta5":
             server = Server(args, train_clients, test_clients, model, metrics, True, valid_clients)
         else: 
             server = Server(args, train_clients, test_clients, model, metrics)
     else:
-        print("Fda Mode activated.")
+        print("\nActivating FDA mode...\t", end="")
         server = FdaServer(args, source_dataset, train_clients, test_clients, model, metrics)
+    print('Done.')
 
-    #server.train()
     execution_time = timeit.timeit(server.train, number=1)
     print(f"Execution time: {execution_time} seconds")
+
     # Code to predict an image
     if args.pred:
         print("Predicting "+args.pred)

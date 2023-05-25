@@ -7,6 +7,7 @@ from utils.style_transfer import StyleAugment
 from PIL import Image
 import datasets.ss_transforms as sstr
 import matplotlib.pyplot as plt
+
 class FdaServer:
     def __init__(self, args, source_dataset, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
@@ -14,15 +15,20 @@ class FdaServer:
         self.train_clients = train_clients
         self.test_clients = test_clients
         self.validation_clients = valid_clients
-        self.model = model
+        self.source_model = model
         self.metrics = metrics
         self.activate_val = valid
-        self.model_params_dict = copy.deepcopy(self.model.state_dict())
+        self.model_params_dict = copy.deepcopy(self.source_model.state_dict())
+
+        self.teacher_model = None
+        self.student_model = None
+        self.teacher_counter = 0
 
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b) 
         
-        self.extract_styles()
+        if not args.load:
+            self.extract_styles()
         
     def select_clients(self, seed=None):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
@@ -35,7 +41,44 @@ class FdaServer:
     def extract_styles(self):
         for c in self.train_clients:
             self.styleaug.add_style(c.dataset)
-        
+    
+    def train_source(self):
+
+        if self.args.load:
+            pth = "models/checkpoints/source_checkpoint.pth" if self.args.chp else "models/source_best_model.pth"
+            saved_params = torch.load(pth)
+            self.model_params_dict = saved_params
+            self.source_model.load_state_dict(saved_params)
+            to_print = " from checkpoints." if self.args.chp else "."
+            print(f"Source model loaded{to_print}")
+        else:
+            _, model_dict = self.train_round_source(self.source_dataset)
+            if self.args.chp:
+                pth = "models/checkpoints/source_checkpoint.pth"
+                model_dict = torch.load(pth)
+            self.model_params_dict = model_dict
+            self.source_model.load_state_dict(self.model_params_dict)
+
+        if self.args.save:
+                print("Saving training source...")
+                torch.save(self.model_params_dict, 'models/source_best_model.pth')
+
+    def train_round_source(self, client):
+        """
+            This method trains the model with the dataset of the clients. It handles the training at single round level
+            :param clients: list of one client containing the source dataset to train
+            :return: model updates gathered from the clients, to be aggregated
+        """
+        # Test client augmetation
+        print(f"\n Training on source dataset starting.. Num. of samples: {len(client[0].dataset)}")
+        #Update parameters of the client model
+        client[0].set_set_style_tf_fn(self.styleaug)
+        client[0].model.load_state_dict(self.model_params_dict)
+        # Temp line. setup train
+        self.metrics["eval_train"].reset()
+        update = client[0].train(self.metrics["eval_train"], [self.test_clients[0].test_loader])
+        return update
+    
     def train_round(self, clients):
         """
             This method trains the model with the dataset of the clients. It handles the training at single round level
@@ -43,13 +86,21 @@ class FdaServer:
             :return: model updates gathered from the clients, to be aggregated
         """
         updates = []
-        # Test client augmetation
         
+        # Update teacher
+        self.teacher_counter += 1
+        if (self.teacher_counter % self.args.teacher_step) == 0:
+            print(f"Updating teacher at step {self.teacher_counter}")
+            self.teacher_model.load_state_dict(copy.deepcopy(self.model_params_dict))
+
+        student_params = copy.deepcopy(self.student_model.state_dict())
+        # Test client augmetation
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
-            c.set_set_style_tf_fn(self.styleaug)
-            c.model.load_state_dict(self.model_params_dict)
+            c.model.load_state_dict(student_params)
+            c.set_teacher(self.teacher_model)
+            c.early_stopper.reset_counter()
             # Temp line. setup train
             update = c.train()
             updates.append(update)
@@ -86,46 +137,37 @@ class FdaServer:
         """
 
         num_rounds = self.args.num_rounds
-        eval_miou_base = 0 
         if self.args.centr:
             num_rounds = 1
-        
-        if self.args.load:
-            pth = "models/checkpoints/fda_checkpoint.pth" if self.args.chp else "models/fda_best_model.pth"
-            saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
-            self.model.load_state_dict(saved_params)
-            self.model.eval()
-            to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Model loaded{to_print}")
-        else:
-            for r in range(num_rounds):
-                print("------------------")
-                print(f"Round {r+1}/{num_rounds} started.")
-                print("------------------")
 
-                # Train a round
-                updates = self.train_round(self.source_dataset) # must be a list of 1 client
-                # Aggregate the parameters
-                self.model_params_dict = self.aggregate(updates)
-                self.model.load_state_dict(self.model_params_dict, strict=False)
-                if self.activate_val:
-                    eval_miou=self.eval_validation()
-                    if self.args.chp and (eval_miou>eval_miou_base):
-                        eval_miou_base = eval_miou
-                        torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
-                        print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
+        # Centralized train on source dataset
+        self.train_source()
 
-        if self.args.save and (self.args.chp == False):
-                print("Saving model...")
-                torch.save(self.model_params_dict, 'models/fda_best_model.pth')
-        
-        if self.args.dataset != "gta5":  
-            print("------------------------------------")
-            print(f"Evaluation of the trainset started.")
-            print("------------------------------------")      
-            #self.eval_train()
-        #self.test()
+        self.test()
+
+        # Setup teacher and student
+        self.teacher_model = copy.deepcopy(self.source_model)
+        self.student_model = copy.deepcopy(self.source_model)
+
+        # Start of distributed train
+        for r in range(num_rounds):                
+            print("------------------")
+            print(f"Round {r+1}/{num_rounds} started.")
+            print("------------------")
+
+            # Select random subset of clients
+            chosen_clients = self.select_clients(seed=r)
+            
+            # Train a round
+            updates = self.train_round(chosen_clients)
+
+            # Aggregate the parameters
+            self.model_params_dict = self.aggregate(updates)
+
+            # Save in the student model the aggregated weights
+            self.student_model.load_state_dict(self.model_params_dict)
+
+        self.test()
 
     def eval_train(self):
         """
@@ -143,7 +185,7 @@ class FdaServer:
         This method handles the evaluation on the validation client(s)
         """
         self.metrics["eval_train"].reset()
-        self.validation_clients[0].model.load_state_dict(self.model_params_dict)
+        self.validation_clients[0].model.load_state_dict(self.student_model.state_dict())
         self.validation_clients[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Validation: Mean IoU: {res["Mean IoU"]}')
@@ -155,13 +197,16 @@ class FdaServer:
         print("------------------------------------")
         print(f"Test on SAME DOMAIN DATA started.")
         print("------------------------------------")
+        self.metrics["test_same_dom"].reset()
         self.test_clients[0].model.load_state_dict(self.model_params_dict)
         self.test_clients[0].test(self.metrics["test_same_dom"])
         res=self.metrics["test_same_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
+
         print("------------------------------------")
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
+        self.metrics["test_diff_dom"].reset()
         self.test_clients[1].model.load_state_dict(self.model_params_dict)
         self.test_clients[1].test(self.metrics["test_diff_dom"])
         res=self.metrics["test_diff_dom"].get_results()
@@ -180,11 +225,11 @@ class FdaServer:
 
             input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
             input_tensor = input_tensor.cuda()
-            self.model.eval()
+            self.source_model.eval()
 
             # Perform inference
             with torch.no_grad():
-                output = self.model(input_tensor)['out']  # Get the output logits
+                output = self.source_model(input_tensor)['out']  # Get the output logits
             output = output.squeeze(0).cpu().numpy()
         
             normalized_output = (output - output.min()) / (output.max() - output.min())

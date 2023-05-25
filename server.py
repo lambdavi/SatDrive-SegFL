@@ -36,7 +36,9 @@ class Server:
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
-            update = c.train()
+            if self.args.centr:
+                self.metrics["eval_train"].reset()
+            update = c.train(self.metrics["eval_train"], [self.test_clients[0].test_loader, self.test_clients[1].test_loader])    
             updates.append(update)
         return updates
 
@@ -76,7 +78,7 @@ class Server:
             num_rounds = 1
         
         if self.args.load:
-            pth = "models/checkpoints/checkpoint.pth" if self.args.chp else "models/best_model.pth"
+            pth = f"models/checkpoints/{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.dataset}_best_model.pth"
             saved_params = torch.load(pth)
             self.model_params_dict = saved_params
             self.model.load_state_dict(saved_params)
@@ -90,29 +92,25 @@ class Server:
                 print("------------------")
 
                 # Select random subset of clients
-                chosen_client = self.select_clients(seed=r)
+                chosen_clients = self.select_clients(seed=r)
+                
                 # Train a round
-                updates = self.train_round(chosen_client)
+                updates = self.train_round(chosen_clients)
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
-                self.model.load_state_dict(self.model_params_dict, strict=False)
-                if self.activate_val:
-                    eval_miou=self.eval_validation()
-                    if self.args.chp and (eval_miou>eval_miou_base):
-                        eval_miou_base = eval_miou
-                        torch.save(self.model.state_dict(), "models/checkpoints/checkpoint.pth")
-                        print(f"Changed checkpoint at round {r} with miou:{eval_miou}")
+                self.model.load_state_dict(self.model_params_dict, strict=False) 
             
-            if self.args.save and (self.args.chp == False):
+            if self.args.save:
                 print("Saving model...")
-                torch.save(self.model_params_dict, 'models/best_model.pth')
+                torch.save(self.model_params_dict, f'models/{self.args.dataset}_best_model.pth')
 
-        if self.args.dataset != "gta5":  
-            print("------------------------------------")
-            print(f"Evaluation of the trainset started.")
-            print("------------------------------------")      
-            self.eval_train()
-        self.test()
+        if self.args.val == False:
+            if self.args.dataset != "gta5":  
+                print("------------------------------------")
+                print(f"Evaluation of the trainset started.")
+                print("------------------------------------")      
+                self.eval_train()
+            self.test()
 
     def eval_train(self):
         """
@@ -194,7 +192,8 @@ class Server:
         fig, ax = plt.subplots()
 
         # Display the predicted image
-        ax.imshow(predicted_image)
+        ax.imshow(np.array(input_image))
+        ax.imshow(predicted_image, alpha=0.7)
         ax.axis('off')
 
         # Create the legend outside the image
