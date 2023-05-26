@@ -60,6 +60,7 @@ class IW_MaxSquareloss(nn.Module):
         prior = torch.mean(prob, (2, 3), True).detach()
         loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
         return loss
+    
 class SelfTrainingLoss(nn.Module):
     requires_reduction = False
 
