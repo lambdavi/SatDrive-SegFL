@@ -218,7 +218,10 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs = self._get_outputs(images)
+                if self.args.model == "transf":
+                    _, outputs = self.model(images, labels)
+                else:
+                    outputs = self._get_outputs(images)
                 self.update_metric(metric, outputs, labels)
         
         if eval:
