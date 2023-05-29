@@ -9,7 +9,7 @@ from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
 from utils.loss import SelfTrainingLoss, IW_MaxSquareloss, KnowledgeDistillationLoss
-
+from transformers import SegformerFeatureExtractor
 import matplotlib.pyplot as plt
 
 class Client:
