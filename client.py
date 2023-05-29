@@ -54,7 +54,9 @@ class Client:
         if self.args.model == 'resnet18':
             return self.model(images)
         if self.args.model == 'transf':
-            ret = self.model(images).logits
+            ret = self.model(images)
+            print(ret.shape)
+            print(ret[0].shape)
             return ret
         raise NotImplementedError
     
