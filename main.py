@@ -58,7 +58,7 @@ def model_init(args):
         return model
     if args.model == 'transf':
         return SegformerForSemanticSegmentation.from_pretrained(
-            "google/segformer_b0-512x512",
+            "nvidia/segformer-b0-finetuned-ade-512-512",
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
