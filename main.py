@@ -229,7 +229,7 @@ def get_source_client(args, model):
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
-    if args.model == 'deeplabv3_mobilenetv2':
+    if args.model == 'deeplabv3_mobilenetv2' or args.model == "transf":
         metrics = {
             'eval_train': StreamSegMetrics(num_classes, 'eval_train'),
             'test_same_dom': StreamSegMetrics(num_classes, 'test_same_dom'),
