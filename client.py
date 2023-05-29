@@ -220,7 +220,11 @@ class Client:
                 # Forward pass
                 if self.args.model == "transf":
                     _, outputs = self.model(images, labels)
+                    print(outputs.shape)
+                    print(labels.shape)
+
                     print(outputs)
+                    print(labels)
                 else:
                     outputs = self._get_outputs(images)
 
