@@ -100,7 +100,6 @@ def get_transforms(args):
     elif args.model == "transf":
         train_transforms = sstr.Compose([
                 sstr.RandomCrop((768, 768)),
-                sstr.RandomHorizontalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
