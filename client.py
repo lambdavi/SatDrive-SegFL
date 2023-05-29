@@ -55,9 +55,8 @@ class Client:
             return self.model(images)
         if self.args.model == 'transf':
             ret = self.model(images)
-            print(ret.shape)
-            print(ret[0].shape)
-            return ret
+            print(ret)
+            return ret.logits
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):

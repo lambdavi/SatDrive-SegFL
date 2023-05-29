@@ -62,7 +62,6 @@ def model_init(args):
         feature_extractor.size = 128
         return SegformerForSemanticSegmentation.from_pretrained(
             "nvidia/segformer-b0-finetuned-ade-512-512", 
-            return_dict=False, 
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
