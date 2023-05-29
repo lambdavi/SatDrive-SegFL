@@ -225,19 +225,13 @@ class Client:
                 labels = labels.to(self.device)
                 # Forward pass
                 if self.args.model == "transf":
-                    _, logits = self.model(images, labels)
-                    upsampled_logits = nn.functional.interpolate(
+                    logits = self.model(images).logits
+                    outputs = nn.functional.interpolate(
                         logits, 
                         size=labels.shape[-2:], 
                         mode="bilinear", 
                         align_corners=False
                     )
-                    outputs = upsampled_logits.argmax(dim=1)
-                    print(outputs.shape)
-                    print(labels.shape)
-
-                    print(outputs)
-                    print(labels)
                 else:
                     outputs = self._get_outputs(images)
 
