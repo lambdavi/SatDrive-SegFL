@@ -58,7 +58,7 @@ def model_init(args):
         return model
     if args.model == 'transf':
         return SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/segformer-b0-finetuned-ade-512-512",
+            "nvidia/segformer-b0-finetuned-cityscapes-768-768",
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
@@ -94,7 +94,8 @@ def get_transforms(args):
         ])
     elif args.model == "transf":
         train_transforms = sstr.Compose([
-                sstr.RandomResizedCrop((512, 512), scale=(0.5, 2.0)),
+                sstr.RandomCrop((768, 768)),
+                sstr.RandomHorizontalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
