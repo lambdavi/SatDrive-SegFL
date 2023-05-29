@@ -220,7 +220,7 @@ class Client:
                 # Forward pass
                 if self.args.model == "transf":
                     _, outputs = self.model(images, labels)
-                    outputs = outputs.argmax(dim=1)
+                    print(outputs)
                 else:
                     outputs = self._get_outputs(images)
 
