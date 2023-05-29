@@ -23,12 +23,12 @@ from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
+from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
 
 from torchvision.transforms import RandomApply
 
 import timeit
 import os
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -56,13 +56,21 @@ def model_init(args):
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
-    if args.model == 'cnn':
-        # TODO: missing code here!
-        raise NotImplementedError
+    if args.model == 'transf':
+        feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")
+        feature_extractor.reduce_labels = False
+        feature_extractor.size = 128
+        return SegformerForSemanticSegmentation.from_pretrained(
+            "nvidia/segformer-b0-finetuned-ade-512-512", 
+            return_dict=False, 
+            num_labels=get_dataset_num_classes(args.dataset),
+            ignore_mismatched_sizes=True,
+        )
+
     raise NotImplementedError
 
 def get_transforms(args):
-    if args.model == 'deeplabv3_mobilenetv2':
+    if args.model == 'deeplabv3_mobilenetv2' or args.model == "transf":
         train_transforms = [
             sstr.Compose([
                 RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2),
@@ -79,7 +87,7 @@ def get_transforms(args):
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
-    elif args.model == 'cnn' or args.model == 'resnet18':
+    elif args.model == 'resnet18':
         train_transforms = nptr.Compose([
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
