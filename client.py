@@ -54,7 +54,9 @@ class Client:
         if self.args.model == 'resnet18':
             return self.model(images)
         if self.args.model == 'transf':
-            return self.model(images)[1]
+            ret = self.model(images)
+            print(ret)
+            return ret[0][0]
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
