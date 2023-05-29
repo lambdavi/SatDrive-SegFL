@@ -109,7 +109,13 @@ class Client:
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
             if self.args.model == "transf":
-                outputs = self.model(images).logits
+                logits = self.model(images).logits
+                outputs = nn.functional.interpolate(
+                        logits, 
+                        size=labels.shape[-2:], 
+                        mode="bilinear", 
+                        align_corners=False
+                    )
             else:
                 outputs = self._get_outputs(images)
             loss = self.reduction(self.criterion(outputs,labels),labels)
