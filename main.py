@@ -57,11 +57,9 @@ def model_init(args):
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
     if args.model == 'transf':
-        feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")
-        feature_extractor.do_reduce_labels = False
-        feature_extractor.size = 128
         return SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/segformer-b0-finetuned-ade-512-512", 
+            "nvidia/segformer-b0-finetuned-ade-512-512",
+            return_dict=False, 
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
@@ -69,7 +67,7 @@ def model_init(args):
     raise NotImplementedError
 
 def get_transforms(args):
-    if args.model == 'deeplabv3_mobilenetv2' or args.model == "transf":
+    if args.model == 'deeplabv3_mobilenetv2':
         train_transforms = [
             sstr.Compose([
                 RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2),
@@ -94,6 +92,16 @@ def get_transforms(args):
         test_transforms = nptr.Compose([
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
+        ])
+    elif args.model == "transf":
+        train_transforms = sstr.Compose([
+                sstr.RandomResizedCrop((512, 512), scale=(0.5, 2.0)),
+                sstr.ToTensor(),
+                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ]),
+        test_transforms = sstr.Compose([
+            sstr.ToTensor(),
+            sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
     else:
         raise NotImplementedError

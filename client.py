@@ -108,8 +108,11 @@ class Client:
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            outputs = self._get_outputs(images)
-            loss = self.reduction(self.criterion(outputs,labels),labels)
+            if self.args.model == "transf":
+                loss, _ = self.model(images, labels)
+            else:
+                outputs = self._get_outputs(images)
+                loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
