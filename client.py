@@ -109,10 +109,10 @@ class Client:
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
             if self.args.model == "transf":
-                loss, _ = self.model(images, labels)
+                outputs = self.model(images).logits
             else:
                 outputs = self._get_outputs(images)
-                loss = self.reduction(self.criterion(outputs,labels),labels)
+            loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
@@ -221,12 +221,11 @@ class Client:
                 if self.args.model == "transf":
                     _, logits = self.model(images, labels)
                     upsampled_logits = nn.functional.interpolate(
-                    logits, 
-                    size=labels.shape[-2:], 
-                    mode="bilinear", 
-                    align_corners=False
+                        logits, 
+                        size=labels.shape[-2:], 
+                        mode="bilinear", 
+                        align_corners=False
                     )
-        
                     outputs = upsampled_logits.argmax(dim=1)
                     print(outputs.shape)
                     print(labels.shape)
