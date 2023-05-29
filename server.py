@@ -85,7 +85,8 @@ class Server:
             self.model.eval()
             to_print = " from checkpoints." if self.args.chp else "."
             print(f"Model loaded{to_print}")
-        else:
+
+        if (not self.args.load) or self.args.resume:
             for r in range(num_rounds):
                 print("------------------")
                 print(f"Round {r+1}/{num_rounds} started.")

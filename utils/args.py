@@ -43,5 +43,6 @@ def get_parser():
     parser.add_argument('--loss', type=str, choices=['self', 'iw'], default = "self", help='Loss choice')
     parser.add_argument('--val', action='store_true', default=False, help='Activate validation during training')
     parser.add_argument('--teacher_step', type=int, default = INF, help='How often change the teacher model in FDA settings')
+    parser.add_argument('--resume', action='store_true', default=False, help='Resume from training model')
 
     return parser
