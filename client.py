@@ -225,7 +225,7 @@ class Client:
                     size=labels.shape[-2:], 
                     mode="bilinear", 
                     align_corners=False
-                )
+                    )
         
                     outputs = upsampled_logits.argmax(dim=1)
                     print(outputs.shape)
