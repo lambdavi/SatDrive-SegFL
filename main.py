@@ -58,7 +58,7 @@ def model_init(args):
         return model
     if args.model == 'transf':
         feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")
-        feature_extractor.reduce_labels = False
+        feature_extractor.do_reduce_labels = False
         feature_extractor.size = 128
         return SegformerForSemanticSegmentation.from_pretrained(
             "nvidia/segformer-b0-finetuned-ade-512-512", 
