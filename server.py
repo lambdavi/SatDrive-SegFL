@@ -77,7 +77,7 @@ class Server:
         if self.args.centr:
             num_rounds = 1
         
-        if self.args.load:
+        if self.args.load or self.args.resume:
             pth = f"models/checkpoints/{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.dataset}_best_model.pth"
             saved_params = torch.load(pth)
             self.model_params_dict = saved_params
