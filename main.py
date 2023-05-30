@@ -98,7 +98,7 @@ def get_transforms(args):
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
         ])
-    elif args.model == "transf":
+    elif args.model in ["transf", "bisenetv2"]:
         train_transforms = sstr.Compose([
                 sstr.RandomResizedCrop((768, 768), scale=(0.5, 2)),
                 sstr.ToTensor(),
