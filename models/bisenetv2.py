@@ -22,7 +22,7 @@ class BiSeNetv2(nn.Module):
         self.semantic_branch = SemanticBranch(n_channel, 128, act_type)
         self.bga_layer = BilateralGuidedAggregationLayer(128, 128, act_type)
         self.seg_head = SegHead(128, n_classes, act_type)
-
+        self.pretrained = pretrained
         self.init_weights()
         
     def init_weights(self):
