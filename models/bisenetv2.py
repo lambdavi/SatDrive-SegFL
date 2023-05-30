@@ -413,19 +413,20 @@ class AttentionRefinementModule(nn.Module):
         self.conv = ConvBlock(in_channels, out_channels, kernel_size=1)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
-            nn.Linear(out_channels, out_channels // 4),
+            nn.Conv2d(out_channels, out_channels // 4, kernel_size=1),
             nn.ReLU(inplace=True),
-            nn.Linear(out_channels // 4, out_channels),
+            nn.Conv2d(out_channels // 4, out_channels, kernel_size=1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
         feature = self.pool(x)
         feature = self.conv(feature)
-        attention = self.fc(feature.squeeze(dim=3).squeeze(dim=2))
-        attention = attention.unsqueeze(dim=3).unsqueeze(dim=2)
-        out = x * attention.expand_as(x)
+        attention = self.fc(feature)
+        attention = attention.expand_as(x)
+        out = x * attention
         return out
+
 
 
 class ContextPath(nn.Module):
