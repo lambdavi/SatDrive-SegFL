@@ -236,7 +236,7 @@ class Client:
                 # Forward pass
                 
                 if self.args.model == 'bisenetv2':
-                    outputs = self.model(images, test=True)
+                    outputs = self.model(images, test=True, use_test_resize=True)
                     self.update_metric(metric, outputs, labels)
                 else:
                     self._get_outputs(images, labels)
