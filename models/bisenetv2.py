@@ -1,21 +1,35 @@
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.model_zoo as modelzoo
 
 backbone_url = 'https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/backbone_v2.pth'
 
-
+class conv2d(nn.Module):
+    def __init__(self,in_dim,out_dim,k,pad,stride,groups = 1,bias=False,use_bn = True,use_rl = True):
+        super(conv2d,self).__init__()
+        self.use_bn = use_bn
+        self.use_rl = use_rl
+        self.conv = nn.Conv2d(in_dim,out_dim,k,padding=pad,stride=stride, groups=groups,bias=bias)
+        self.bn = nn.BatchNorm2d(out_dim)
+        self.relu = nn.ReLU(inplace=True)
+    def forward(self,bottom):
+        if self.use_bn and self.use_rl:
+            return self.relu(self.bn(self.conv(bottom)))
+        elif self.use_bn:
+            return self.bn(self.conv(bottom))
+        else:
+            return self.conv(bottom)
+        
 class ConvBNReLU(nn.Module):
 
     def __init__(self, in_chan, out_chan, ks=3, stride=1, padding=1,
                  dilation=1, groups=1, bias=False):
         super(ConvBNReLU, self).__init__()
         self.conv = nn.Conv2d(
-                in_chan, out_chan, kernel_size=ks, stride=stride,
-                padding=padding, dilation=dilation,
-                groups=groups, bias=bias)
+            in_chan, out_chan, kernel_size=ks, stride=stride,
+            padding=padding, dilation=dilation,
+            groups=groups, bias=bias)
+
         self.bn = nn.BatchNorm2d(out_chan)
         self.relu = nn.ReLU(inplace=True)
 
@@ -42,7 +56,6 @@ class UpSample(nn.Module):
 
     def init_weight(self):
         nn.init.xavier_normal_(self.proj.weight, gain=1.)
-
 
 
 class DetailBranch(nn.Module):
@@ -99,7 +112,6 @@ class CEBlock(nn.Module):
         super(CEBlock, self).__init__()
         self.bn = nn.BatchNorm2d(128)
         self.conv_gap = ConvBNReLU(128, 128, 1, stride=1, padding=0)
-        #TODO: in paper here is naive conv2d, no bn-relu
         self.conv_last = ConvBNReLU(128, 128, 3, stride=1)
 
     def forward(self, x):
@@ -122,7 +134,7 @@ class GELayerS1(nn.Module):
                 in_chan, mid_chan, kernel_size=3, stride=1,
                 padding=1, groups=in_chan, bias=False),
             nn.BatchNorm2d(mid_chan),
-            nn.ReLU(inplace=True), # not shown in paper
+            nn.ReLU(inplace=True),
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(
@@ -159,7 +171,7 @@ class GELayerS2(nn.Module):
                 mid_chan, mid_chan, kernel_size=3, stride=1,
                 padding=1, groups=mid_chan, bias=False),
             nn.BatchNorm2d(mid_chan),
-            nn.ReLU(inplace=True), # not shown in paper
+            nn.ReLU(inplace=True),
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(
@@ -169,14 +181,14 @@ class GELayerS2(nn.Module):
         )
         self.conv2[1].last_bn = True
         self.shortcut = nn.Sequential(
-                nn.Conv2d(
-                    in_chan, in_chan, kernel_size=3, stride=2,
-                    padding=1, groups=in_chan, bias=False),
-                nn.BatchNorm2d(in_chan),
-                nn.Conv2d(
-                    in_chan, out_chan, kernel_size=1, stride=1,
-                    padding=0, bias=False),
-                nn.BatchNorm2d(out_chan),
+            nn.Conv2d(
+                in_chan, in_chan, kernel_size=3, stride=2,
+                padding=1, groups=in_chan, bias=False),
+            nn.BatchNorm2d(in_chan),
+            nn.Conv2d(
+                in_chan, out_chan, kernel_size=1, stride=1,
+                padding=0, bias=False),
+            nn.BatchNorm2d(out_chan),
         )
         self.relu = nn.ReLU(inplace=True)
 
@@ -221,85 +233,48 @@ class SegmentBranch(nn.Module):
         return feat2, feat3, feat4, feat5_4, feat5_5
 
 
+
 class BGALayer(nn.Module):
+    def __init__(self,in_dim):
+        super(BGALayer,self).__init__()
+        self.in_dim = in_dim
+        self.db_dwconv = conv2d(in_dim,in_dim,3,1,1,in_dim,use_rl=False)
+        self.db_conv1x1 = conv2d(in_dim,in_dim,1,0,1,use_rl=False,use_bn=False)
+        self.db_conv = conv2d(in_dim,in_dim,3,1,2,use_rl=False)
+        self.db_apooling = nn.AvgPool2d(3,2,1)
 
-    def __init__(self):
-        super(BGALayer, self).__init__()
-        self.left1 = nn.Sequential(
-            nn.Conv2d(
-                128, 128, kernel_size=3, stride=1,
-                padding=1, groups=128, bias=False),
-            nn.BatchNorm2d(128),
-            nn.Conv2d(
-                128, 128, kernel_size=1, stride=1,
-                padding=0, bias=False),
-        )
-        self.left2 = nn.Sequential(
-            nn.Conv2d(
-                128, 128, kernel_size=3, stride=2,
-                padding=1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.AvgPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=False)
-        )
-        self.right1 = nn.Sequential(
-            nn.Conv2d(
-                128, 128, kernel_size=3, stride=1,
-                padding=1, bias=False),
-            nn.BatchNorm2d(128),
-        )
-        self.right2 = nn.Sequential(
-            nn.Conv2d(
-                128, 128, kernel_size=3, stride=1,
-                padding=1, groups=128, bias=False),
-            nn.BatchNorm2d(128),
-            nn.Conv2d(
-                128, 128, kernel_size=1, stride=1,
-                padding=0, bias=False),
-        )
-        self.up1 = nn.Upsample(scale_factor=4)
-        self.up2 = nn.Upsample(scale_factor=4)
+        self.sb_dwconv = conv2d(in_dim,in_dim,3,1,1,in_dim,use_rl=False)
+        self.sb_conv1x1 = conv2d(in_dim,in_dim,1,0,1,use_rl=False,use_bn=False)
+        self.sb_conv = conv2d(in_dim,in_dim,3,1,1,use_rl=False)
+        self.sb_sigmoid = nn.Sigmoid()
 
-        self.conv = nn.Sequential(
-            nn.Conv2d(
-                128, 128, kernel_size=3, stride=1,
-                padding=1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True), # not shown in paper
-        )
-
-    def forward(self, x_d, x_s):
-        dsize = x_d.size()[2:]
-        left1 = self.left1(x_d)
-        left2 = self.left2(x_d)
-        right1 = self.right1(x_s)
-        right2 = self.right2(x_s)
-        right1 = self.up1(right1)
-        left = left1 * torch.sigmoid(right1)
-        right = left2 * torch.sigmoid(right2)
-        right = self.up2(right)
-        out = self.conv(left + right)
-        return out
-
-
+        self.conv = conv2d(in_dim,in_dim,3,1,1,use_rl=False)
+    def forward(self,db,sb):
+        db_dwc = self.db_dwconv(db)
+        db_out = self.db_conv1x1(db_dwc)
+        db_conv = self.db_conv(db)
+        db_pool = self.db_apooling(db_conv)
+       
+        sb_dwc = self.sb_dwconv(sb)
+        sb_out = self.sb_sigmoid(self.sb_conv1x1(sb_dwc))
+        sb_conv = self.sb_conv(sb)
+        sb_up = self.sb_sigmoid(nn.functional.interpolate(sb_conv, size=db_out.size()[2:], mode="bilinear",align_corners=True))
+        db_l = db_out*sb_up
+        sb_r = nn.functional.interpolate(sb_out*db_pool, size=db_out.size()[2:], mode="bilinear",align_corners=True)
+        res = self.conv(db_l+sb_r)
+        return res
 
 class SegmentHead(nn.Module):
 
-    def __init__(self, in_chan, mid_chan, n_classes, up_factor=8, aux=True):
+    def __init__(self, in_chan, mid_chan, n_classes, up_factor=8, aux=False):
         super(SegmentHead, self).__init__()
         self.conv = ConvBNReLU(in_chan, mid_chan, 3, stride=1)
         self.drop = nn.Dropout(0.1)
-        self.up_factor = up_factor
 
-        out_chan = n_classes
-        mid_chan2 = up_factor * up_factor if aux else mid_chan
-        up_factor = up_factor // 2 if aux else up_factor
+        out_channels = n_classes * (up_factor ** 2)
         self.conv_out = nn.Sequential(
-            nn.Sequential(
-                nn.Upsample(scale_factor=2),
-                ConvBNReLU(mid_chan, mid_chan2, 3, stride=1)
-                ) if aux else nn.Identity(),
-            nn.Conv2d(mid_chan2, out_chan, 1, 1, 0, bias=True),
-            nn.Upsample(scale_factor=up_factor, mode='bilinear', align_corners=False)
+            nn.Conv2d(mid_chan, out_channels, kernel_size=1, stride=1, padding=0),
+            nn.PixelShuffle(up_factor)
         )
 
     def forward(self, x):
@@ -311,44 +286,41 @@ class SegmentHead(nn.Module):
 
 class BiSeNetV2(nn.Module):
 
-    def __init__(self, n_classes, aux_mode='train'):
+    def __init__(self, n_classes, output_aux=True, pretrained=False):
         super(BiSeNetV2, self).__init__()
-        self.aux_mode = aux_mode
+        self.output_aux = output_aux
+        self.pretrained = pretrained
         self.detail = DetailBranch()
         self.segment = SegmentBranch()
-        self.bga = BGALayer()
+        self.bga = BGALayer(128)
 
         self.head = SegmentHead(128, 1024, n_classes, up_factor=8, aux=False)
-        if self.aux_mode == 'train':
+        if self.output_aux:
             self.aux2 = SegmentHead(16, 128, n_classes, up_factor=4)
             self.aux3 = SegmentHead(32, 128, n_classes, up_factor=8)
             self.aux4 = SegmentHead(64, 128, n_classes, up_factor=16)
             self.aux5_4 = SegmentHead(128, 128, n_classes, up_factor=32)
+        self.test_up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
 
         self.init_weights()
 
-    def forward(self, x):
+    def forward(self, x, test=False, use_test_resize=None):
         size = x.size()[2:]
         feat_d = self.detail(x)
         feat2, feat3, feat4, feat5_4, feat_s = self.segment(x)
         feat_head = self.bga(feat_d, feat_s)
 
         logits = self.head(feat_head)
-        if self.aux_mode == 'train':
+        if self.output_aux and not test:
             logits_aux2 = self.aux2(feat2)
             logits_aux3 = self.aux3(feat3)
             logits_aux4 = self.aux4(feat4)
             logits_aux5_4 = self.aux5_4(feat5_4)
-            #return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4ù
-            return logits
-        
-        elif self.aux_mode == 'eval':
-            return logits
-        elif self.aux_mode == 'pred':
-            pred = logits.argmax(dim=1)
-            return pred
-        else:
-            raise NotImplementedError
+            return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4
+        if test and use_test_resize:
+            return self.test_up(logits)
+
+        return logits
 
     def init_weights(self):
         for name, module in self.named_modules():
@@ -361,14 +333,14 @@ class BiSeNetV2(nn.Module):
                 else:
                     nn.init.ones_(module.weight)
                 nn.init.zeros_(module.bias)
-        self.load_pretrain()
-
+        if self.pretrained:
+            self.load_pretrain()
 
     def load_pretrain(self):
         state = modelzoo.load_url(backbone_url)
         for name, child in self.named_children():
             if name in state.keys():
-                child.load_state_dict(state[name], strict=True)
+                child.load_state_dict(state[name], strict=False)
 
     def get_params(self):
         def add_param_to_list(mod, wd_params, nowd_params):
@@ -387,4 +359,3 @@ class BiSeNetV2(nn.Module):
             else:
                 add_param_to_list(child, wd_params, nowd_params)
         return wd_params, nowd_params, lr_mul_wd_params, lr_mul_nowd_params
-
