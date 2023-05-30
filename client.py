@@ -59,10 +59,10 @@ class Client:
                     size=labels.shape[-2:], 
                     mode="bilinear", 
                     align_corners=False
-                )
+            )
             return outputs
         if self.args.model == 'bisenetv2':
-            return self.model(images, test, use_test_resize)
+            return self.model(images)
             
         raise NotImplementedError
     
