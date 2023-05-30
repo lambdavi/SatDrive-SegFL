@@ -1,5 +1,7 @@
+
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.utils.model_zoo as modelzoo
 
 backbone_url = 'https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/backbone_v2.pth'
@@ -11,10 +13,9 @@ class ConvBNReLU(nn.Module):
                  dilation=1, groups=1, bias=False):
         super(ConvBNReLU, self).__init__()
         self.conv = nn.Conv2d(
-            in_chan, out_chan, kernel_size=ks, stride=stride,
-            padding=padding, dilation=dilation,
-            groups=groups, bias=bias)
-
+                in_chan, out_chan, kernel_size=ks, stride=stride,
+                padding=padding, dilation=dilation,
+                groups=groups, bias=bias)
         self.bn = nn.BatchNorm2d(out_chan)
         self.relu = nn.ReLU(inplace=True)
 
@@ -41,6 +42,7 @@ class UpSample(nn.Module):
 
     def init_weight(self):
         nn.init.xavier_normal_(self.proj.weight, gain=1.)
+
 
 
 class DetailBranch(nn.Module):
@@ -97,6 +99,7 @@ class CEBlock(nn.Module):
         super(CEBlock, self).__init__()
         self.bn = nn.BatchNorm2d(128)
         self.conv_gap = ConvBNReLU(128, 128, 1, stride=1, padding=0)
+        #TODO: in paper here is naive conv2d, no bn-relu
         self.conv_last = ConvBNReLU(128, 128, 3, stride=1)
 
     def forward(self, x):
@@ -119,7 +122,7 @@ class GELayerS1(nn.Module):
                 in_chan, mid_chan, kernel_size=3, stride=1,
                 padding=1, groups=in_chan, bias=False),
             nn.BatchNorm2d(mid_chan),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=True), # not shown in paper
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(
@@ -156,7 +159,7 @@ class GELayerS2(nn.Module):
                 mid_chan, mid_chan, kernel_size=3, stride=1,
                 padding=1, groups=mid_chan, bias=False),
             nn.BatchNorm2d(mid_chan),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=True), # not shown in paper
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(
@@ -166,14 +169,14 @@ class GELayerS2(nn.Module):
         )
         self.conv2[1].last_bn = True
         self.shortcut = nn.Sequential(
-            nn.Conv2d(
-                in_chan, in_chan, kernel_size=3, stride=2,
-                padding=1, groups=in_chan, bias=False),
-            nn.BatchNorm2d(in_chan),
-            nn.Conv2d(
-                in_chan, out_chan, kernel_size=1, stride=1,
-                padding=0, bias=False),
-            nn.BatchNorm2d(out_chan),
+                nn.Conv2d(
+                    in_chan, in_chan, kernel_size=3, stride=2,
+                    padding=1, groups=in_chan, bias=False),
+                nn.BatchNorm2d(in_chan),
+                nn.Conv2d(
+                    in_chan, out_chan, kernel_size=1, stride=1,
+                    padding=0, bias=False),
+                nn.BatchNorm2d(out_chan),
         )
         self.relu = nn.ReLU(inplace=True)
 
@@ -253,37 +256,24 @@ class BGALayer(nn.Module):
                 128, 128, kernel_size=1, stride=1,
                 padding=0, bias=False),
         )
-        self.up1 = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
-        self.up2 = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+        self.up1 = nn.Upsample(scale_factor=4)
+        self.up2 = nn.Upsample(scale_factor=4)
 
         self.conv = nn.Sequential(
             nn.Conv2d(
                 128, 128, kernel_size=3, stride=1,
                 padding=1, bias=False),
             nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=True), # not shown in paper
         )
 
     def forward(self, x_d, x_s):
+        dsize = x_d.size()[2:]
         left1 = self.left1(x_d)
         left2 = self.left2(x_d)
         right1 = self.right1(x_s)
         right2 = self.right2(x_s)
         right1 = self.up1(right1)
-        if left1.shape != right1.shape:
-            print("here")
-            right1 = nn.functional.interpolate(
-                        right1, 
-                        size=left1.shape[-2:], 
-                        mode="bilinear", 
-                        align_corners=True
-            )
-            left1 = nn.functional.interpolate(
-                        left1, 
-                        size=right1.shape[-2:], 
-                        mode="bilinear", 
-                        align_corners=True
-            )
         left = left1 * torch.sigmoid(right1)
         right = left2 * torch.sigmoid(right2)
         right = self.up2(right)
@@ -291,17 +281,25 @@ class BGALayer(nn.Module):
         return out
 
 
+
 class SegmentHead(nn.Module):
 
-    def __init__(self, in_chan, mid_chan, n_classes, up_factor=8, aux=False):
+    def __init__(self, in_chan, mid_chan, n_classes, up_factor=8, aux=True):
         super(SegmentHead, self).__init__()
         self.conv = ConvBNReLU(in_chan, mid_chan, 3, stride=1)
         self.drop = nn.Dropout(0.1)
+        self.up_factor = up_factor
 
-        out_channels = n_classes * (up_factor ** 2)
+        out_chan = n_classes
+        mid_chan2 = up_factor * up_factor if aux else mid_chan
+        up_factor = up_factor // 2 if aux else up_factor
         self.conv_out = nn.Sequential(
-            nn.Conv2d(mid_chan, out_channels, kernel_size=1, stride=1, padding=0),
-            nn.PixelShuffle(up_factor)
+            nn.Sequential(
+                nn.Upsample(scale_factor=2),
+                ConvBNReLU(mid_chan, mid_chan2, 3, stride=1)
+                ) if aux else nn.Identity(),
+            nn.Conv2d(mid_chan2, out_chan, 1, 1, 0, bias=True),
+            nn.Upsample(scale_factor=up_factor, mode='bilinear', align_corners=False)
         )
 
     def forward(self, x):
@@ -313,41 +311,44 @@ class SegmentHead(nn.Module):
 
 class BiSeNetV2(nn.Module):
 
-    def __init__(self, n_classes, output_aux=True, pretrained=False):
+    def __init__(self, n_classes, aux_mode='train'):
         super(BiSeNetV2, self).__init__()
-        self.output_aux = output_aux
-        self.pretrained = pretrained
+        self.aux_mode = aux_mode
         self.detail = DetailBranch()
         self.segment = SegmentBranch()
         self.bga = BGALayer()
 
         self.head = SegmentHead(128, 1024, n_classes, up_factor=8, aux=False)
-        if self.output_aux:
+        if self.aux_mode == 'train':
             self.aux2 = SegmentHead(16, 128, n_classes, up_factor=4)
             self.aux3 = SegmentHead(32, 128, n_classes, up_factor=8)
             self.aux4 = SegmentHead(64, 128, n_classes, up_factor=16)
             self.aux5_4 = SegmentHead(128, 128, n_classes, up_factor=32)
-        self.test_up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
 
         self.init_weights()
 
-    def forward(self, x, test=False, use_test_resize=None):
+    def forward(self, x):
         size = x.size()[2:]
         feat_d = self.detail(x)
         feat2, feat3, feat4, feat5_4, feat_s = self.segment(x)
         feat_head = self.bga(feat_d, feat_s)
 
         logits = self.head(feat_head)
-        if self.output_aux and not test:
+        if self.aux_mode == 'train':
             logits_aux2 = self.aux2(feat2)
             logits_aux3 = self.aux3(feat3)
             logits_aux4 = self.aux4(feat4)
             logits_aux5_4 = self.aux5_4(feat5_4)
-            return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4
-        if test and use_test_resize:
-            return self.test_up(logits)
-
-        return logits
+            #return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4ù
+            return logits
+        
+        elif self.aux_mode == 'eval':
+            return logits
+        elif self.aux_mode == 'pred':
+            pred = logits.argmax(dim=1)
+            return pred
+        else:
+            raise NotImplementedError
 
     def init_weights(self):
         for name, module in self.named_modules():
@@ -360,8 +361,8 @@ class BiSeNetV2(nn.Module):
                 else:
                     nn.init.ones_(module.weight)
                 nn.init.zeros_(module.bias)
-        if self.pretrained:
-            self.load_pretrain()
+        self.load_pretrain()
+
 
     def load_pretrain(self):
         state = modelzoo.load_url(backbone_url)
@@ -386,3 +387,4 @@ class BiSeNetV2(nn.Module):
             else:
                 add_param_to_list(child, wd_params, nowd_params)
         return wd_params, nowd_params, lr_mul_wd_params, lr_mul_nowd_params
+
