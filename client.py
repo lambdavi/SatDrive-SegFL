@@ -61,6 +61,8 @@ class Client:
                     align_corners=False
                 )
             return outputs
+        if self.args.model == 'bisenetv2':
+            self.model(images)[0]
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
