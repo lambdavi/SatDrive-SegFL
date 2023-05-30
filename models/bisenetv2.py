@@ -23,9 +23,22 @@ class BiSeNetv2(nn.Module):
         self.bga_layer = BilateralGuidedAggregationLayer(128, 128, act_type)
         self.seg_head = SegHead(128, n_classes, act_type)
 
-        if pretrained:
-            self.load_pretrain()
+        self.init_weights()
         
+    def init_weights(self):
+        for name, module in self.named_modules():
+            if isinstance(module, (nn.Conv2d, nn.Linear)):
+                nn.init.kaiming_normal_(module.weight, mode='fan_out')
+                if not module.bias is None: nn.init.constant_(module.bias, 0)
+            elif isinstance(module, nn.modules.batchnorm._BatchNorm):
+                if hasattr(module, 'last_bn') and module.last_bn:
+                    nn.init.zeros_(module.weight)
+                else:
+                    nn.init.ones_(module.weight)
+                nn.init.zeros_(module.bias)
+        if self.pretrained:
+            self.load_pretrain()
+
     def load_pretrain(self):
         state = modelzoo.load_url(backbone_url)
         for name, child in self.named_children():
