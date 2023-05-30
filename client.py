@@ -47,7 +47,7 @@ class Client:
     def set_teacher(self, teacher_model):
         self.teacher_params = copy.deepcopy(teacher_model.state_dict())
 
-    def _get_outputs(self, images, labels=None, test=False):
+    def _get_outputs(self, images, labels=None, test=False, use_test_resize=False):
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
         if self.args.model in ['resnet18',]:
@@ -62,7 +62,7 @@ class Client:
                 )
             return outputs
         if self.args.model == 'bisenetv2':
-            return self.model(images, test=test)
+            return self.model(images, test, use_test_resize)
             
         raise NotImplementedError
     
