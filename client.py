@@ -47,7 +47,7 @@ class Client:
     def set_teacher(self, teacher_model):
         self.teacher_params = copy.deepcopy(teacher_model.state_dict())
 
-    def _get_outputs(self, images, labels=None, test=False):
+    def _get_outputs(self, images, labels=None):
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
         if self.args.model in ['resnet18',]:
@@ -62,14 +62,8 @@ class Client:
             )
             return outputs
         if self.args.model == 'bisenetv2':
-            logits = self.model(images, test=test)
-            outputs = nn.functional.interpolate(
-                    logits, 
-                    size=labels.shape[-2:], 
-                    mode="bilinear", 
-                    align_corners=False
-            )
-            return outputs
+            return self.model(images)
+            
             
         raise NotImplementedError
     
@@ -229,7 +223,7 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs=self._get_outputs(images, labels, test=True)
+                outputs=self._get_outputs(images, labels)
                 self.update_metric(metric, outputs, labels)
         if eval:
             return metric.get_results()["Mean IoU"]
