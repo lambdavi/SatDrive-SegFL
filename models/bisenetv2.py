@@ -411,11 +411,19 @@ class AttentionRefinementModule(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(AttentionRefinementModule, self).__init__()
         self.conv = ConvBlock(in_channels, out_channels, kernel_size=1)
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(out_channels, out_channels // 4),
+            nn.ReLU(inplace=True),
+            nn.Linear(out_channels // 4, out_channels),
+            nn.Sigmoid()
+        )
 
     def forward(self, x):
-        feature = torch.mean(x, dim=(2, 3), keepdim=True)
+        feature = self.pool(x)
         feature = self.conv(feature)
-        attention = torch.sigmoid(feature)
+        attention = self.fc(feature.squeeze(dim=3).squeeze(dim=2))
+        attention = attention.unsqueeze(dim=3).unsqueeze(dim=2)
         out = x * attention
         return out
 
@@ -455,7 +463,7 @@ class BisenetV2(nn.Module):
 
         if pretrained:
             self.load_pretrain()
-            
+
     def load_pretrain(self):
         state = modelzoo.load_url(backbone_url)
         for name, child in self.named_children():
