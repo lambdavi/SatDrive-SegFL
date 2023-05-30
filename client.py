@@ -47,7 +47,7 @@ class Client:
     def set_teacher(self, teacher_model):
         self.teacher_params = copy.deepcopy(teacher_model.state_dict())
 
-    def _get_outputs(self, images):
+    def _get_outputs(self, images, labels=None):
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
         if self.args.model == 'resnet18':
@@ -89,7 +89,7 @@ class Client:
             torch.cuda.empty_cache()
             optimizer.zero_grad()
             images = images.to(self.device, dtype=torch.float32)
-            outputs = self._get_outputs(images)
+            outputs = self._get_outputs(images, labels)
             c = crit(outputs, images)
             p = pseudo(outputs)
             loss = red(c, p)
@@ -112,7 +112,7 @@ class Client:
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            outputs = self._get_outputs(images)
+            outputs = self._get_outputs(images, labels)
             loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
@@ -219,7 +219,7 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs = self._get_outputs(images)
+                outputs = self._get_outputs(images, labels)
                 self.update_metric(metric, outputs, labels)
         if eval:
             return metric.get_results()["Mean IoU"]

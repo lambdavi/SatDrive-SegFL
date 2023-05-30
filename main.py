@@ -57,13 +57,12 @@ def model_init(args):
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
     if args.model == 'transf':
-        """return SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/segformer-b0-finetuned-cityscapes-768-768",
-            num_labels=get_dataset_num_classes(args.dataset),
-            ignore_mismatched_sizes=True,
-        )"""
+        """
+            nvidia/mit-b[0,1,2,3,4,5]
+            "nvidia/segformer-b0-finetuned-cityscapes-768-768"
+        """
         return SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/mit-b2",
+            "nvidia/mit-b1",
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
