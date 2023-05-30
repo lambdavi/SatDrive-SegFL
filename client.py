@@ -128,7 +128,7 @@ class Client:
                 loss = loss + boost_loss
             else:
                 loss = self.reduction(self.criterion(outputs,labels),labels)
-                
+
             loss.backward()
             # Update parameters
             optimizer.step()
@@ -234,9 +234,14 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs = self.model(images, test=True) \
-                    if self.args.model == 'bisenetv2' else self._get_outputs(images, labels)
-                self.update_metric(metric, outputs, labels)
+                
+                if self.args.model == 'bisenetv2':
+                    outputs = self.model(images, test=True)
+                    _, prediction = outputs.max(dim=1)
+                    self.update_metric(metric, prediction, labels)
+                else:
+                    self._get_outputs(images, labels)
+                    self.update_metric(metric, outputs, labels)
         if eval:
             return metric.get_results()["Mean IoU"]
     
