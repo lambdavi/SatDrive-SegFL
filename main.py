@@ -69,7 +69,9 @@ def model_init(args):
             ignore_mismatched_sizes=True,
         )
     if args.model == "bisenetv2":
-        return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), output_aux=True, pretrained=True)
+       # return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), output_aux=True, pretrained=True)
+            return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), aux_mode="train")
+
     raise NotImplementedError
 
 def get_transforms(args):
