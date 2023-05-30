@@ -62,7 +62,7 @@ class Client:
                 )
             return outputs
         if self.args.model == 'bisenetv2':
-            return self.model(images)[0]
+            return self.model(images)
             
         raise NotImplementedError
     
