@@ -107,6 +107,7 @@ def get_transforms(args):
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
         test_transforms = sstr.Compose([
+            sstr.Resize(512, 928),
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
