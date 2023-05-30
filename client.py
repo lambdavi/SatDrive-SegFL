@@ -47,7 +47,7 @@ class Client:
     def set_teacher(self, teacher_model):
         self.teacher_params = copy.deepcopy(teacher_model.state_dict())
 
-    def _get_outputs(self, images, labels=None, test=False, use_test_resize=False):
+    def _get_outputs(self, images, labels=None):
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
         if self.args.model in ['resnet18',]:
@@ -116,7 +116,19 @@ class Client:
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
             outputs = self._get_outputs(images, labels)
-            loss = self.reduction(self.criterion(outputs,labels),labels)
+
+            if self.args.model == "bisenetv2":
+                outputs, feat2, feat3, feat4, feat5_4 = outputs
+                loss = self.reduction(self.criterion(outputs, labels), labels)
+                boost_loss = 0
+                boost_loss += self.reduction(self.criterion(feat2, labels), labels)
+                boost_loss += self.reduction(self.criterion(feat3, labels), labels)
+                boost_loss += self.reduction(self.criterion(feat4, labels), labels)
+                boost_loss += self.reduction(self.criterion(feat5_4, labels), labels)
+                loss = loss + boost_loss
+            else:
+                loss = self.reduction(self.criterion(outputs,labels),labels)
+                
             loss.backward()
             # Update parameters
             optimizer.step()
@@ -222,7 +234,8 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs = self._get_outputs(images, labels, test=True)
+                outputs = self.model(images, test=True) \
+                    if self.args.model == 'bisenetv2' else self._get_outputs(images, labels)
                 self.update_metric(metric, outputs, labels)
         if eval:
             return metric.get_results()["Mean IoU"]
