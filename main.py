@@ -61,8 +61,9 @@ def model_init(args):
             nvidia/mit-b[0,1,2,3,4,5]
             "nvidia/segformer-b0-finetuned-cityscapes-768-768"
         """
+        weights = args.transformer_model
         return SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/mit-b1",
+            f"nvidia/mit-{weights}",
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
