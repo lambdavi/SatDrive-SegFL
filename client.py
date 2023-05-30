@@ -237,7 +237,7 @@ class Client:
                 
                 if self.args.model == 'bisenetv2':
                     self.model.aux_mode = "eval"
-                    outputs = self.model(images)
+                    outputs = self.model(images)[0]
                 else:
                     self._get_outputs(images, labels)
                 self.update_metric(metric, outputs, labels)
