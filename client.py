@@ -90,7 +90,7 @@ class Client:
             torch.cuda.empty_cache()
             optimizer.zero_grad()
             images = images.to(self.device, dtype=torch.float32)
-            outputs = self.model(images)["out"]
+            outputs = self._get_outputs(images)
             c = crit(outputs, images)
             p = pseudo(outputs)
             loss = red(c, p)
