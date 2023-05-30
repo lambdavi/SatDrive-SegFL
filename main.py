@@ -6,7 +6,7 @@ import torch
 import random
 
 import numpy as np
-from torchvision.models import resnet18, ViT_B_16_Weights, vit_b_16
+from torchvision.models import resnet18
 
 import datasets.ss_transforms as sstr
 import datasets.np_transforms as nptr
@@ -22,9 +22,9 @@ from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
-from models.bisenetv2 import BiSeNetv2
+from models.bisenetv2 import BiSeNetV2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
-from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
+from transformers import SegformerForSemanticSegmentation
 
 from torchvision.transforms import RandomApply
 
@@ -70,7 +70,7 @@ def model_init(args):
         )
     if args.model == "bisenetv2":
        # return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), output_aux=True, pretrained=True)
-            return BiSeNetv2(n_classes=get_dataset_num_classes(args.dataset), pretrained=True)
+            return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), pretrained=True)
 
     raise NotImplementedError
 
