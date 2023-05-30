@@ -6,7 +6,7 @@ import torch
 import random
 
 import numpy as np
-from torchvision.models import resnet18
+from torchvision.models import resnet18, ViT_B_16_Weights, vit_b_16
 
 import datasets.ss_transforms as sstr
 import datasets.np_transforms as nptr
@@ -75,7 +75,6 @@ def get_transforms(args):
         train_transforms = [
             sstr.Compose([
                 RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2),
-                #RandomApply([sstr.ColorJitter(0.5, 0.5, 0.1, 0.1)], p=0.5)
             ]),
             sstr.Compose([
                 sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
@@ -98,13 +97,11 @@ def get_transforms(args):
             nptr.Normalize((0.5,), (0.5,)),
         ])
     elif args.model == "transf":
-        train_transforms = [sstr.Compose([RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2)]),
-            sstr.Compose([
-                sstr.RandomCrop((768, 768)),
+        train_transforms = sstr.Compose([
+                sstr.RandomResizedCrop((768, 768), scale=(0.5, 2)),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
-        ]
         test_transforms = sstr.Compose([
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
