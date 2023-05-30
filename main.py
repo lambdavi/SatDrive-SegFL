@@ -22,7 +22,7 @@ from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
-from models.bisenetv2 import BisenetV2
+from models.bisenetv2 import BiSeNetv2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
 
