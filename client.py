@@ -54,9 +54,14 @@ class Client:
         if self.args.model == 'resnet18':
             return self.model(images)
         if self.args.model == 'transf':
-            ret = self.model(images)
-            print(ret)
-            return ret.logits
+            logits = self.model(images).logits
+            outputs = nn.functional.interpolate(
+                    logits, 
+                    size=labels.shape[-2:], 
+                    mode="bilinear", 
+                    align_corners=False
+                )
+            return outputs
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
@@ -108,16 +113,7 @@ class Client:
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            if self.args.model == "transf":
-                logits = self.model(images).logits
-                outputs = nn.functional.interpolate(
-                        logits, 
-                        size=labels.shape[-2:], 
-                        mode="bilinear", 
-                        align_corners=False
-                    )
-            else:
-                outputs = self._get_outputs(images)
+            outputs = self._get_outputs(images)
             loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
