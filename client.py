@@ -236,11 +236,10 @@ class Client:
                 # Forward pass
                 
                 if self.args.model == 'bisenetv2':
-                    outputs = self.model(images, test=True, use_test_resize=True)
-                    self.update_metric(metric, outputs, labels)
+                    outputs = self.model(images, test=True)
                 else:
                     self._get_outputs(images, labels)
-                    self.update_metric(metric, outputs, labels)
+                self.update_metric(metric, outputs, labels)
         if eval:
             return metric.get_results()["Mean IoU"]
     
