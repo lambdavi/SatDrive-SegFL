@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as modelzoo
 
-from modules import conv3x3, conv1x1, DWConvBNAct, PWConvBNAct, ConvBNAct, Activation
+from .modules import conv3x3, conv1x1, DWConvBNAct, PWConvBNAct, ConvBNAct, Activation
 backbone_url = 'https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/backbone_v2.pth'
 
 
