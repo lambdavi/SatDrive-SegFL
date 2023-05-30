@@ -237,8 +237,8 @@ class Client:
                 
                 if self.args.model == 'bisenetv2':
                     outputs = self.model(images, test=True)
-                    _, prediction = outputs.max(dim=1)
-                    self.update_metric(metric, prediction, labels)
+                    print(outputs)
+                    self.update_metric(metric, outputs, labels)
                 else:
                     self._get_outputs(images, labels)
                     self.update_metric(metric, outputs, labels)
