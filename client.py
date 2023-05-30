@@ -62,7 +62,14 @@ class Client:
             )
             return outputs
         if self.args.model == 'bisenetv2':
-            return self.model(images)
+            logits = self.model(images)
+            outputs = nn.functional.interpolate(
+                    logits, 
+                    size=labels.shape[-2:], 
+                    mode="bilinear", 
+                    align_corners=False
+            )
+            return outputs
             
         raise NotImplementedError
     

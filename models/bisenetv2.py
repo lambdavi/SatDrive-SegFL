@@ -332,7 +332,6 @@ class BiSeNetV2(nn.Module):
             return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4
         if test and use_test_resize:
             return self.test_up(logits)
-        logits = nn.functional.interpolate(x, size, mode='bilinear', align_corners=True)
 
         return logits
 
