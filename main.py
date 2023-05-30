@@ -70,7 +70,7 @@ def model_init(args):
         )
     if args.model == "bisenetv2":
        # return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), output_aux=True, pretrained=True)
-            return BisenetV2(n_classes=get_dataset_num_classes(args.dataset), pretrained=True)
+            return BiSeNetv2(n_classes=get_dataset_num_classes(args.dataset), pretrained=True)
 
     raise NotImplementedError
 
