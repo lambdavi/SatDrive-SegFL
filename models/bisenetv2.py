@@ -9,18 +9,28 @@ Date:       2023/04/15
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.utils.model_zoo as modelzoo
 
 from modules import conv3x3, conv1x1, DWConvBNAct, PWConvBNAct, ConvBNAct, Activation
+backbone_url = 'https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/backbone_v2.pth'
 
 
 class BiSeNetv2(nn.Module):
-    def __init__(self, num_class=1, n_channel=3, act_type='relu'):
+    def __init__(self, num_class=1, n_channel=3, act_type='relu', pretrained=False):
         super(BiSeNetv2, self).__init__()
         self.detail_branch = DetailBranch(n_channel, 128, act_type)
         self.semantic_branch = SemanticBranch(n_channel, 128, act_type)
         self.bga_layer = BilateralGuidedAggregationLayer(128, 128, act_type)
         self.seg_head = SegHead(128, num_class, act_type)
+
+        if pretrained:
+            self.load_pretrain()
         
+    def load_pretrain(self):
+        state = modelzoo.load_url(backbone_url)
+        for name, child in self.named_children():
+            if name in state.keys():
+                child.load_state_dict(state[name], strict=True)
     def forward(self, x):
         size = x.size()[2:]
         x_d = self.detail_branch(x)
