@@ -50,7 +50,7 @@ class Client:
     def _get_outputs(self, images, labels=None):
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
-        if self.args.model == 'resnet18':
+        if self.args.model in ['resnet18', 'bisenetv2']:
             return self.model(images)
         if self.args.model == 'transf':
             logits = self.model(images).logits

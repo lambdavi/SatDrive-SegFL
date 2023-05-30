@@ -22,6 +22,7 @@ from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
+from models.bisenetv2 import BiSeNetV2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
 
@@ -67,7 +68,8 @@ def model_init(args):
             num_labels=get_dataset_num_classes(args.dataset),
             ignore_mismatched_sizes=True,
         )
-
+    if args.model == "bisenetv2":
+        return BiSeNetV2(num_classes=get_dataset_num_classes(args.dataset))
     raise NotImplementedError
 
 def get_transforms(args):

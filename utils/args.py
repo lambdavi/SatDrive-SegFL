@@ -13,7 +13,7 @@ def get_parser():
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument('--dataset', type=str, choices=['idda', 'femnist', 'gta5'], required=True, help='dataset name')
     parser.add_argument('--niid', action='store_true', default=False,  help='Run the experiment with the non-IID partition (IID by default). Only on FEMNIST dataset.')
-    parser.add_argument('--model', type=str, choices=['deeplabv3_mobilenetv2', 'resnet18', 'transf'], help='model name')
+    parser.add_argument('--model', type=str, choices=['deeplabv3_mobilenetv2', 'resnet18', 'transf', 'bisenetv2'], help='model name')
     parser.add_argument('--transformer_model', type=str, choices=['b0', 'b1', 'b2'], default="b1", help='weights of the transformers b0 lighter - b2 heavier')
     parser.add_argument('--num_rounds', type=int, help='number of rounds')
     parser.add_argument('--num_epochs', type=int, help='number of local epochs')
