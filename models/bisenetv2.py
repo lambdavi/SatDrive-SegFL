@@ -16,12 +16,12 @@ backbone_url = 'https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/ba
 
 
 class BiSeNetv2(nn.Module):
-    def __init__(self, num_class=1, n_channel=3, act_type='relu', pretrained=False):
+    def __init__(self, n_classes=1, n_channel=3, act_type='relu', pretrained=False):
         super(BiSeNetv2, self).__init__()
         self.detail_branch = DetailBranch(n_channel, 128, act_type)
         self.semantic_branch = SemanticBranch(n_channel, 128, act_type)
         self.bga_layer = BilateralGuidedAggregationLayer(128, 128, act_type)
-        self.seg_head = SegHead(128, num_class, act_type)
+        self.seg_head = SegHead(128, n_classes, act_type)
 
         if pretrained:
             self.load_pretrain()
