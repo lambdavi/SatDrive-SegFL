@@ -278,7 +278,10 @@ class BGALayer(nn.Module):
                         mode="bilinear", 
                         align_corners=False
             )
-            right1 = right1[:,:,:,:-1]
+            if left1.shape[-1] > right1.shape[-1]:
+                left1 = left1[:,:,:,:-1]
+            else:
+                right1 = right1[:,:,:,:-1]
         left = left1 * torch.sigmoid(right1)
         right = left2 * torch.sigmoid(right2)
         right = self.up2(right)
