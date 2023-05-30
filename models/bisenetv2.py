@@ -276,12 +276,14 @@ class BGALayer(nn.Module):
                         right1, 
                         size=left1.shape[-2:], 
                         mode="bilinear", 
-                        align_corners=False
+                        align_corners=True
             )
-            if left1.shape[-1] > right1.shape[-1]:
-                left1 = left1[:,:,:,:-1]
-            else:
-                right1 = right1[:,:,:,:-1]
+            left1 = nn.functional.interpolate(
+                        left1, 
+                        size=right1.shape[-2:], 
+                        mode="bilinear", 
+                        align_corners=True
+            )
         left = left1 * torch.sigmoid(right1)
         right = left2 * torch.sigmoid(right2)
         right = self.up2(right)
