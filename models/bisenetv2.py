@@ -424,7 +424,7 @@ class AttentionRefinementModule(nn.Module):
         feature = self.conv(feature)
         attention = self.fc(feature.squeeze(dim=3).squeeze(dim=2))
         attention = attention.unsqueeze(dim=3).unsqueeze(dim=2)
-        out = x * attention
+        out = x * attention.expand_as(x)
         return out
 
 
