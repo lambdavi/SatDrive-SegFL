@@ -63,10 +63,7 @@ class Client:
             return outputs
         if self.args.model == 'bisenetv2':
             outputs = self.model(images, test=test)
-            if test:
-                return outputs
-            else:
-                return outputs[0]
+            return outputs
             
             
         raise NotImplementedError
@@ -122,8 +119,11 @@ class Client:
             optimizer.zero_grad()
             
             outputs = self._get_outputs(images, labels)
-                        
-            loss = self.reduction(self.criterion(outputs,labels),labels)
+            if self.args.model == "bisenetv2":
+                for log in outputs:
+                    loss += self.reduction(self.criterion(log,labels),labels)
+            else:
+                loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
