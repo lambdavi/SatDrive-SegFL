@@ -78,7 +78,7 @@ def get_transforms(args):
     if args.model == 'deeplabv3_mobilenetv2':
         train_transforms = [
             sstr.Compose([
-                RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2),
+                RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
             ]),
             sstr.Compose([
                 sstr.RandomCrop((512, 928)),
