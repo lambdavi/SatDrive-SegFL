@@ -22,13 +22,14 @@ from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
+from models.bisenetv2 import BiSeNetV2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
+from transformers import SegformerForSemanticSegmentation
 
 from torchvision.transforms import RandomApply
 
 import timeit
 import os
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -56,21 +57,31 @@ def model_init(args):
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
-    if args.model == 'cnn':
-        # TODO: missing code here!
-        raise NotImplementedError
+    if args.model == 'transf':
+        """
+            nvidia/mit-b[0,1,2,3,4,5]
+            "nvidia/segformer-b0-finetuned-cityscapes-768-768"
+        """
+        weights = args.transformer_model
+        return SegformerForSemanticSegmentation.from_pretrained(
+            f"nvidia/mit-{weights}",
+            num_labels=get_dataset_num_classes(args.dataset),
+            ignore_mismatched_sizes=True,
+        )
+    if args.model == "bisenetv2":
+       # return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), output_aux=True, pretrained=True)
+            return BiSeNetV2(get_dataset_num_classes(args.dataset), pretrained=True)
+
     raise NotImplementedError
 
 def get_transforms(args):
     if args.model == 'deeplabv3_mobilenetv2':
         train_transforms = [
             sstr.Compose([
-                RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.2),
-                #RandomApply([sstr.ColorJitter(0.5, 0.5, 0.1, 0.1)], p=0.5)
+                RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
             ]),
             sstr.Compose([
-                sstr.RandomResizedCrop((512, 928), scale=(0.5, 2.0)),
-                sstr.RandomHorizontalFlip(),
+                sstr.RandomCrop((512, 928)),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ]), 
@@ -79,7 +90,7 @@ def get_transforms(args):
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
-    elif args.model == 'cnn' or args.model == 'resnet18':
+    elif args.model == 'resnet18':
         train_transforms = nptr.Compose([
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
@@ -87,6 +98,16 @@ def get_transforms(args):
         test_transforms = nptr.Compose([
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
+        ])
+    elif args.model in ["transf", "bisenetv2"]:
+        train_transforms = sstr.Compose([
+                sstr.RandomCrop((512, 928)),
+                sstr.ToTensor(),
+                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+        test_transforms = sstr.Compose([
+            sstr.ToTensor(),
+            sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
     else:
         raise NotImplementedError
@@ -221,7 +242,7 @@ def get_source_client(args, model):
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
-    if args.model == 'deeplabv3_mobilenetv2':
+    if args.model in ['deeplabv3_mobilenetv2', "transf", "bisenetv2"]:
         metrics = {
             'eval_train': StreamSegMetrics(num_classes, 'eval_train'),
             'test_same_dom': StreamSegMetrics(num_classes, 'test_same_dom'),

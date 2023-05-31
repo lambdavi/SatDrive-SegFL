@@ -8,8 +8,7 @@ from utils.utils import HardNegativeMining, MeanReduction
 from utils.early_stopping import EarlyStopper
 from torch.optim.lr_scheduler import StepLR, LinearLR 
 from tqdm import tqdm
-from utils.loss import SelfTrainingLoss, IW_MaxSquareloss, KnowledgeDistillationLoss
-
+from utils.loss import SelfTrainingLoss, IW_MaxSquareloss
 import matplotlib.pyplot as plt
 
 class Client:
@@ -48,11 +47,25 @@ class Client:
     def set_teacher(self, teacher_model):
         self.teacher_params = copy.deepcopy(teacher_model.state_dict())
 
-    def _get_outputs(self, images):
+    def _get_outputs(self, images, labels=None, test=False):
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
-        if self.args.model == 'resnet18':
+        if self.args.model in ['resnet18',]:
             return self.model(images)
+        if self.args.model == 'transf':
+            logits = self.model(images).logits
+            outputs = nn.functional.interpolate(
+                    logits, 
+                    size=labels.shape[-2:], 
+                    mode="bilinear", 
+                    align_corners=False
+            )
+            return outputs
+        if self.args.model == 'bisenetv2':
+            outputs = self.model(images, test=test)
+            return outputs
+            
+            
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
@@ -81,7 +94,7 @@ class Client:
             torch.cuda.empty_cache()
             optimizer.zero_grad()
             images = images.to(self.device, dtype=torch.float32)
-            outputs = self.model(images)["out"]
+            outputs = self._get_outputs(images, _)
             c = crit(outputs, images)
             p = pseudo(outputs)
             loss = red(c, p)
@@ -104,8 +117,13 @@ class Client:
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            outputs = self._get_outputs(images)
-            loss = self.reduction(self.criterion(outputs,labels),labels)
+            
+            outputs = self._get_outputs(images, labels)
+            if self.args.model == "bisenetv2":
+                for log in outputs:
+                    loss += self.reduction(self.criterion(log,labels),labels)
+            else:
+                loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
@@ -119,7 +137,7 @@ class Client:
         if self.args.opt == 'SGD':
             optimizer = optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
         elif self.args.opt == 'adam':
-            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr, betas=(0.9, 0.99), eps=10**(-8), weight_decay=self.args.wd)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd)
         else:
             raise NotImplementedError
         
@@ -211,9 +229,8 @@ class Client:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 # Forward pass
-                outputs = self._get_outputs(images)
+                outputs=self._get_outputs(images, labels, test=True)
                 self.update_metric(metric, outputs, labels)
-        
         if eval:
             return metric.get_results()["Mean IoU"]
     
