@@ -52,7 +52,7 @@ class Client:
             return self.model(images)['out']
         if self.args.model in ['resnet18',]:
             return self.model(images)
-        if self.args.model == 'transf':
+        if self.args.model == 'segformer':
             logits = self.model(images).logits
             outputs = nn.functional.interpolate(
                     logits, 

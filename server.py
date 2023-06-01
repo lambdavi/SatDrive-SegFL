@@ -73,7 +73,6 @@ class Server:
         """
 
         num_rounds = self.args.num_rounds
-        eval_miou_base = 0  # used to save checkpoints if needed
         if self.args.centr:
             num_rounds = 1
         

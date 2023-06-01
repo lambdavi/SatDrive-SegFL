@@ -57,7 +57,7 @@ def model_init(args):
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
-    if args.model == 'transf':
+    if args.model == 'segformer':
         """
             nvidia/mit-b[0,1,2,3,4,5]
             "nvidia/segformer-b0-finetuned-cityscapes-768-768"
@@ -75,7 +75,7 @@ def model_init(args):
     raise NotImplementedError
 
 def get_transforms(args):
-    if args.model == 'deeplabv3_mobilenetv2':
+    if args.model in ["segformer",'deeplabv3_mobilenetv2']:
         train_transforms = [
             sstr.Compose([
                 RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
@@ -99,7 +99,7 @@ def get_transforms(args):
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
         ])
-    elif args.model in ["transf", "bisenetv2"]:
+    elif args.model == "bisenetv2":
         train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 928)),
                 sstr.ToTensor(),
@@ -242,7 +242,7 @@ def get_source_client(args, model):
 
 def set_metrics(args):
     num_classes = get_dataset_num_classes(args.dataset)
-    if args.model in ['deeplabv3_mobilenetv2', "transf", "bisenetv2"]:
+    if args.model in ['deeplabv3_mobilenetv2', "segformer", "bisenetv2"]:
         metrics = {
             'eval_train': StreamSegMetrics(num_classes, 'eval_train'),
             'test_same_dom': StreamSegMetrics(num_classes, 'test_same_dom'),
