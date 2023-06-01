@@ -7,18 +7,20 @@ from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 
 class_eval = [255, 1, 2, 3, 4, 5, 6]
-IMG_DIR = "images"
-LAB_DIR = "labels"
+IMG_DIR = "images_png"
+LAB_DIR = "masks_png"
 
 class LoveDADataset(VisionDataset):
     def __init__(self,
                  root: str,
                  list_samples: list[str],
+                 folder: str,
                  transform: tr.Compose = None,
                  client_name: str = None):
         super().__init__(root=root, transform=transform, target_transform=None)
         self.list_samples = list_samples
         self.client_name = client_name
+        self.folder = folder
         self.target_transform = self.get_mapping()
         self.style_tf_fn = None
         self.return_unprocessed_image = False
@@ -38,8 +40,8 @@ class LoveDADataset(VisionDataset):
         return lambda x: from_numpy(mapping[x])
 
     def __getitem__(self, index: int) -> Any:
-        image = Image.open(os.path.join(self.root,IMG_DIR, self.list_samples[index]+".png")).convert("RGB")
-        label = Image.open(os.path.join(self.root, LAB_DIR, self.list_samples[index]+".png"))
+        image = Image.open(os.path.join(self.root,self.folder, IMG_DIR, self.list_samples[index])).convert("RGB")
+        label = Image.open(os.path.join(self.root, self.folder, LAB_DIR, self.list_samples[index]))
 
         if self.return_unprocessed_image:
             return image
