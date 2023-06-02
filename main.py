@@ -48,7 +48,7 @@ def get_dataset_num_classes(dataset):
     if dataset == 'femnist':
         return 62
     if dataset == 'loveda':
-        return 7
+        return 8
     raise NotImplementedError
 
 def model_init(args):
@@ -86,7 +86,7 @@ def get_transforms(args):
                     RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
                 ]),
                 sstr.Compose([
-                    sstr.RandomCrop((512, 928)),
+                    sstr.RandomCrop((512, 512)),
                     sstr.ToTensor(),
                     sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 ]), 

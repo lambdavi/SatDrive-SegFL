@@ -6,7 +6,7 @@ from torch import from_numpy
 from torchvision.datasets import VisionDataset
 import datasets.ss_transforms as tr
 
-class_eval = [255, 1, 2, 3, 4, 5, 6]
+class_eval = [0, 1, 2, 3, 4, 5, 6, 7]
 IMG_DIR = "images_png"
 LAB_DIR = "masks_png"
 

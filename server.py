@@ -185,7 +185,7 @@ class Server:
         
         # Save the predicted image
         #class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
-        class_names = ["background", "building", "road", "water", "barren", "forest", "agriculture"]
+        class_names = ["DC", "background", "building", "road", "water", "barren", "forest", "agriculture"]
 
         # Create a legend
         legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
