@@ -45,7 +45,7 @@ class Client:
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
-        self.teacher_params = copy.deepcopy(teacher_model.state_dict())
+        self.teacher = copy.deepcopy(teacher_model.state_dict())
 
     def _get_outputs(self, images, labels=None, test=False):
         if self.args.model == 'deeplabv3_mobilenetv2':
