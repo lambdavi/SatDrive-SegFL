@@ -240,7 +240,6 @@ class Client:
         epochs = range(len(self.mious[0]))
         
         # Create a line chart with two y-values
-        plt.plot(epochs, self.losses, label='train_loss')
         plt.plot(epochs, self.mious[2], label='train_miou')
         plt.plot(epochs, self.mious[0], label='val_miou_same')
         plt.plot(epochs, self.mious[1], label='val_miou_diff')
