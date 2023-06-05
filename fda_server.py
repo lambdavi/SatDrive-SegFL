@@ -143,6 +143,7 @@ class FdaServer:
         # Centralized train on source dataset
         self.train_source()
         self.eval_train()
+        self.eval_validation()
         self.test()
 
         # Setup teacher and student
@@ -188,8 +189,8 @@ class FdaServer:
         This method handles the evaluation on the validation client(s)
         """
         self.metrics["eval_train"].reset()
-        self.validation_clients[0].model.load_state_dict(self.student_model.state_dict())
-        self.validation_clients[0].test(self.metrics["eval_train"])
+        self.source_dataset[0].model.load_state_dict(self.model_params_dict())
+        self.source_dataset[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Validation: Mean IoU: {res["Mean IoU"]}')
 
