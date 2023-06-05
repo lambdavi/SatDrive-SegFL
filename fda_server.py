@@ -192,7 +192,7 @@ class FdaServer:
         print(f"Test on SOURCE DATASET started.")
         print("------------------------------------")
         self.metrics["eval_train"].reset()
-        self.source_dataset[0].model.load_state_dict(self.model_params_dict())
+        self.source_dataset[0].model.load_state_dict(self.model_params_dict)
         self.source_dataset[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Validation: Mean IoU: {res["Mean IoU"]}')
