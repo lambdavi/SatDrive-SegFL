@@ -142,8 +142,8 @@ class FdaServer:
 
         # Centralized train on source dataset
         self.train_source()
-        self.eval_train()
         self.eval_validation()
+        self.eval_train()
         self.test()
 
         # Setup teacher and student
@@ -175,7 +175,7 @@ class FdaServer:
         This method handles the evaluation on the train clients
         """
         print("------------------------------------")
-        print(f"Test on TRAINING SET started.")
+        print(f"Test on TARGET DATASET started.")
         print("------------------------------------")
         self.metrics["eval_train"].reset()
         for c in self.train_clients:
@@ -188,6 +188,9 @@ class FdaServer:
         """
         This method handles the evaluation on the validation client(s)
         """
+        print("------------------------------------")
+        print(f"Test on SOURCE DATASET started.")
+        print("------------------------------------")
         self.metrics["eval_train"].reset()
         self.source_dataset[0].model.load_state_dict(self.model_params_dict())
         self.source_dataset[0].test(self.metrics["eval_train"])
