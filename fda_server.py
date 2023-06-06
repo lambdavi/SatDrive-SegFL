@@ -142,9 +142,9 @@ class FdaServer:
 
         # Centralized train on source dataset
         self.train_source()
-        #self.eval_validation()
-        #self.eval_train()
-        #self.test()
+        self.eval_validation()
+        self.eval_train()
+        self.test()
 
         # Setup teacher and student
         self.teacher_model = copy.deepcopy(self.source_model)
@@ -221,7 +221,7 @@ class FdaServer:
 
     def predict(self, image_path):
 
-            """# Load and preprocess the input image
+            # Load and preprocess the input image
             input_image = Image.open(image_path)
 
             # Apply necessary transformations
@@ -271,10 +271,10 @@ class FdaServer:
 
             # Save the figure
             plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
-            """
-            self.__predict_image()
+            
+            self.__predict_image_fda()
 
-    def __predict_image(self):
+    def __predict_image_fda(self):
         # Temp function to save image of the style transfer (FDA)
         # Load and preprocess the input image
         dataset = self.source_dataset[0].dataset
