@@ -221,7 +221,7 @@ class FdaServer:
 
     def predict(self, image_path):
 
-            # Load and preprocess the input image
+            """# Load and preprocess the input image
             input_image = Image.open(image_path)
 
             # Apply necessary transformations
@@ -271,8 +271,8 @@ class FdaServer:
 
             # Save the figure
             plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
-
-            #self.__predict_image()
+            """
+            self.__predict_image()
 
     def __predict_image(self):
         # Temp function to save image of the style transfer (FDA)
