@@ -144,7 +144,7 @@ class FdaServer:
         self.train_source()
         #self.eval_validation()
         #self.eval_train()
-        self.test()
+        #self.test()
 
         # Setup teacher and student
         self.teacher_model = copy.deepcopy(self.source_model)
@@ -168,7 +168,7 @@ class FdaServer:
             # Save in the student model the aggregated weights
             self.student_model.load_state_dict(self.model_params_dict)
 
-        self.test()
+        #self.test()
 
     def eval_train(self):
         """
