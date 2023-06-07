@@ -156,11 +156,11 @@ class Server:
     def predict(self, image_path):
         def get_outputs(images, labels=None, test=False):
             if self.args.model == 'deeplabv3_mobilenetv2':
-                return self.source_model(images)['out']
+                return self.model(images)['out']
             if self.args.model in ['resnet18',]:
-                return self.source_model(images)
+                return self.model(images)
             if self.args.model == 'segformer':
-                logits = self.source_model(images).logits
+                logits = self.model(images).logits
                 outputs = torch.nn.functional.interpolate(
                         logits, 
                         size=images.shape[-2:], 
@@ -169,7 +169,7 @@ class Server:
                 )
                 return outputs
             if self.args.model == 'bisenetv2':
-                outputs = self.source_model(images, test=test)
+                outputs = self.model(images, test=test)
                 return outputs
         # Load and preprocess the input image
         input_image = Image.open(image_path)
@@ -182,7 +182,7 @@ class Server:
 
         input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
         input_tensor = input_tensor.cuda()
-        self.source_model.eval()
+        self.model.eval()
 
         # Perform inference
         with torch.no_grad():
