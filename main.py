@@ -171,7 +171,7 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print("Distributed Mode Set.")
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
+            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
@@ -216,13 +216,12 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print("Distributed Mode Set.")
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
+            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder="Urban", transform=train_transforms,
                                                 client_name="client_"+str(i)))
 
-        # Test on Rural
         test_same_dom_data = os.listdir(os.path.join(root, "Urban2", "images_png"))
         test_same_dom_dataset = LoveDADataset(root=root, list_samples=test_same_dom_data, folder="Urban2", transform=test_transforms,
                                                 client_name='test_same_dom')
@@ -247,10 +246,17 @@ def get_source_client(args, model, same=None):
             with open(os.path.join(root, 'train.txt'), 'r') as f:
                 all_data_train = f.read().splitlines()
             f.close()
-            sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)
-            return [sc]
+            sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)        
         elif args.dataset == "loveda":
-            return [same]
+            root = 'data/loveda'
+
+            # Extract all data from the Urban (trainset) 
+            all_data_train = os.listdir(os.path.join(root, "Urban", "images_png"))
+            dataset = LoveDADataset(root=root, list_samples=all_data_train, folder="Urban", transform=train_transforms,
+                                                client_name='loveda_all')
+            sc = Client(args, dataset, model)
+
+        return [sc]
     else:
         return None
 

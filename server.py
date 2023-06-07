@@ -154,7 +154,23 @@ class Server:
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def predict(self, image_path):
-
+        def get_outputs(images, labels=None, test=False):
+            if self.args.model == 'deeplabv3_mobilenetv2':
+                return self.source_model(images)['out']
+            if self.args.model in ['resnet18',]:
+                return self.source_model(images)
+            if self.args.model == 'segformer':
+                logits = self.source_model(images).logits
+                outputs = torch.nn.functional.interpolate(
+                        logits, 
+                        size=images.shape[-2:], 
+                        mode="bilinear", 
+                        align_corners=False
+                )
+                return outputs
+            if self.args.model == 'bisenetv2':
+                outputs = self.source_model(images, test=test)
+                return outputs
         # Load and preprocess the input image
         input_image = Image.open(image_path)
 
@@ -166,11 +182,11 @@ class Server:
 
         input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
         input_tensor = input_tensor.cuda()
-        self.model.eval()
+        self.source_model.eval()
 
         # Perform inference
         with torch.no_grad():
-            output = self.model(input_tensor)['out']  # Get the output logits
+            output = get_outputs(input_tensor, test=True)  # Get the output logits
         output = output.squeeze(0).cpu().numpy()
     
         normalized_output = (output - output.min()) / (output.max() - output.min())
@@ -184,18 +200,20 @@ class Server:
         predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
         
         # Save the predicted image
-        #class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
-        class_names = ["DC", "background", "building", "road", "water", "barren", "forest", "agriculture"]
+        if self.args.dataset != "loveda":
+            class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
+        else:
+            class_names = ["DC", "background", "building", "road", "water", "barren", "forest", "agriculture"]
 
         # Create a legend
         legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
 
-       # Create a figure and axes
-        fig, ax = plt.subplots()
+        # Create a figure and axes
+        _, ax = plt.subplots()
 
         # Display the predicted image
         ax.imshow(np.array(input_image))
-        ax.imshow(predicted_image, alpha=0.7)
+        ax.imshow(predicted_image, alpha=0.3)
         ax.axis('off')
 
         # Create the legend outside the image

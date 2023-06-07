@@ -90,12 +90,13 @@ class Client:
             return outs.max(1)[1]
         
         self.model.train()
+        seg = self.args.model == "segformer"
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             torch.cuda.empty_cache()
             optimizer.zero_grad()
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
-            c = crit(outputs, images)
+            c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
             optimizer.step()
