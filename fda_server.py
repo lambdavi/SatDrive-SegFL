@@ -142,8 +142,8 @@ class FdaServer:
 
         # Centralized train on source dataset
         self.train_source()
-        #self.eval_validation()
-        #self.eval_train()
+        self.eval_validation()
+        self.eval_train()
         self.test()
 
         # Setup teacher and student
