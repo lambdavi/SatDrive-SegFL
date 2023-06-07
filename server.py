@@ -102,7 +102,7 @@ class Server:
             
             if self.args.save:
                 print("Saving model...")
-                torch.save(self.model_params_dict, f'models/{self.args.dataset}_best_model.pth')
+                torch.save(self.model_params_dict, f'models/{self.args.model}_{self.args.dataset}_best_model.pth')
 
         if self.args.val == False:
             if self.args.dataset != "gta5":  

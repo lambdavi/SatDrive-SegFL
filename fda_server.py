@@ -61,7 +61,7 @@ class FdaServer:
 
         if self.args.save:
             print("Saving training source...")
-            torch.save(self.model_params_dict, 'models/source_best_model.pth')
+            torch.save(self.model_params_dict, f'models/{self.args.model}_source_best_model.pth')
 
     def train_round_source(self, client):
         """
