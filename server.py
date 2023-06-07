@@ -109,8 +109,8 @@ class Server:
                 print("------------------------------------")
                 print(f"Evaluation of the trainset started.")
                 print("------------------------------------")      
-                self.eval_train()
-            self.test()
+                #self.eval_train()
+            #self.test()
 
     def eval_train(self):
         """
@@ -193,7 +193,6 @@ class Server:
 
         predicted_labels = np.argmax(normalized_output, axis=0)
 
-        # Normalize the predicted labels to the range [0, 1]
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
         # Create the predicted image with colors
@@ -213,7 +212,11 @@ class Server:
 
         # Display the predicted image
         ax.imshow(np.array(input_image))
-        ax.imshow(predicted_image, alpha=0.3)
+
+        if self.args.dataset == "loveda":
+            ax.imshow(predicted_image, alpha=0.4)
+        else:  
+            ax.imshow(predicted_image, alpha=0.7)
         ax.axis('off')
 
         # Create the legend outside the image

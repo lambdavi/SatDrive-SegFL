@@ -269,9 +269,13 @@ class FdaServer:
         # Create a figure and axes
         _, ax = plt.subplots()
 
-        # Display the predicted image
+       # Display the predicted image
         ax.imshow(np.array(input_image))
-        ax.imshow(predicted_image, alpha=0.3)
+
+        if self.args.dataset == "loveda":
+            ax.imshow(predicted_image, alpha=0.4)
+        else:  
+            ax.imshow(predicted_image, alpha=0.7)
         ax.axis('off')
 
         # Create the legend outside the image
