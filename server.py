@@ -109,8 +109,8 @@ class Server:
                 print("------------------------------------")
                 print(f"Evaluation of the trainset started.")
                 print("------------------------------------")      
-                #self.eval_train()
-            #self.test()
+                self.eval_train()
+            self.test()
 
     def eval_train(self):
         """
