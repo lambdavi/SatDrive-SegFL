@@ -42,16 +42,22 @@ class FdaServer:
             self.styleaug.add_style(c.dataset)
     
     def train_source(self):
+        retrain_error=False
 
         if self.args.load or self.args.resume:
             pth = f"models/checkpoints/{self.args.model}_source_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_source_best_model.pth"
-            saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
-            self.source_model.load_state_dict(saved_params)
-            to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Source model loaded{to_print}")
-            
-        if (not self.args.load) or self.args.resume:
+            try:
+                saved_params = torch.load(pth)
+                self.model_params_dict = saved_params
+                self.source_model.load_state_dict(saved_params)
+                self.source_model.eval()
+                to_print = " from checkpoints." if self.args.chp else "."
+                print(f"Source model loaded{to_print}")
+            except:
+                print("The checkpoint for this model does not exist. The model will be retrained.")
+                retrain_error=True
+                
+        if (not self.args.load) or self.args.resume or retrain_error:
             _, model_dict = self.train_round_source(self.source_dataset)
             if self.args.chp:
                 pth = "models/checkpoints/source_checkpoint.pth"

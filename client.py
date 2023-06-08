@@ -31,7 +31,6 @@ class Client:
         
         self.teacher = None
 
-        self.losses = []
         self.mious = [[], [], []]
 
     def __str__(self):
@@ -114,6 +113,7 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
+        self.model.train()
         for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
@@ -130,7 +130,6 @@ class Client:
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
-        self.losses.append(loss.item())
         
     
     def get_optimizer_and_scheduler(self):
@@ -241,7 +240,6 @@ class Client:
         epochs = range(len(self.mious[0]))
         
         # Create a line chart with two y-values
-        plt.plot(epochs, self.losses, label='train_loss')
         plt.plot(epochs, self.mious[2], label='train_miou')
         plt.plot(epochs, self.mious[0], label='val_miou_same')
         plt.plot(epochs, self.mious[1], label='val_miou_diff')

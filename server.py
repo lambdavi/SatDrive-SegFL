@@ -72,20 +72,25 @@ class Server:
         This method orchestrates the training the evals and tests at rounds level
         """
 
+        retrain_error=False
         num_rounds = self.args.num_rounds
         if self.args.centr:
             num_rounds = 1
         
         if self.args.load or self.args.resume:
             pth = f"models/checkpoints/{self.args.model}_{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_{self.args.dataset}_best_model.pth"
-            saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
-            self.model.load_state_dict(saved_params)
-            self.model.eval()
-            to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Model loaded{to_print}")
-
-        if (not self.args.load) or self.args.resume:
+            try:
+                saved_params = torch.load(pth)
+                self.model_params_dict = saved_params
+                self.model.load_state_dict(saved_params)
+                self.model.eval()
+                to_print = " from checkpoints." if self.args.chp else "."
+                print(f"Model loaded{to_print}")
+            except:
+                print("The checkpoint for this model does not exist. The model will be retrained.")
+                retrain_error=True
+            
+        if (not self.args.load) or self.args.resume or retrain_error:
             for r in range(num_rounds):
                 print("------------------")
                 print(f"Round {r+1}/{num_rounds} started.")
