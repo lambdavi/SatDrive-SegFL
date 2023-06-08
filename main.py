@@ -25,7 +25,7 @@ from models.deeplabv3 import deeplabv3_mobilenetv2
 from models.bisenetv2 import BiSeNetV2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 from transformers import SegformerForSemanticSegmentation
-
+from transformers.utils import logging
 from torchvision.transforms import RandomApply
 
 import timeit
@@ -60,6 +60,7 @@ def model_init(args):
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
     if args.model == 'segformer':
+        logging.set_verbosity(logging.FATAL)
         weights = args.transformer_model
         return SegformerForSemanticSegmentation.from_pretrained(
             f"nvidia/mit-{weights}",
