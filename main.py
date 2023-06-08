@@ -76,7 +76,7 @@ def get_transforms(args):
     if args.model in ["segformer",'deeplabv3_mobilenetv2']:
         if args.dataset == "loveda":
             train_transforms = sstr.Compose([
-                sstr.RandomCrop((512, 928)),
+                sstr.RandomCrop((512, 512)),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
