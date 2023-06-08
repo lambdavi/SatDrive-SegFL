@@ -44,7 +44,7 @@ class FdaServer:
     def train_source(self):
 
         if self.args.load or self.args.resume:
-            pth = "models/checkpoints/source_checkpoint.pth" if self.args.chp else "models/source_best_model.pth"
+            pth = f"models/checkpoints/{self.args.model}_source_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_source_best_model.pth"
             saved_params = torch.load(pth)
             self.model_params_dict = saved_params
             self.source_model.load_state_dict(saved_params)
