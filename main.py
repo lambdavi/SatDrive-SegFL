@@ -83,7 +83,7 @@ def get_transforms(args):
         else:
             train_transforms = [
                 sstr.Compose([
-                    RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
+                    RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.30),
                 ]),
                 sstr.Compose([
                     sstr.RandomCrop((512, 928)),
