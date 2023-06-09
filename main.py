@@ -73,7 +73,7 @@ def model_init(args):
     raise NotImplementedError
 
 def get_transforms(args):
-    if args.model in ["segformer",'deeplabv3_mobilenetv2']:
+    if args.model in ["segformer",'deeplabv3_mobilenetv2', 'bisenetv2']:
         if args.dataset == "loveda":
             train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 512)),
@@ -104,7 +104,7 @@ def get_transforms(args):
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
         ])
-    elif args.model == "bisenetv2":
+        """elif args.model == "bisenetv2":
         train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 928)),
                 sstr.ToTensor(),
@@ -114,6 +114,7 @@ def get_transforms(args):
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+        """
     else:
         raise NotImplementedError
     return train_transforms, test_transforms
