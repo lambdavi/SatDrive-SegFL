@@ -74,16 +74,17 @@ def model_init(args):
 
 def get_transforms(args):
     if args.model in ["segformer",'deeplabv3_mobilenetv2']:
-        if args.dataset == "loveda":
+        if args.dataset == "loveda" or args.model == "segformer":
             train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 512)),
+                sstr.RandomHorizontalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
         else:
             train_transforms = [
                 sstr.Compose([
-                    RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.30),
+                    RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
                 ]),
                 sstr.Compose([
                     sstr.RandomCrop((512, 928)),
