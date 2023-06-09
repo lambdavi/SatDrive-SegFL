@@ -31,7 +31,6 @@ class Client:
         
         self.teacher = None
 
-        self.losses = []
         self.mious = [[], [], []]
 
     def __str__(self):
@@ -45,7 +44,7 @@ class Client:
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
-        self.teacher_params = copy.deepcopy(teacher_model.state_dict())
+        self.teacher = copy.deepcopy(teacher_model)
 
     def _get_outputs(self, images, labels=None, test=False):
         if self.args.model == 'deeplabv3_mobilenetv2':
@@ -90,12 +89,13 @@ class Client:
             return outs.max(1)[1]
         
         self.model.train()
+        seg = self.args.model == "segformer"
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
             torch.cuda.empty_cache()
             optimizer.zero_grad()
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
-            c = crit(outputs, images)
+            c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
             optimizer.step()
@@ -113,6 +113,7 @@ class Client:
         :param cur_epoch: current epoch of training
         :param optimizer: optimizer used for the local training
         """
+        self.model.train()
         for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
@@ -129,7 +130,6 @@ class Client:
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}")
-        self.losses.append(loss.item())
         
     
     def get_optimizer_and_scheduler(self):

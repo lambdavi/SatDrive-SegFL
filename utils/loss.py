@@ -98,12 +98,22 @@ class SelfTrainingLoss(nn.Module):
         mask = torch.stack([self.get_image_mask(pb, pl) for pb, pl in zip(F.softmax(pred, dim=1), pseudo_lab)], dim=0)
         return mask
 
-    def get_pseudo_lab(self, pred, imgs=None, return_mask_fract=False, model=None):
+    def get_pseudo_lab(self, pred, imgs=None, return_mask_fract=False, model=None, seg=False):
         teacher = self.teacher if model is None else model
         if teacher is not None:
             with torch.no_grad():
                 try:
-                    pred = teacher(imgs)['out']
+                    if seg:
+                        logi = self.teacher(imgs)
+                        logits = logi.logits
+                        pred = nn.functional.interpolate(
+                                logits, 
+                                size=imgs.shape[-2:], 
+                                mode="bilinear", 
+                                align_corners=False
+                        )
+                    else:
+                        pred = teacher(imgs)['out']
                 except:
                     pred = teacher(imgs)
                 pseudo_lab = pred.detach().max(1)[1]
@@ -115,8 +125,8 @@ class SelfTrainingLoss(nn.Module):
             return pseudo_lab, F.softmax(pred, dim=1), mask.sum() / mask.numel()
         return pseudo_lab
 
-    def forward(self, pred, imgs=None):
-        pseudo_lab = self.get_pseudo_lab(pred, imgs)
+    def forward(self, pred, imgs=None, seg=False):
+        pseudo_lab = self.get_pseudo_lab(pred, imgs, seg=seg)
         loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction='none')
         return loss.mean() * self.lambda_selftrain
 

@@ -7,7 +7,6 @@ from utils.style_transfer import StyleAugment
 from PIL import Image
 import datasets.ss_transforms as sstr
 import matplotlib.pyplot as plt
-
 class FdaServer:
     def __init__(self, args, source_dataset, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
@@ -43,15 +42,22 @@ class FdaServer:
             self.styleaug.add_style(c.dataset)
     
     def train_source(self):
+        retrain_error=False
 
-        if self.args.load:
-            pth = "models/checkpoints/source_checkpoint.pth" if self.args.chp else "models/source_best_model.pth"
-            saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
-            self.source_model.load_state_dict(saved_params)
-            to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Source model loaded{to_print}")
-        else:
+        if self.args.load or self.args.resume:
+            pth = f"models/checkpoints/{self.args.model}_source_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_source_best_model.pth"
+            try:
+                saved_params = torch.load(pth)
+                self.model_params_dict = saved_params
+                self.source_model.load_state_dict(saved_params)
+                self.source_model.eval()
+                to_print = " from checkpoints." if self.args.chp else "."
+                print(f"Source model loaded{to_print}")
+            except:
+                print("The checkpoint for this model does not exist. The model will be retrained.")
+                retrain_error=True
+                
+        if (not self.args.load) or self.args.resume or retrain_error:
             _, model_dict = self.train_round_source(self.source_dataset)
             if self.args.chp:
                 pth = "models/checkpoints/source_checkpoint.pth"
@@ -60,8 +66,8 @@ class FdaServer:
             self.source_model.load_state_dict(self.model_params_dict)
 
         if self.args.save:
-                print("Saving training source...")
-                torch.save(self.model_params_dict, 'models/source_best_model.pth')
+            print("Saving training source...")
+            torch.save(self.model_params_dict, f'models/{self.args.model}_source_best_model.pth')
 
     def train_round_source(self, client):
         """
@@ -205,7 +211,7 @@ class FdaServer:
         print(f"Test on SAME DOMAIN DATA started.")
         print("------------------------------------")
         self.metrics["test_same_dom"].reset()
-        self.test_clients[0].model.load_state_dict(self.model_params_dict)
+        self.test_clients[0].model.load_state_dict(copy.deepcopy(self.model_params_dict))
         self.test_clients[0].test(self.metrics["test_same_dom"])
         res=self.metrics["test_same_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
@@ -214,72 +220,98 @@ class FdaServer:
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
         self.metrics["test_diff_dom"].reset()
-        self.test_clients[1].model.load_state_dict(self.model_params_dict)
+        self.test_clients[1].model.load_state_dict(copy.deepcopy(self.model_params_dict))
         self.test_clients[1].test(self.metrics["test_diff_dom"])
         res=self.metrics["test_diff_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def predict(self, image_path):
+        def get_outputs(images, labels=None, test=False):
+            if self.args.model == 'deeplabv3_mobilenetv2':
+                return self.source_model(images)['out']
+            if self.args.model in ['resnet18',]:
+                return self.source_model(images)
+            if self.args.model == 'segformer':
+                logits = self.source_model(images).logits
+                outputs = torch.nn.functional.interpolate(
+                        logits, 
+                        size=images.shape[-2:], 
+                        mode="bilinear", 
+                        align_corners=False
+                )
+                return outputs
+            if self.args.model == 'bisenetv2':
+                outputs = self.source_model(images, test=test)
+                return outputs
+        # Load and preprocess the input image
+        input_image = Image.open(image_path)
 
-            # Load and preprocess the input image
-            input_image = Image.open(image_path)
+        # Apply necessary transformations
+        transforms= sstr.Compose([
+            sstr.ToTensor(),
+            sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
 
-            # Apply necessary transformations
-            transforms= sstr.Compose([
-                sstr.ToTensor(),
-                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
+        input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
+        input_tensor = input_tensor.cuda()
+        self.source_model.eval()
 
-            input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
-            input_tensor = input_tensor.cuda()
-            self.source_model.eval()
+        # Perform inference
+        with torch.no_grad():
+            output = get_outputs(input_tensor, test=True)  # Get the output logits
+        output = output.squeeze(0).cpu().numpy()
+    
+        normalized_output = (output - output.min()) / (output.max() - output.min())
 
-            # Perform inference
-            with torch.no_grad():
-                output = self.source_model(input_tensor)['out']  # Get the output logits
-            output = output.squeeze(0).cpu().numpy()
+        predicted_labels = np.argmax(normalized_output, axis=0)
+
+        # Normalize the predicted labels to the range [0, 1]
+        colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
+
+        # Create the predicted image with colors
+        predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
         
-            normalized_output = (output - output.min()) / (output.max() - output.min())
-
-            predicted_labels = np.argmax(normalized_output, axis=0)
-
-            # Normalize the predicted labels to the range [0, 1]
-            colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
-
-            # Create the predicted image with colors
-            predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
-            
-            # Save the predicted image
+        # Save the predicted image
+        if self.args.dataset != "loveda":
             class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
-            # Create a legend
-            legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
+        else:
+            class_names = ["DC", "background", "building", "road", "water", "barren", "forest", "agriculture"]
+
+        # Create a legend
+        legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
 
         # Create a figure and axes
-            fig, ax = plt.subplots()
+        _, ax = plt.subplots()
 
-            # Display the predicted image
-            ax.imshow(predicted_image)
-            ax.axis('off')
+       # Display the predicted image
+        ax.imshow(np.array(input_image))
 
-            # Create the legend outside the image
-            legend = ax.legend(legend_elements, class_names, loc='center left', bbox_to_anchor=(1, 0.5))
-            # Adjust the positioning and appearance of the legend
-            legend.set_title('Legend')
-            frame = legend.get_frame()
-            frame.set_edgecolor('black')
-            frame.set_facecolor('white')
+        if self.args.dataset == "loveda":
+            ax.imshow(predicted_image, alpha=0.4)
+        else:  
+            ax.imshow(predicted_image, alpha=0.7)
+        ax.axis('off')
 
-            # Save the figure
-            plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
-            
-            self.__predict_image_fda()
+        # Create the legend outside the image
+        legend = ax.legend(legend_elements, class_names, loc='center left', bbox_to_anchor=(1, 0.5))
+        # Adjust the positioning and appearance of the legend
+        legend.set_title('Legend')
+        frame = legend.get_frame()
+        frame.set_edgecolor('black')
+        frame.set_facecolor('white')
 
-    def __predict_image_fda(self):
+
+        # Save the figure
+        plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
+
+        #self.__image_fda()
+
+    def __image_fda(self):
         # Temp function to save image of the style transfer (FDA)
         # Load and preprocess the input image
         dataset = self.source_dataset[0].dataset
         dataset.return_unprocessed_image = True
-        input_image = self.styleaug.apply_style(dataset[5])
+        input_image = self.styleaug.apply_style(dataset[4])
         # Create the predicted image with colors
     
         fig, ax = plt.subplots()
@@ -289,6 +321,3 @@ class FdaServer:
         ax.axis('off')
         # Save the figure
         plt.savefig('fda_transform.png', bbox_inches='tight', dpi=300)
-
-
-        

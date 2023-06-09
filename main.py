@@ -14,18 +14,18 @@ import datasets.weather as weather
 
 from torch import nn
 from client import Client
-from datasets.femnist import Femnist
 from server import Server
 from fda_server import FdaServer
 from utils.args import get_parser
 from utils.utils import split_list_random, split_list_balanced
 from datasets.idda import IDDADataset
+from datasets.loveda import LoveDADataset
 from datasets.gta5 import GTA5Dataset
 from models.deeplabv3 import deeplabv3_mobilenetv2
 from models.bisenetv2 import BiSeNetV2
 from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
 from transformers import SegformerForSemanticSegmentation
-
+from transformers.utils import logging
 from torchvision.transforms import RandomApply
 
 import timeit
@@ -47,6 +47,8 @@ def get_dataset_num_classes(dataset):
         return 20
     if dataset == 'femnist':
         return 62
+    if dataset == 'loveda':
+        return 8
     raise NotImplementedError
 
 def model_init(args):
@@ -58,10 +60,7 @@ def model_init(args):
         model.fc = nn.Linear(in_features=512, out_features=get_dataset_num_classes(args.dataset))
         return model
     if args.model == 'segformer':
-        """
-            nvidia/mit-b[0,1,2,3,4,5]
-            "nvidia/segformer-b0-finetuned-cityscapes-768-768"
-        """
+        logging.set_verbosity(logging.FATAL)
         weights = args.transformer_model
         return SegformerForSemanticSegmentation.from_pretrained(
             f"nvidia/mit-{weights}",
@@ -69,23 +68,30 @@ def model_init(args):
             ignore_mismatched_sizes=True,
         )
     if args.model == "bisenetv2":
-       # return BiSeNetV2(n_classes=get_dataset_num_classes(args.dataset), output_aux=True, pretrained=True)
             return BiSeNetV2(get_dataset_num_classes(args.dataset), pretrained=True)
 
     raise NotImplementedError
 
 def get_transforms(args):
     if args.model in ["segformer",'deeplabv3_mobilenetv2']:
-        train_transforms = [
-            sstr.Compose([
-                RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
-            ]),
-            sstr.Compose([
-                sstr.RandomCrop((512, 928)),
+        if args.dataset == "loveda" or args.model == "segformer":
+            train_transforms = sstr.Compose([
+                sstr.RandomCrop((512, 512)),
+                sstr.RandomHorizontalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ]), 
-        ]
+            ])
+        else:
+            train_transforms = [
+                sstr.Compose([
+                    RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
+                ]),
+                sstr.Compose([
+                    sstr.RandomCrop((512, 928)),
+                    sstr.ToTensor(),
+                    sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                ]), 
+            ]
         test_transforms = sstr.Compose([
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -112,20 +118,6 @@ def get_transforms(args):
     else:
         raise NotImplementedError
     return train_transforms, test_transforms
-
-def read_femnist_dir(data_dir):
-    data = defaultdict(lambda: {})
-    files = os.listdir(data_dir)
-    files = [f for f in files if f.endswith('.json')]
-    for f in files:
-        file_path = os.path.join(data_dir, f)
-        with open(file_path, 'r') as inf:
-            cdata = json.load(inf)
-        data.update(cdata['user_data'])
-    return data
-
-def read_femnist_data(train_data_dir, test_data_dir):
-    return read_femnist_dir(train_data_dir), read_femnist_dir(test_data_dir)
 
 def get_datasets(args):
 
@@ -161,18 +153,6 @@ def get_datasets(args):
                                                 client_name='test_diff_dom')
         test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
 
-    elif args.dataset == 'femnist':
-        niid = args.niid 
-        train_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'train')
-        test_data_dir = os.path.join('data', 'femnist', 'data', 'niid' if niid else 'iid', 'test')
-        train_data, test_data = read_femnist_data(train_data_dir, test_data_dir)
-        train_transforms, test_transforms = get_transforms(args)
-        train_datasets, test_datasets = [], []
-        for user, data in train_data.items():
-            train_datasets.append(Femnist(data, train_transforms, user))
-        for user, data in test_data.items():
-            test_datasets.append(Femnist(data, test_transforms, user))
-
     elif args.dataset == 'gta5':
         root = 'data/gta5'
 
@@ -193,7 +173,7 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print("Distributed Mode Set.")
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*2)
+            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
@@ -221,21 +201,63 @@ def get_datasets(args):
         
         return train_datasets, test_datasets, validation_data
 
+    elif args.dataset == "loveda":
+        root = 'data/loveda'
+
+        # Extract all data from the Urban (trainset) 
+        all_data_train = os.listdir(os.path.join(root, "Urban", "images_png"))
+
+        print(f"Total number of images to be loaded: {len(all_data_train)}")
+        
+        if args.centr:
+            # If centralized we get all training data on one single client
+            print("Centralized mode set.")
+            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder="Urban", transform=train_transforms,
+                                                client_name='centralized'))
+        else:
+            # Otherwise we divide data in multiple datasets.
+            print("Distributed Mode Set.")
+
+            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            
+            for i, samples in enumerate(total_client_splits):
+                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder="Urban", transform=train_transforms,
+                                                client_name="client_"+str(i)))
+
+        test_same_dom_data = os.listdir(os.path.join(root, "Urban2", "images_png"))
+        test_same_dom_dataset = LoveDADataset(root=root, list_samples=test_same_dom_data, folder="Urban2", transform=test_transforms,
+                                                client_name='test_same_dom')
+        
+        test_diff_dom_data = os.listdir(os.path.join(root, "Rural", "images_png"))
+        test_diff_dom_dataset = LoveDADataset(root=root, list_samples=test_diff_dom_data, folder="Rural", transform=test_transforms,
+                                            client_name='test_diff_dom')
+        test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
+        
     else:
         raise NotImplementedError
 
     return train_datasets, test_datasets, None
 
-def get_source_client(args, model):
+def get_source_client(args, model, same=None):
     train_transforms, _ = get_transforms(args)
-    if args.dataset == "idda" and args.fda:
-        root = 'data/gta5'
-        # Extract all data from train.txt
-        all_data_train = []
-        with open(os.path.join(root, 'train.txt'), 'r') as f:
-            all_data_train = f.read().splitlines()
-        f.close()
-        sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)
+    if args.fda:
+        if args.dataset == "idda": # target == idda
+            root = 'data/gta5'
+            # Extract all data from train.txt
+            all_data_train = []
+            with open(os.path.join(root, 'train.txt'), 'r') as f:
+                all_data_train = f.read().splitlines()
+            f.close()
+            sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)        
+        elif args.dataset == "loveda":
+            root = 'data/loveda'
+
+            # Extract all data from the Urban (trainset) 
+            all_data_train = os.listdir(os.path.join(root, "Urban", "images_png"))
+            dataset = LoveDADataset(root=root, list_samples=all_data_train, folder="Urban", transform=train_transforms,
+                                                client_name='loveda_all')
+            sc = Client(args, dataset, model)
+
         return [sc]
     else:
         return None
@@ -280,7 +302,7 @@ def main():
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
     print('Generate datasets...', end=" ")
     print('Done.')
-    source_dataset = get_source_client(args, model)
+    source_dataset = get_source_client(args, model, train_datasets)
     metrics = set_metrics(args)
 
     print('Generate clients...', end=" ")

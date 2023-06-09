@@ -72,20 +72,25 @@ class Server:
         This method orchestrates the training the evals and tests at rounds level
         """
 
+        retrain_error=False
         num_rounds = self.args.num_rounds
         if self.args.centr:
             num_rounds = 1
         
         if self.args.load or self.args.resume:
-            pth = f"models/checkpoints/{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.dataset}_best_model.pth"
-            saved_params = torch.load(pth)
-            self.model_params_dict = saved_params
-            self.model.load_state_dict(saved_params)
-            self.model.eval()
-            to_print = " from checkpoints." if self.args.chp else "."
-            print(f"Model loaded{to_print}")
-
-        if (not self.args.load) or self.args.resume:
+            pth = f"models/checkpoints/{self.args.model}_{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_{self.args.dataset}_best_model.pth"
+            try:
+                saved_params = torch.load(pth)
+                self.model_params_dict = saved_params
+                self.model.load_state_dict(saved_params)
+                self.model.eval()
+                to_print = " from checkpoints." if self.args.chp else "."
+                print(f"Model loaded{to_print}")
+            except:
+                print("The checkpoint for this model does not exist. The model will be retrained.")
+                retrain_error=True
+            
+        if (not self.args.load) or self.args.resume or retrain_error:
             for r in range(num_rounds):
                 print("------------------")
                 print(f"Round {r+1}/{num_rounds} started.")
@@ -102,7 +107,7 @@ class Server:
             
             if self.args.save:
                 print("Saving model...")
-                torch.save(self.model_params_dict, f'models/{self.args.dataset}_best_model.pth')
+                torch.save(self.model_params_dict, f'models/{self.args.model}_{self.args.dataset}_best_model.pth')
 
         if self.args.val == False:
             if self.args.dataset != "gta5":  
@@ -154,7 +159,23 @@ class Server:
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def predict(self, image_path):
-
+        def get_outputs(images, labels=None, test=False):
+            if self.args.model == 'deeplabv3_mobilenetv2':
+                return self.model(images)['out']
+            if self.args.model in ['resnet18',]:
+                return self.model(images)
+            if self.args.model == 'segformer':
+                logits = self.model(images).logits
+                outputs = torch.nn.functional.interpolate(
+                        logits, 
+                        size=images.shape[-2:], 
+                        mode="bilinear", 
+                        align_corners=False
+                )
+                return outputs
+            if self.args.model == 'bisenetv2':
+                outputs = self.model(images, test=test)
+                return outputs
         # Load and preprocess the input image
         input_image = Image.open(image_path)
 
@@ -170,30 +191,37 @@ class Server:
 
         # Perform inference
         with torch.no_grad():
-            output = self.model(input_tensor)['out']  # Get the output logits
+            output = get_outputs(input_tensor, test=True)  # Get the output logits
         output = output.squeeze(0).cpu().numpy()
     
         normalized_output = (output - output.min()) / (output.max() - output.min())
 
         predicted_labels = np.argmax(normalized_output, axis=0)
 
-        # Normalize the predicted labels to the range [0, 1]
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
         # Create the predicted image with colors
         predicted_image = Image.fromarray((colormap(predicted_labels) * 255).astype(np.uint8))
         
         # Save the predicted image
-        class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
+        if self.args.dataset != "loveda":
+            class_names = ["road", "sidewalk", "building", "wall", "fence", "pole", "traffic light", "traffic sign", "vegatation", "terrain", "sky", "person", "rider", "car", "motorcycle", "bicycle"]
+        else:
+            class_names = ["DC", "background", "building", "road", "water", "barren", "forest", "agriculture"]
+
         # Create a legend
         legend_elements = [plt.Rectangle((0, 0), 1, 1, color=colormap(i)) for i in range(len(class_names))]
 
-       # Create a figure and axes
-        fig, ax = plt.subplots()
+        # Create a figure and axes
+        _, ax = plt.subplots()
 
         # Display the predicted image
         ax.imshow(np.array(input_image))
-        ax.imshow(predicted_image, alpha=0.7)
+
+        if self.args.dataset == "loveda":
+            ax.imshow(predicted_image, alpha=0.4)
+        else:  
+            ax.imshow(predicted_image, alpha=0.7)
         ax.axis('off')
 
         # Create the legend outside the image
