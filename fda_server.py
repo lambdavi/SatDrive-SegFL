@@ -185,7 +185,7 @@ class FdaServer:
         print("------------------------------------")
         self.metrics["eval_train"].reset()
         for c in self.train_clients:
-            c.model.load_state_dict(copy.deepcopy(self.model_params_dict))
+            c.model.load_state_dict(self.model_params_dict)
             c.test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
@@ -198,7 +198,7 @@ class FdaServer:
         print(f"Test on SOURCE DATASET started.")
         print("------------------------------------")
         self.metrics["eval_train"].reset()
-        self.source_dataset[0].model.load_state_dict(copy.deepcopy(self.model_params_dict))
+        self.source_dataset[0].model.load_state_dict(self.model_params_dict)
         self.source_dataset[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
