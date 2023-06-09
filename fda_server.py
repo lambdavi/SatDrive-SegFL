@@ -148,6 +148,8 @@ class FdaServer:
 
         # Centralized train on source dataset
         self.train_source()
+        self.eval_validation()
+        self.eval_train()
         self.test()
 
         # Setup teacher and student
@@ -178,6 +180,9 @@ class FdaServer:
         """
         This method handles the evaluation on the train clients
         """
+        print("------------------------------------")
+        print(f"Test on TARGET DATASET started.")
+        print("------------------------------------")
         self.metrics["eval_train"].reset()
         for c in self.train_clients:
             c.model.load_state_dict(self.model_params_dict)
@@ -189,11 +194,14 @@ class FdaServer:
         """
         This method handles the evaluation on the validation client(s)
         """
+        print("------------------------------------")
+        print(f"Test on SOURCE DATASET started.")
+        print("------------------------------------")
         self.metrics["eval_train"].reset()
-        self.validation_clients[0].model.load_state_dict(self.student_model.state_dict())
-        self.validation_clients[0].test(self.metrics["eval_train"])
+        self.source_dataset[0].model.load_state_dict(self.model_params_dict)
+        self.source_dataset[0].test(self.metrics["eval_train"])
         res=self.metrics["eval_train"].get_results()
-        print(f'Validation: Mean IoU: {res["Mean IoU"]}')
+        print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def test(self):
         """
@@ -292,6 +300,7 @@ class FdaServer:
         frame.set_edgecolor('black')
         frame.set_facecolor('white')
 
+
         # Save the figure
         plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
 
@@ -312,6 +321,3 @@ class FdaServer:
         ax.axis('off')
         # Save the figure
         plt.savefig('fda_transform.png', bbox_inches='tight', dpi=300)
-
-
-        
