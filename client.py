@@ -1,18 +1,27 @@
 import copy
-import torch
 
-from torch import optim, nn
-from collections import defaultdict
-from torch.utils.data import DataLoader
-from utils.utils import HardNegativeMining, MeanReduction
-from utils.early_stopping import EarlyStopper
-from torch.optim.lr_scheduler import StepLR, LinearLR 
-from tqdm import tqdm
-from utils.loss import SelfTrainingLoss, IW_MaxSquareloss
 import matplotlib.pyplot as plt
+import torch
+from torch import nn, optim
+from torch.optim.lr_scheduler import LinearLR, StepLR
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+from utils.early_stopping import EarlyStopper
+from utils.loss import IW_MaxSquareloss, SelfTrainingLoss
+from utils.utils import HardNegativeMining, MeanReduction
+
 
 class Client:
-
+    """
+    Client class for training and testing models on a specific dataset.
+    Args:
+            `args`: Arguments object containing the client-specific configurations.\n
+            `dataset`: Dataset object for training and testing.\n
+            `model`: Model object to be trained and tested.\n
+            `test_client` (bool): Flag indicating if the client is a test client.\n
+            `val` (bool): Flag indicating if validation should be performed.
+    """
     def __init__(self, args, dataset, model, test_client=False, val=False):
         self.args = args
         self.dataset = dataset
@@ -34,19 +43,48 @@ class Client:
         self.mious = [[], [], []]
 
     def __str__(self):
+        """
+        Return the name of the client as a string.
+        """
         return self.name
 
     @staticmethod
     def update_metric(metric, outputs, labels):
+        """
+        Update the evaluation metric with the model outputs and labels.
+
+        Args:
+            `metric`: Metric object to be updated.\n
+            `outputs`: Model outputs.\n
+            `labels`: True labels.
+
+        """
         _, prediction = outputs.max(dim=1)
         labels = labels.cpu().numpy()
         prediction = prediction.cpu().numpy()
         metric.update(labels, prediction)
 
     def set_teacher(self, teacher_model):
+        """
+        Set the teacher model for self-training.
+
+        Args:
+            `teacher_model`: Teacher model object.
+
+        """
         self.teacher = copy.deepcopy(teacher_model)
 
     def _get_outputs(self, images, labels=None, test=False):
+        """
+        Get the model outputs for the given images and labels.
+
+        Args:
+            `images`: Input images.\n
+            `labels`: True labels.\n
+            `test` (bool): Flag indicating if the model is being tested.
+        Returns:
+            Model outputs.
+        """
         if self.args.model == 'deeplabv3_mobilenetv2':
             return self.model(images)['out']
         if self.args.model in ['resnet18',]:
@@ -64,11 +102,18 @@ class Client:
             outputs = self.model(images, test=test)
             return outputs
             
-            
         raise NotImplementedError
     
     def __get_criterion_and_reduction_rules(self, use_labels=False):
+        """
+        Get the criterion and reduction rules for training.
 
+        Args:
+            `use_labels` (bool): Flag indicating if labels are used.
+
+        Returns:
+            Criterion object and reduction object.
+        """
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         if self.args.loss == "self":
             criterion = SelfTrainingLoss(lambda_selftrain=1,  **shared_kwargs)
@@ -84,7 +129,18 @@ class Client:
         return criterion, reduction
 
     def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
+        """
+        Run a pseudo-epoch for self-training.
 
+        Args:
+            `cur_epoch`: Current epoch index.\n
+            `optimizer`: Optimizer object.\n
+            `crit`: Criterion object.\n
+            `red`: Reduction object.\n
+
+        Returns:
+            Early stopping condition (if set) or None
+        """
         def pseudo(outs):
             return outs.max(1)[1]
         
@@ -109,9 +165,15 @@ class Client:
     
     def run_epoch(self, cur_epoch, optimizer):
         """
-        This method locally trains the model with the dataset of the client. It handles the training at mini-batch level
-        :param cur_epoch: current epoch of training
-        :param optimizer: optimizer used for the local training
+        Run a single epoch of training (on source/centralized dataset).
+
+        Args:
+            `cur_epoch`: Current epoch index.
+
+            `optimizer`: Optimizer object.
+
+        Returns:
+            None
         """
         self.model.train()
         for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
@@ -133,6 +195,12 @@ class Client:
         
     
     def get_optimizer_and_scheduler(self):
+        """
+        Get the optimizer and scheduler based on the run configuration.
+
+        Returns:
+            Optimizer object and scheduler object.
+        """
          # Optimizer chocie
         if self.args.opt == 'SGD':
             optimizer = optim.SGD(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.wd, momentum=self.args.m)
@@ -152,6 +220,15 @@ class Client:
         return optimizer, scheduler
 
     def set_set_style_tf_fn(self, styleaug):
+        """
+        Set the style transfer function for the client's dataset.
+
+        Args:
+            `styleaug`: Style augmentation object.
+
+        Returns:
+            None
+        """
         self.styleaug = styleaug
         self.train_loader.dataset.set_style_tf_fn(self.styleaug.apply_style)
 
@@ -159,7 +236,12 @@ class Client:
         """
         This method locally trains the model with the dataset of the client. It handles the training at epochs level
         (by calling the run_epoch method for each local epoch of training)
-        :return: length of the local dataset, copy of the model parameters
+        Args:
+            `eval_metric`: Evaluation metric object. Default: None
+            `eval_datasets`: List of evaluation datasets. Default: None
+
+        Returns:
+            Length of the local dataset, model's state dictionary.
         """
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
@@ -217,8 +299,15 @@ class Client:
 
     def test(self, metric, eval=None, eval_dataset=None):
         """
-        This method tests the model on the local dataset of the client.
-        :param metric: StreamMetric object
+        Test the model on the client's dataset.
+
+        Args:
+            `metric`: Evaluation metric object.
+            `eval`: Flag indicating if evaluation is being performed. Default: None
+            `eval_dataset`: Evaluation dataset. Default: None
+
+        Returns:
+            Mean IoU score if evaluation flag is set.
         """
         self.model.eval()
         if eval and eval_dataset:
@@ -238,7 +327,18 @@ class Client:
             return metric.get_results()["Mean IoU"]
     
     def plot_loss_miou(self):
+        """
+        Plot the training mIoU and validation mIoU over epochs.
 
+        This method generates a line chart showing the training mIoU and validation mIoU
+        over the epochs. It plots the mIoU values stored in the `mious` attribute of the
+        `Client` object.
+
+        The chart is saved as an image file named "miou_vs_miou.png".
+
+        Returns:
+            None
+        """
         # Sample data
         epochs = range(len(self.mious[0]))
         

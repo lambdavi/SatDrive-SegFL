@@ -1,12 +1,30 @@
 import copy
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from PIL import Image
+
 import datasets.ss_transforms as sstr
-import matplotlib.pyplot as plt
+
+
 class Server:
+    """
+    A class representing the Server for both centralized mode and distributed mode without FDA.
+
+    The Server is responsible for coordinating the training process of the system. It handles
+    the client-server framework.
+
+    Args:
+        args: An object containing the arguments and configuration for the FDA server.
+        train_clients: A list of training clients.
+        test_clients: A list of test clients.
+        model: The initial source model.
+        metrics: A dictionary containing evaluation metrics.
+        valid (bool): Whether to include validation during training. Default is False.
+        valid_clients: A list of validation clients. Required if `valid` is True. Default is None.
+    """
     def __init__(self, args, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
         self.train_clients = train_clients
@@ -18,6 +36,15 @@ class Server:
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
 
     def select_clients(self, seed=None):
+        """
+        Selects a subset of clients for a training round.
+
+        Args:
+            seed (int): Random seed for client selection. Default is None.
+
+        Returns:
+            numpy.ndarray: An array of selected clients for the training round.
+        """
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
         if seed:
             np.random.seed(seed)
@@ -28,8 +55,10 @@ class Server:
     def train_round(self, clients):
         """
             This method trains the model with the dataset of the clients. It handles the training at single round level
-            :param clients: list of all the clients to train
-            :return: model updates gathered from the clients, to be aggregated
+            Args:
+                `clients`: list of all the clients to train
+            Returns:
+                list[tuple]: [(len_dataset, state_dictionary)]. Model updates gathered from the client to be aggregated.
         """
         updates = []
         for i, c in enumerate(clients):
@@ -44,9 +73,13 @@ class Server:
 
     def aggregate(self, updates):
         """
-        This method handles the FedAvg aggregation
-        :param updates: updates received from the clients
-        :return: aggregated parameters
+        Aggregates the model updates received from the clients using FedAvg.
+
+        Args:
+            `updates`: Model updates received from the clients. List of tuples.
+
+        Returns:
+            OrderedDict: Aggregated model parameters.
         """
         total_weight = 0.
         base = OrderedDict()
@@ -110,10 +143,7 @@ class Server:
                 torch.save(self.model_params_dict, f'models/{self.args.model}_{self.args.dataset}_best_model.pth')
 
         if self.args.val == False:
-            if self.args.dataset != "gta5":  
-                print("------------------------------------")
-                print(f"Evaluation of the trainset started.")
-                print("------------------------------------")      
+            if self.args.dataset != "gta5":       
                 self.eval_train()
             self.test()
 
@@ -121,6 +151,9 @@ class Server:
         """
         This method handles the evaluation on the train clients
         """
+        print("------------------------------------")
+        print(f"Evaluation of the trainset started.")
+        print("------------------------------------") 
         self.metrics["eval_train"].reset()
         for c in self.train_clients:
             c.model.load_state_dict((copy.deepcopy(self.model_params_dict)))
@@ -159,6 +192,12 @@ class Server:
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def predict(self, image_path):
+        """
+        Handles the the prediction. Outputs an image in the root directory.
+
+        Args: 
+            `image_path`: path to the image to predict.
+        """
         def get_outputs(images, labels=None, test=False):
             if self.args.model == 'deeplabv3_mobilenetv2':
                 return self.model(images)['out']

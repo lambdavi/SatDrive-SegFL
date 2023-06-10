@@ -1,34 +1,31 @@
-import os
 import json
-
-import torch
+import os
 import random
+import timeit
 
 import numpy as np
-from torchvision.models import resnet18
-
-import datasets.ss_transforms as sstr
-import datasets.np_transforms as nptr
-import datasets.weather as weather
-
+import torch
 from torch import nn
-from client import Client
-from server import Server
-from fda_server import FdaServer
-from utils.args import get_parser
-from utils.utils import split_list_random, split_list_balanced
-from datasets.idda import IDDADataset
-from datasets.loveda import LoveDADataset
-from datasets.gta5 import GTA5Dataset
-from models.deeplabv3 import deeplabv3_mobilenetv2
-from models.bisenetv2 import BiSeNetV2
-from utils.stream_metrics import StreamSegMetrics, StreamClsMetrics
+from torchvision.models import resnet18
+from torchvision.transforms import RandomApply
 from transformers import SegformerForSemanticSegmentation
 from transformers.utils import logging
-from torchvision.transforms import RandomApply
 
-import timeit
-import os
+import datasets.np_transforms as nptr
+import datasets.ss_transforms as sstr
+import datasets.weather as weather
+from client import Client
+from datasets.gta5 import GTA5Dataset
+from datasets.idda import IDDADataset
+from datasets.loveda import LoveDADataset
+from fda_server import FdaServer
+from models.bisenetv2 import BiSeNetV2
+from models.deeplabv3 import deeplabv3_mobilenetv2
+from server import Server
+from utils.args import get_parser
+from utils.stream_metrics import StreamClsMetrics, StreamSegMetrics
+from utils.utils import split_list_balanced, split_list_random
+
 
 def set_seed(random_seed):
     random.seed(random_seed)
@@ -230,9 +227,11 @@ def get_datasets(args):
     return train_datasets, test_datasets, None
 
 def get_source_client(args, model):
-    """ Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. 
-        input: args, model (pytorch)
-        output: list of one clients containing the source training set. This function is needed since the 'gen_clients' functions focuses
+    """ Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
+        Args:
+            `args`, `model` (pytorch)
+        Returns:
+            list of one clients containing the source training set. This function is needed since the 'gen_clients' functions focuses
         on the dataset split. 
     """
     train_transforms, _ = get_transforms(args)

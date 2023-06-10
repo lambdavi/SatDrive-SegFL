@@ -1,12 +1,14 @@
 import copy
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from utils.style_transfer import StyleAugment
 from PIL import Image
+
 import datasets.ss_transforms as sstr
-import matplotlib.pyplot as plt
+from utils.style_transfer import StyleAugment
+
 
 class FdaServer:
     """
@@ -15,14 +17,14 @@ class FdaServer:
     The FDA server is responsible for coordinating the training process of the federated learning system.
 
     Args:
-        args: An object containing the arguments and configuration for the FDA server.
-        source_dataset: The source dataset used for domain adaptation.
-        train_clients: A list of training clients.
-        test_clients: A list of test clients.
-        model: The initial source model.
-        metrics: A dictionary containing evaluation metrics.
-        valid (bool): Whether to include validation during training. Default is False.
-        valid_clients: A list of validation clients. Required if `valid` is True. Default is None.
+        `args`: An object containing the arguments and configuration for the FDA server.\n
+        `source_dataset`: The source dataset used for domain adaptation.\n
+        `train_clients`: A list of training clients.\n
+        `test_clients`: A list of test clients.\n
+        `model`: The initial source model.\n
+        `metrics`: A dictionary containing evaluation metrics.\n
+        `valid` (bool): Whether to include validation during training. Default is False.\n
+        `valid_clients`: A list of validation clients. Required if `valid` is True. Default is None.
     """
     def __init__(self, args, source_dataset, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
@@ -50,7 +52,7 @@ class FdaServer:
         Selects a subset of clients for a training round.
 
         Args:
-            seed (int): Random seed for client selection. Default is None.
+            `seed` (int): Random seed for client selection. Default is None.
 
         Returns:
             numpy.ndarray: An array of selected clients for the training round.
@@ -105,7 +107,7 @@ class FdaServer:
         Trains a single round of the source model.
 
         Args:
-            client: A client object containing the source dataset.
+            `client`: A client object containing the source dataset.
 
         Returns:
             tuple: (len_dataset, dict_params). Model updates gathered from the client to be aggregated.
@@ -125,10 +127,10 @@ class FdaServer:
         Trains the model with the datasets of multiple clients in a federated training round.
 
         Args:
-            clients: A list of clients to train.
+            `clients`: A list of clients to train.
 
-       Returns:
-            list[tuple]: [(len_dataset, dict_params)]. Model updates gathered from the client to be aggregated.
+        Returns:
+            list[tuple]: [(len_dataset, state_dictionary)]. Model updates gathered from the client to be aggregated.
         """
         updates = []
         
@@ -156,7 +158,7 @@ class FdaServer:
         Aggregates the model updates received from the clients using FedAvg.
 
         Args:
-            updates: Model updates received from the clients. List of tuples.
+            `updates`: Model updates received from the clients. List of tuples.
 
         Returns:
             OrderedDict: Aggregated model parameters.
@@ -273,7 +275,7 @@ class FdaServer:
         Handles the the prediction. Outputs an image in the root directory.
 
         Args: 
-            Path to the image to predict.
+            `image_path`: path to the image to predict.
         """
         def get_outputs(images, labels=None, test=False):
             if self.args.model == 'deeplabv3_mobilenetv2':
