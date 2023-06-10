@@ -6,7 +6,25 @@ from tqdm import tqdm
 
 
 class StyleAugment:
+    """
+    Class for applying FDA (Fouried Domain Adaptation) style augmentation to images.
 
+    Args:
+        n_images_per_style (int): Number of images per style.
+        L (float): Parameter for computing the size of the style patch.
+        size (tuple): Desired size of the images after preprocessing.
+        b (int): Size of the style patch.
+
+    Methods:
+        preprocess(self, x): Preprocesses the input image.
+        deprocess(self, x, size): Deprocesses the input image.
+        add_style(self, loader, multiple_styles=False, name=None): Adds styles to the style pool.
+        _extract_style(self, img_np): Extracts the style from an image.
+        compute_size(self, amp_shift): Computes the size of the style patch.
+        apply_style(self, image): Applies a random style to the input image.
+        _apply_style(self, img): Applies a specific style to the input image.
+        test(self, images_np, images_target_np=None, size=None): Tests the style augmentation on input images.
+    """
     def __init__(self, n_images_per_style=10, L=0.1, size=(1024, 512), b=None):
         self.styles = []
         self.styles_names = []
@@ -18,6 +36,15 @@ class StyleAugment:
         self.b = b
 
     def preprocess(self, x):
+        """
+        Preprocesses the input image.
+
+        Args:
+            x: Input image.
+
+        Returns:
+            np.ndarray: Preprocessed image.
+        """
         if isinstance(x, np.ndarray):
             x = cv2.resize(x, self.size, interpolation=cv2.INTER_CUBIC)
             self.cv2 = True
@@ -29,6 +56,16 @@ class StyleAugment:
         return x.copy()
 
     def deprocess(self, x, size):
+        """
+        Deprocesses the input image.
+
+        Args:
+            x: Input image.
+            size: Desired size of the output image.
+
+        Returns:
+            PIL.Image.Image: Deprocessed image.
+        """
         if self.cv2:
             x = cv2.resize(np.uint8(x).transpose((1, 2, 0))[:, :, ::-1], size, interpolation=cv2.INTER_CUBIC)
         else:
@@ -37,6 +74,17 @@ class StyleAugment:
         return x
 
     def add_style(self, loader, multiple_styles=False, name=None):
+        """
+        Adds styles to the style pool.
+
+        Args:
+            loader: Data loader for loading images.
+            multiple_styles (bool): Whether to add multiple styles per image.
+            name (str): Name of the style.
+
+        Returns:
+            None
+        """
         if self.n_images_per_style < 0:
             return
 
@@ -69,6 +117,15 @@ class StyleAugment:
         loader.return_unprocessed_image = False
 
     def _extract_style(self, img_np):
+        """
+        Extracts the style from an image.
+
+        Args:
+            img_np: Input image.
+
+        Returns:
+            np.ndarray: Extracted style.
+        """
         fft_np = np.fft.fft2(img_np, axes=(-2, -1))
         amp = np.abs(fft_np)
         amp_shift = np.fft.fftshift(amp, axes=(-2, -1))
@@ -79,6 +136,15 @@ class StyleAugment:
         return style
 
     def compute_size(self, amp_shift):
+        """
+        Computes the size of the style patch.
+
+        Args:
+            amp_shift: Shifted amplitude spectrum.
+
+        Returns:
+            tuple: Size parameters (h1, h2, w1, w2) of the style patch.
+        """
         _, h, w = amp_shift.shape
         b = (np.floor(np.amin((h, w)) * self.L)).astype(int) if self.b is None else self.b
         c_h = np.floor(h / 2.0).astype(int)
@@ -93,7 +159,15 @@ class StyleAugment:
         return self._apply_style(image)
 
     def _apply_style(self, img):
+        """
+        Applies a random style to the input image.
 
+        Args:
+            image: Input image.
+
+        Returns:
+            PIL.Image.Image: Image with applied style.
+        """
         if self.n_images_per_style < 0:
             return img
 
@@ -127,7 +201,17 @@ class StyleAugment:
     
     
     def test(self, images_np, images_target_np=None, size=None):
+        """
+        Tests the style augmentation on input images.
 
+        Args:
+            images_np: Input images.
+            images_target_np: Target images (optional).
+            size: Desired size of the images (optional).
+
+        Returns:
+            None
+        """
         Image.fromarray(np.uint8(images_np.transpose((1, 2, 0)))[:, :, ::-1]).show()
         fft_np = np.fft.fft2(images_np, axes=(-2, -1))
         amp = np.abs(fft_np)

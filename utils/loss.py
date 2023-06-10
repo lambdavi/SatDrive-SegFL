@@ -4,6 +4,15 @@ import numpy as np
 import torch.nn.functional as F
 
 def weight_train_loss(losses):
+    """
+    Computes weighted training losses based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        `dict`: A dictionary containing the weighted average of losses.
+    """
     fin_losses = {}
     c = list(losses.keys())[0]
     loss_names = list(losses[c]['loss'].keys())
@@ -21,6 +30,15 @@ def weight_train_loss(losses):
 
 
 def weight_test_loss(losses):
+    """
+    Computes the weighted test loss based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        float: The weighted average of the losses.
+    """
     tot_loss = 0
     weights = 0
     for k, v in losses.items():
@@ -29,6 +47,16 @@ def weight_test_loss(losses):
     return tot_loss / weights
 
 class IW_MaxSquareloss(nn.Module):
+    """
+    Implements the IW_MaxSquareloss loss function for image segmentation.
+
+    Args:
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `ratio` (float): The ratio parameter for weight calculation.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    """
     requires_reduction = False
 
     def __init__(self, ignore_index=255, ratio=0.2, **kwargs):
@@ -62,6 +90,18 @@ class IW_MaxSquareloss(nn.Module):
         return loss
     
 class SelfTrainingLoss(nn.Module):
+    """
+    Implements the self-training loss for image segmentation.
+
+    Args:
+        `conf_th` (float): Confidence threshold for pseudo-labeling.
+        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `lambda_selftrain` (float): Weighting factor for the self-training loss.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    """
     requires_reduction = False
 
     def __init__(self, conf_th=0.9, fraction=0.66, ignore_index=255, lambda_selftrain=1, **kwargs):
@@ -73,9 +113,28 @@ class SelfTrainingLoss(nn.Module):
         self.lambda_selftrain = lambda_selftrain
 
     def set_teacher(self, model):
+        """
+        Sets the teacher model for self-training.
+
+        Args:
+            model: The teacher model.
+
+        Returns:
+            None
+        """
         self.teacher = model
 
     def get_image_mask(self, prob, pseudo_lab):
+        """
+        Generates the mask for pseudo-labeling based on confidence threshold and top-k fraction.
+
+        Args:
+            prob (torch.Tensor): The predicted probabilities.
+            pseudo_lab (torch.Tensor): The pseudo labels.
+
+        Returns:
+            torch.Tensor: The generated mask.
+        """
         max_prob = prob.detach().clone().max(0)[0]
         mask_prob = max_prob > self.conf_th if 0. < self.conf_th < 1. else torch.zeros(max_prob.size(),
                                                                                        dtype=torch.bool).to(
@@ -94,11 +153,34 @@ class SelfTrainingLoss(nn.Module):
         return mask_prob | mask_topk
 
     def get_batch_mask(self, pred, pseudo_lab):
+        """
+        Generates the mask for pseudo-labeling for a batch of samples.
+
+        Args:
+            pred (torch.Tensor): The predicted probabilities.
+            pseudo_lab (torch.Tensor): The pseudo labels.
+
+        Returns:
+            torch.Tensor: The generated batch mask.
+        """
         b, _, _, _ = pred.size()
         mask = torch.stack([self.get_image_mask(pb, pl) for pb, pl in zip(F.softmax(pred, dim=1), pseudo_lab)], dim=0)
         return mask
 
     def get_pseudo_lab(self, pred, imgs=None, return_mask_fract=False, model=None, seg=False):
+        """
+        Generates pseudo-labels for the given predictions and images.
+
+        Args:
+            pred (torch.Tensor): The predicted probabilities.
+            imgs (torch.Tensor): The input images.
+            return_mask_fract (bool): Whether to return the mask fraction.
+            model: The teacher model (optional).
+            seg (bool): Whether the prediction is segmentation logits.
+
+        Returns:
+            torch.Tensor: The generated pseudo-labels.
+        """
         teacher = self.teacher if model is None else model
         if teacher is not None:
             with torch.no_grad():
@@ -126,22 +208,61 @@ class SelfTrainingLoss(nn.Module):
         return pseudo_lab
 
     def forward(self, pred, imgs=None, seg=False):
+        """
+        Forward pass of the self-training loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images (optional).
+            seg (bool): Whether the prediction is segmentation logits.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        """
         pseudo_lab = self.get_pseudo_lab(pred, imgs, seg=seg)
         loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction='none')
         return loss.mean() * self.lambda_selftrain
 
 class SelfTrainingLossEntropy(SelfTrainingLoss):
+    """
+    Self-training loss with entropy regularization.
+
+    Args:
+        lambda_entropy (float): Weighting factor for the entropy regularization.
+
+    Inherits from:
+        SelfTrainingLoss
+    """
     def __init__(self, lambda_entropy=0.005, **kwargs):
         super().__init__(**kwargs)
         self.lambda_entropy = lambda_entropy
 
     def cross_entropy(self, pred, imgs=None):
+        """
+        Calculates the cross-entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images.
+
+        Returns:
+            torch.Tensor: The calculated cross-entropy loss.
+        """
         pseudo_lab = self.get_pseudo_lab(pred, imgs)
         loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction='none')
         return loss.mean()
 
     @staticmethod
     def entropy_loss(pred):
+        """
+        Calculates the entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+
+        Returns:
+            torch.Tensor: The calculated entropy loss.
+        """
         p = F.softmax(pred, dim=1)
         logp = F.log_softmax(pred, dim=1)
         plogp = p * logp
@@ -152,19 +273,47 @@ class SelfTrainingLossEntropy(SelfTrainingLoss):
         return ent.mean()
 
     def forward(self, pred, imgs=None):
+        """
+        Forward pass of the self-training loss with entropy regularization.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        """
         ce_loss = self.cross_entropy(pred, imgs)
         entropy_loss = self.entropy_loss(pred)*self.lambda_entropy
         loss = ce_loss + entropy_loss
         return loss
     
 class EntropyLoss(nn.Module):
+    """
+    Entropy loss.
 
+    Args:
+        lambda_entropy (float): Weighting factor for the entropy loss.
+        num_classes (int): Number of classes.
+
+    Inherits from:
+        nn.Module
+    """
     def __init__(self, lambda_entropy=0.005, num_classes=13, **kwargs):
         super().__init__(**kwargs)
         self.lambda_entropy = lambda_entropy
         self.normalization_factor = self.__get_normalization_factor(num_classes)
 
     def __get_normalization_factor(self, num_classes):
+        """
+        Calculates the normalization factor for entropy loss.
+
+        Args:
+            num_classes (int): Number of classes.
+
+        Returns:
+            float: The normalization factor.
+        """
         a = torch.ones((1, num_classes, 1, 1))
         a = 1 / num_classes * a
         p = F.softmax(a, dim=1)
@@ -184,55 +333,14 @@ class EntropyLoss(nn.Module):
         return ent.mean()
 
     def forward(self, pred):
+        """
+        Forward pass of the entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        """
         loss = self.entropy_loss(pred)*self.lambda_entropy
         return loss
-
-class KnowledgeDistillationLoss(nn.Module):
-
-    def __init__(self, reduction='mean', alpha=1.):
-        super().__init__()
-        self.reduction = reduction
-        self.alpha = alpha
-
-    def forward(self, inputs, targets, pred_labels=None, mask=None):
-        inputs = inputs.narrow(1, 0, targets.shape[1])
-        outputs = torch.log_softmax(inputs, dim=1)
-        labels = torch.softmax(targets * self.alpha, dim=1)
-        loss = (outputs * labels).mean(dim=1)
-
-        if pred_labels is not None:
-            loss = loss * pred_labels.float()
-        if mask is not None:
-            loss = loss * mask
-        if self.reduction == 'mean':
-            outputs = -torch.mean(loss)
-        elif self.reduction == 'sum':
-            outputs = -torch.sum(loss)
-        else:
-            outputs = -loss
-        return outputs
-    
-class KnowledgeDistillationLoss(nn.Module):
-
-    def __init__(self, reduction='mean', alpha=1.):
-        super().__init__()
-        self.reduction = reduction
-        self.alpha = alpha
-
-    def forward(self, inputs, targets, pred_labels=None, mask=None):
-        inputs = inputs.narrow(1, 0, targets.shape[1])
-        outputs = torch.log_softmax(inputs, dim=1)
-        labels = torch.softmax(targets * self.alpha, dim=1)
-        loss = (outputs * labels).mean(dim=1)
-
-        if pred_labels is not None:
-            loss = loss * pred_labels.float()
-        if mask is not None:
-            loss = loss * mask
-        if self.reduction == 'mean':
-            outputs = -torch.mean(loss)
-        elif self.reduction == 'sum':
-            outputs = -torch.sum(loss)
-        else:
-            outputs = -loss
-        return outputs
