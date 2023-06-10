@@ -104,17 +104,6 @@ def get_transforms(args):
             nptr.ToTensor(),
             nptr.Normalize((0.5,), (0.5,)),
         ])
-        """elif args.model == "bisenetv2":
-        train_transforms = sstr.Compose([
-                sstr.RandomCrop((512, 928)),
-                sstr.ToTensor(),
-                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
-        test_transforms = sstr.Compose([
-            sstr.ToTensor(),
-            sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-        """
     else:
         raise NotImplementedError
     return train_transforms, test_transforms
