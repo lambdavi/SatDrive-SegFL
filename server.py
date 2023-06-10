@@ -61,14 +61,21 @@ class Server:
                 list[tuple]: [(len_dataset, state_dictionary)]. Model updates gathered from the client to be aggregated.
         """
         updates = []
+
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
-            #Update parameters of the client model
+
+            # Update parameters of the client model
             c.model.load_state_dict(self.model_params_dict)
-            if self.args.centr:
+
+            if self.args.val:
                 self.metrics["eval_train"].reset()
-            update = c.train(self.metrics["eval_train"], [self.test_clients[0].test_loader, self.test_clients[1].test_loader])    
+                update = c.train(self.metrics["eval_train"], [self.test_clients[0].test_loader, self.test_clients[1].test_loader]) 
+            else:
+                update = c.train()    
+
             updates.append(update)
+            
         return updates
 
     def aggregate(self, updates):
@@ -84,6 +91,7 @@ class Server:
         total_weight = 0.
         base = OrderedDict()
 
+        # Numerator of weighted average
         for (client_samples, client_model) in updates:
             total_weight += client_samples
             for key, value in client_model.items():
@@ -94,10 +102,12 @@ class Server:
 
         averaged_sol_n = copy.deepcopy(self.model_params_dict)
 
+        # Denominator of weighted average
         for key, value in base.items():
             if total_weight != 0:
                 averaged_sol_n[key] = value.to('cuda') / total_weight
 
+        # Return weighted average
         return averaged_sol_n
 
     def train(self):
@@ -134,6 +144,7 @@ class Server:
                 
                 # Train a round
                 updates = self.train_round(chosen_clients)
+
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
                 self.model.load_state_dict(self.model_params_dict, strict=False) 
@@ -154,10 +165,13 @@ class Server:
         print("------------------------------------")
         print(f"Evaluation of the trainset started.")
         print("------------------------------------") 
+
         self.metrics["eval_train"].reset()
+
         for c in self.train_clients:
             c.model.load_state_dict((copy.deepcopy(self.model_params_dict)))
             c.test(self.metrics["eval_train"])
+
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
@@ -165,9 +179,15 @@ class Server:
         """
         This method handles the evaluation on the validation client(s)
         """
+        print("------------------------------------")
+        print(f"Evaluation of the validation set started.")
+        print("------------------------------------") 
+
         self.metrics["eval_train"].reset()
+
         self.validation_clients[0].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.validation_clients[0].test(self.metrics["eval_train"])
+    
         res=self.metrics["eval_train"].get_results()
         print(f'Validation: Mean IoU: {res["Mean IoU"]}')
         return res["Mean IoU"]
@@ -179,15 +199,20 @@ class Server:
         print("------------------------------------")
         print(f"Test on SAME DOMAIN DATA started.")
         print("------------------------------------")
+
         self.test_clients[0].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.test_clients[0].test(self.metrics["test_same_dom"])
+
         res=self.metrics["test_same_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
+
         print("------------------------------------")
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
+
         self.test_clients[1].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.test_clients[1].test(self.metrics["test_diff_dom"])
+        
         res=self.metrics["test_diff_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 

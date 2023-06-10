@@ -245,6 +245,8 @@ class Client:
         """
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
+
+        # Section to evalutation at each epoch if --val param is set
         best_miou = 0 if eval_metric else None
         if eval_datasets:
             if len(eval_datasets)>1:
@@ -252,24 +254,34 @@ class Client:
                 eval_datasets.append(self.train_loader)
             else:
                 m = ["same_domain"]
+        
+        # Set model in train mode
         self.model.train()
+
         stop_condition = False
+
+        # If the teacher is set it means we are in FDA mode
         if self.teacher:
             crit, red = self.__get_criterion_and_reduction_rules()
 
         print("-----------------------------------------------------")
+
         if self.args.num_epochs_c == None:
             self.args.num_epochs_c = 1
         num_epochs = self.args.num_epochs_c if self.teacher else self.args.num_epochs
+
         for epoch in range(num_epochs):
+            # If FDA mode: run epoch with self training 
             if self.teacher:
                 self.run_epoch_pseudo(epoch, optimizer, crit, red)
+            # Otherwise: standard run
             else:
                 self.run_epoch(epoch, optimizer)
 
             if scheduler:
                 scheduler.step()
 
+            # If --val is enabled, evalutes on the train/test sets and save checkpoints if --chp enabled
             if eval_metric and eval_datasets and self.args.val:
                 for i, eval_dataset in enumerate(eval_datasets):
                     eval_miou=self.test(eval_metric, True, eval_dataset)
@@ -283,6 +295,8 @@ class Client:
                                 torch.save(self.model.state_dict(), f"models/checkpoints/{self.args.dataset}_checkpoint.pth")
                             print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
+
+                # If early stopping enabled (--es) then check if we have to stop 
                 if self.args.es:
                     stop_condition = self.early_stopper.early_stop(eval_miou)
                 if(stop_condition):
@@ -291,7 +305,7 @@ class Client:
             
         print("-----------------------------------------------------")
 
-        # save graph
+        # Save Graph if --val enabled
         if self.args.val:
             self.plot_loss_miou()
 

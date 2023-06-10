@@ -112,13 +112,13 @@ class FdaServer:
         Returns:
             tuple: (len_dataset, dict_params). Model updates gathered from the client to be aggregated.
         """
-        # Test client augmetation
         print(f"\n Training on source dataset starting.. Num. of samples: {len(client[0].dataset)}")
-        #Update parameters of the client model
+        # Apply style augmentation
         client[0].set_set_style_tf_fn(self.styleaug)
+        #Update parameters of the client model
         client[0].model.load_state_dict(self.model_params_dict)
         # Temp line. setup train
-        self.metrics["eval_train"].reset()
+        self.metrics["eval_train"].reset()  
         update = client[0].train(self.metrics["eval_train"], [self.test_clients[0].test_loader])
         return update
     
@@ -134,19 +134,22 @@ class FdaServer:
         """
         updates = []
         
-        # Update teacher
+        # Increment the teacher steps counter
         self.teacher_counter += 1
         if (self.teacher_counter % self.args.teacher_step) == 0:
+            # Update teacher
             print(f"Updating teacher at step {self.teacher_counter}")
             self.teacher_model.load_state_dict(copy.deepcopy(self.model_params_dict))
 
-        student_params = copy.deepcopy(self.student_model.state_dict())
         # Test client augmetation
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
             #Update parameters of the client model
-            c.model.load_state_dict(student_params)
+            # Load student_model params
+            c.model.load_state_dict(copy.deepcopy(self.student_model.state_dict()))
+            # Set teacher model on the client
             c.set_teacher(self.teacher_model)
+            # Reset counter for early stop
             c.early_stopper.reset_counter()
             # Temp line. setup train
             update = c.train()
@@ -166,6 +169,7 @@ class FdaServer:
         total_weight = 0.
         base = OrderedDict()
 
+        # Numerator of weighted average
         for (client_samples, client_model) in updates:
             total_weight += client_samples
             for key, value in client_model.items():
@@ -176,10 +180,12 @@ class FdaServer:
 
         averaged_sol_n = copy.deepcopy(self.model_params_dict)
 
+        # Denominator of weighted average
         for key, value in base.items():
             if total_weight != 0:
                 averaged_sol_n[key] = value.to('cuda') / total_weight
 
+        # Return weighted average
         return averaged_sol_n
 
     def train(self):
@@ -228,10 +234,13 @@ class FdaServer:
         print("------------------------------------")
         print(f"Test on TARGET DATASET started.")
         print("------------------------------------")
+
         self.metrics["eval_train"].reset()
+
         for c in self.train_clients:
             c.model.load_state_dict(copy.deepcopy(self.model_params_dict))
             c.test(self.metrics["eval_train"])
+
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
@@ -242,9 +251,12 @@ class FdaServer:
         print("------------------------------------")
         print(f"Test on SOURCE DATASET started.")
         print("------------------------------------")
+
         self.metrics["eval_train"].reset()
+
         self.source_dataset[0].model.load_state_dict(copy.deepcopy(self.model_params_dict))
         self.source_dataset[0].test(self.metrics["eval_train"])
+
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
@@ -255,18 +267,24 @@ class FdaServer:
         print("------------------------------------")
         print(f"Test on SAME DOMAIN DATA started.")
         print("------------------------------------")
+
         self.metrics["test_same_dom"].reset()
+
         self.test_clients[0].model.load_state_dict(copy.deepcopy(self.model_params_dict))
         self.test_clients[0].test(self.metrics["test_same_dom"])
+
         res=self.metrics["test_same_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
         print("------------------------------------")
         print(f"Test on DIFFERENT DOMAIN DATA started.")
         print("------------------------------------")
+
         self.metrics["test_diff_dom"].reset()
+
         self.test_clients[1].model.load_state_dict(copy.deepcopy(self.model_params_dict))
         self.test_clients[1].test(self.metrics["test_diff_dom"])
+
         res=self.metrics["test_diff_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
