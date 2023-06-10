@@ -177,7 +177,7 @@ class Client:
 
         print("-----------------------------------------------------")
         if self.args.num_epochs_c == None:
-            self.args.num_epochs_c = self.args.num_epochs
+            self.args.num_epochs_c = 1
         num_epochs = self.args.num_epochs_c if self.teacher else self.args.num_epochs
         for epoch in range(num_epochs):
             if self.teacher:
