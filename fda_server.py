@@ -7,7 +7,23 @@ from utils.style_transfer import StyleAugment
 from PIL import Image
 import datasets.ss_transforms as sstr
 import matplotlib.pyplot as plt
+
 class FdaServer:
+    """
+    A class representing the Server where FDA (Fourier Domain Adaptation) is used.
+
+    The FDA server is responsible for coordinating the training process of the federated learning system.
+
+    Args:
+        args: An object containing the arguments and configuration for the FDA server.
+        source_dataset: The source dataset used for domain adaptation.
+        train_clients: A list of training clients.
+        test_clients: A list of test clients.
+        model: The initial source model.
+        metrics: A dictionary containing evaluation metrics.
+        valid (bool): Whether to include validation during training. Default is False.
+        valid_clients: A list of validation clients. Required if `valid` is True. Default is None.
+    """
     def __init__(self, args, source_dataset, train_clients, test_clients, model, metrics, valid=False, valid_clients=None):
         self.args = args
         self.source_dataset = source_dataset
@@ -30,6 +46,15 @@ class FdaServer:
             self.extract_styles()
         
     def select_clients(self, seed=None):
+        """
+        Selects a subset of clients for a training round.
+
+        Args:
+            seed (int): Random seed for client selection. Default is None.
+
+        Returns:
+            numpy.ndarray: An array of selected clients for the training round.
+        """
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
         if seed:
             np.random.seed(seed)
@@ -38,10 +63,16 @@ class FdaServer:
         return np.random.choice(self.train_clients, num_clients, replace=False)
 
     def extract_styles(self):
+        """
+        Extracts styles from the training clients and adds them to the style augmenter.
+        """
         for c in self.train_clients:
             self.styleaug.add_style(c.dataset)
     
     def train_source(self):
+        """
+        Trains the source model on the source dataset.
+        """
         retrain_error=False
 
         if self.args.load or self.args.resume:
@@ -71,9 +102,13 @@ class FdaServer:
 
     def train_round_source(self, client):
         """
-            This method trains the model with the dataset of the clients. It handles the training at single round level
-            :param clients: list of one client containing the source dataset to train
-            :return: model updates gathered from the clients, to be aggregated
+        Trains a single round of the source model.
+
+        Args:
+            client: A client object containing the source dataset.
+
+        Returns:
+            tuple: (len_dataset, dict_params). Model updates gathered from the client to be aggregated.
         """
         # Test client augmetation
         print(f"\n Training on source dataset starting.. Num. of samples: {len(client[0].dataset)}")
@@ -87,9 +122,13 @@ class FdaServer:
     
     def train_round(self, clients):
         """
-            This method trains the model with the dataset of the clients. It handles the training at single round level
-            :param clients: list of all the clients to train
-            :return: model updates gathered from the clients, to be aggregated
+        Trains the model with the datasets of multiple clients in a federated training round.
+
+        Args:
+            clients: A list of clients to train.
+
+       Returns:
+            list[tuple]: [(len_dataset, dict_params)]. Model updates gathered from the client to be aggregated.
         """
         updates = []
         
@@ -114,9 +153,13 @@ class FdaServer:
 
     def aggregate(self, updates):
         """
-        This method handles the FedAvg aggregation
-        :param updates: updates received from the clients
-        :return: aggregated parameters
+        Aggregates the model updates received from the clients using FedAvg.
+
+        Args:
+            updates: Model updates received from the clients. List of tuples.
+
+        Returns:
+            OrderedDict: Aggregated model parameters.
         """
         total_weight = 0.
         base = OrderedDict()
@@ -139,7 +182,7 @@ class FdaServer:
 
     def train(self):
         """
-        This method orchestrates the training the evals and tests at rounds level
+        This method orchestrates the training the evals and tests at rounds level.
         """
 
         num_rounds = self.args.num_rounds
@@ -226,6 +269,12 @@ class FdaServer:
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def predict(self, image_path):
+        """
+        Handles the the prediction. Outputs an image in the root directory.
+
+        Args: 
+            Path to the image to predict.
+        """
         def get_outputs(images, labels=None, test=False):
             if self.args.model == 'deeplabv3_mobilenetv2':
                 return self.source_model(images)['out']
@@ -243,6 +292,7 @@ class FdaServer:
             if self.args.model == 'bisenetv2':
                 outputs = self.source_model(images, test=test)
                 return outputs
+            
         # Load and preprocess the input image
         input_image = Image.open(image_path)
 
@@ -252,7 +302,8 @@ class FdaServer:
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        input_tensor = transforms(input_image).unsqueeze(0)  # Add batch dimension
+        # Add batch dimension
+        input_tensor = transforms(input_image).unsqueeze(0)  
         input_tensor = input_tensor.cuda()
         self.source_model.eval()
 
@@ -265,7 +316,7 @@ class FdaServer:
 
         predicted_labels = np.argmax(normalized_output, axis=0)
 
-        # Normalize the predicted labels to the range [0, 1]
+        # Get colormap
         colormap = plt.cm.get_cmap('tab20', predicted_labels.max() + 1)
 
         # Create the predicted image with colors
@@ -294,16 +345,17 @@ class FdaServer:
 
         # Create the legend outside the image
         legend = ax.legend(legend_elements, class_names, loc='center left', bbox_to_anchor=(1, 0.5))
+
         # Adjust the positioning and appearance of the legend
         legend.set_title('Legend')
         frame = legend.get_frame()
         frame.set_edgecolor('black')
         frame.set_facecolor('white')
 
-
         # Save the figure
         plt.savefig('fda_image_fin.png', bbox_inches='tight', dpi=300)
 
+        # Private method to get the different fda images 
         #self.__image_fda()
 
     def __image_fda(self):

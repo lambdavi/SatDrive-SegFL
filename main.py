@@ -261,7 +261,7 @@ def get_source_client(args, model):
 
 def set_metrics(args):
     """ Get the metrics used to evaluate performance based on the task (determined by the model). """
-    
+
     num_classes = get_dataset_num_classes(args.dataset)
     if args.model in ['deeplabv3_mobilenetv2', "segformer", "bisenetv2"]:
         metrics = {
@@ -314,7 +314,7 @@ def main():
     # Get the datasets needed.
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
     print('Done.')
-    source_dataset = get_source_client(args, model, train_datasets)
+    source_dataset = get_source_client(args, model)
 
     # Get the metrics needed.
     metrics = set_metrics(args)

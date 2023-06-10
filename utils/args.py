@@ -11,7 +11,7 @@ def str2tuple(tp=int):
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0, help='random seed')
-    parser.add_argument('--dataset', type=str, choices=['idda', 'femnist', 'gta5', 'loveda'], required=True, help='dataset name')
+    parser.add_argument('--dataset', type=str, choices=['idda', 'gta5', 'loveda'], required=True, help='dataset name')
     parser.add_argument('--niid', action='store_true', default=False,  help='Run the experiment with the non-IID partition (IID by default). Only on FEMNIST dataset.')
     parser.add_argument('--model', type=str, choices=['deeplabv3_mobilenetv2', 'resnet18', 'segformer', 'bisenetv2'], help='model name')
     parser.add_argument('--transformer_model', type=str, choices=['b0', 'b1', 'b2'], default="b0", help='weights of the transformers b0 lighter - b2 heavier')
