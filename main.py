@@ -1,6 +1,5 @@
 import os
 import json
-from collections import defaultdict
 
 import torch
 import random
@@ -45,13 +44,12 @@ def get_dataset_num_classes(dataset):
         return 16
     if dataset == 'gta5':
         return 20
-    if dataset == 'femnist':
-        return 62
     if dataset == 'loveda':
         return 8
     raise NotImplementedError
 
 def model_init(args):
+    """ Get the model based on the value of args. """
     if args.model == 'deeplabv3_mobilenetv2':
         return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
     if args.model == 'resnet18':
@@ -73,6 +71,7 @@ def model_init(args):
     raise NotImplementedError
 
 def get_transforms(args):
+    """ Get the transformations based both on the dataset and the model. """
     if args.model in ["segformer",'deeplabv3_mobilenetv2', 'bisenetv2']:
         if args.dataset == "loveda":
             train_transforms = sstr.Compose([
@@ -109,7 +108,8 @@ def get_transforms(args):
     return train_transforms, test_transforms
 
 def get_datasets(args):
-
+    """ Function to get the datasets based on the args. It return three lists: train datasets, test_datasets and if necessary
+     validation datasets. """
     train_datasets = []
     train_transforms, test_transforms = get_transforms(args)
 
@@ -193,7 +193,7 @@ def get_datasets(args):
     elif args.dataset == "loveda":
         root = 'data/loveda'
 
-        # Extract all data from the Urban (trainset) 
+        # Extract all data from the Urban set (train) 
         all_data_train = os.listdir(os.path.join(root, "Urban", "images_png"))
 
         print(f"Total number of images to be loaded: {len(all_data_train)}")
@@ -212,11 +212,13 @@ def get_datasets(args):
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder="Urban", transform=train_transforms,
                                                 client_name="client_"+str(i)))
-
+        
+        # Extract test data from the Urban2 (test same domain) 
         test_same_dom_data = os.listdir(os.path.join(root, "Urban2", "images_png"))
         test_same_dom_dataset = LoveDADataset(root=root, list_samples=test_same_dom_data, folder="Urban2", transform=test_transforms,
                                                 client_name='test_same_dom')
         
+        # Extract test data from the Rural (test diff domain) 
         test_diff_dom_data = os.listdir(os.path.join(root, "Rural", "images_png"))
         test_diff_dom_dataset = LoveDADataset(root=root, list_samples=test_diff_dom_data, folder="Rural", transform=test_transforms,
                                             client_name='test_diff_dom')
@@ -227,7 +229,12 @@ def get_datasets(args):
 
     return train_datasets, test_datasets, None
 
-def get_source_client(args, model, same=None):
+def get_source_client(args, model):
+    """ Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. 
+        input: args, model (pytorch)
+        output: list of one clients containing the source training set. This function is needed since the 'gen_clients' functions focuses
+        on the dataset split. 
+    """
     train_transforms, _ = get_transforms(args)
     if args.fda:
         if args.dataset == "idda": # target == idda
@@ -238,20 +245,23 @@ def get_source_client(args, model, same=None):
                 all_data_train = f.read().splitlines()
             f.close()
             sc = Client(args, GTA5Dataset(root=root, list_samples=all_data_train, transform=train_transforms, client_name='gta5_all'), model)        
+        
         elif args.dataset == "loveda":
             root = 'data/loveda'
-
             # Extract all data from the Urban (trainset) 
             all_data_train = os.listdir(os.path.join(root, "Urban", "images_png"))
             dataset = LoveDADataset(root=root, list_samples=all_data_train, folder="Urban", transform=train_transforms,
                                                 client_name='loveda_all')
             sc = Client(args, dataset, model)
-
+        else:
+            return None
         return [sc]
     else:
         return None
 
 def set_metrics(args):
+    """ Get the metrics used to evaluate performance based on the task (determined by the model). """
+    
     num_classes = get_dataset_num_classes(args.dataset)
     if args.model in ['deeplabv3_mobilenetv2', "segformer", "bisenetv2"]:
         metrics = {
@@ -269,6 +279,8 @@ def set_metrics(args):
     return metrics
 
 def gen_clients(args, train_datasets, test_datasets, validation_datasets, model):
+    """ Divide the datasets in clients. """
+
     clients = [[], [], []]
     for i, datasets in enumerate([train_datasets, test_datasets]):
         # For each dataset datasets (one for each client), create and append a client
@@ -279,25 +291,40 @@ def gen_clients(args, train_datasets, test_datasets, validation_datasets, model)
     return clients[0], clients[1], clients[2]
 
 def main():
+    # Initilizalize the parser to get all the parameters
     parser = get_parser()
     args = parser.parse_args()
+
+    # Setting up the seed for reproducibility
     set_seed(args.seed)
 
+    # Get the model and move it to GPU
     print('Initializing model...', end=" ")
-    model = model_init(args)
-    model.cuda()
+
+    # This code requires cuda enabled.
+    try:
+        model = model_init(args)
+        model.cuda()
+        print("Model Loaded: "+args.model)
+    except:
+        print("\FATAL: seems like you have not CUDA enabled or you did not specify a model to use. Try again.")
+        exit(1)
     print('Done.')
 
+    # Get the datasets needed.
     train_datasets, test_datasets, validation_dataset = get_datasets(args)
-    print('Generate datasets...', end=" ")
     print('Done.')
     source_dataset = get_source_client(args, model, train_datasets)
+
+    # Get the metrics needed.
     metrics = set_metrics(args)
 
+    # Generate the clients.
     print('Generate clients...', end=" ")
     train_clients, test_clients, valid_clients = gen_clients(args, train_datasets, test_datasets, validation_dataset, model)
     print('Done.')
 
+    # Setting up the server based on the mode chosen. Two server classes are available Server/FdaServer
     print('Setup server...', end=" ")
     if args.fda == False:
         if args.dataset == "gta5":
@@ -312,7 +339,7 @@ def main():
     execution_time = timeit.timeit(server.train, number=1)
     print(f"Execution time: {execution_time} seconds")
 
-    # Code to predict an image
+    # Predict an new image if needed image saved in the root directory as image_fin (for centralized setting), fda_imagine_fin (for fda) 
     if args.pred:
         print("Predicting "+args.pred)
         server.predict(args.pred)
