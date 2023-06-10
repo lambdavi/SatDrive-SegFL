@@ -176,7 +176,10 @@ class Client:
             crit, red = self.__get_criterion_and_reduction_rules()
 
         print("-----------------------------------------------------")
-        for epoch in range(self.args.num_epochs):
+        if self.args.num_epochs_c == None:
+            self.args.num_epochs_c = self.args.num_epochs
+        num_epochs = self.args.num_epochs_c if self.teacher else self.args.num_epochs
+        for epoch in range(num_epochs):
             if self.teacher:
                 self.run_epoch_pseudo(epoch, optimizer, crit, red)
             else:

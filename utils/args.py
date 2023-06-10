@@ -16,7 +16,9 @@ def get_parser():
     parser.add_argument('--model', type=str, choices=['deeplabv3_mobilenetv2', 'resnet18', 'segformer', 'bisenetv2'], help='model name')
     parser.add_argument('--transformer_model', type=str, choices=['b0', 'b1', 'b2'], default="b0", help='weights of the transformers b0 lighter - b2 heavier')
     parser.add_argument('--num_rounds', type=int, default=1, help='number of rounds')
-    parser.add_argument('--num_epochs', type=int, default=1, help='number of local epochs')
+    parser.add_argument('--num_epochs', type=int, default=1, help='number of epochs')
+    parser.add_argument('--num_epochs_c', type=int, default=None, help='number of local epochs clients')
+
     parser.add_argument('--clients_per_round', type=int, default=1, help='number of clients trained per round')
     parser.add_argument('--hnm', action='store_true', default=False, help='Use hard negative mining reduction or not')
     parser.add_argument('--lr', type=float, default=0.05, help='learning rate')
