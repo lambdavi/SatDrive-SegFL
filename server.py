@@ -155,8 +155,7 @@ class Server:
                 torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
 
         if self.args.val == False:
-            if self.args.dataset != "gta5":       
-                self.eval_train()
+            self.eval_train()
             self.test()
 
     def eval_train(self):
