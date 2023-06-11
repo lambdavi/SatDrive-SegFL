@@ -93,9 +93,9 @@ class FdaServer:
                 
         if (not self.args.load) or self.args.resume or retrain_error:
             _, model_dict = self.train_round_source(self.source_dataset)
-            if self.args.chp:
+            """if self.args.chp:
                 pth = f"models/checkpoints/{get_save_string(self.args, True)}_checkpoint.pth"
-                model_dict = torch.load(pth)
+                model_dict = torch.load(pth)"""
             self.model_params_dict = model_dict
             self.source_model.load_state_dict(self.model_params_dict)
 
@@ -208,24 +208,43 @@ class FdaServer:
         self.teacher_model = copy.deepcopy(self.source_model)
         self.student_model = copy.deepcopy(self.source_model)
 
-        # Start of distributed train
-        for r in range(num_rounds):                
-            print("------------------")
-            print(f"Round {r+1}/{num_rounds} started.")
-            print("------------------")
-
-            # Select random subset of clients
-            chosen_clients = self.select_clients(seed=r)
+        # Check for skip all the training if we want to load an existing checkpoint
+        if self.args.load or self.args.resume:
+            pth = f"models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, False)}_best_model.pth"
+            try:
+                saved_params = torch.load(pth)
+                self.model_params_dict = saved_params
+                self.source_model.load_state_dict(saved_params)
+                self.source_model.eval()
+                to_print = " from checkpoints." if self.args.chp else "."
+                print(f"FDA full model loaded {to_print}")
+            except:
+                print("The checkpoint for this model does not exist. The model will be retrained.")
+                retrain_error=True
+                
+        if (not self.args.load) or self.args.resume or retrain_error:
             
-            # Train a round
-            updates = self.train_round(chosen_clients)
+            # Start of distributed train
+            for r in range(num_rounds):                
+                print("------------------")
+                print(f"Round {r+1}/{num_rounds} started.")
+                print("------------------")
 
-            # Aggregate the parameters
-            self.model_params_dict = self.aggregate(updates)
+                # Select random subset of clients
+                chosen_clients = self.select_clients(seed=r)
+                
+                # Train a round
+                updates = self.train_round(chosen_clients)
 
-            # Save in the student model the aggregated weights
-            self.student_model.load_state_dict(self.model_params_dict)
+                # Aggregate the parameters
+                self.model_params_dict = self.aggregate(updates)
 
+                # Save in the student model the aggregated weights
+                self.student_model.load_state_dict(self.model_params_dict)
+
+        if self.args.save:
+            print("Saving full FDA model...")
+            torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
         self.test()
 
     def eval_train(self):
