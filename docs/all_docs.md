@@ -1,6 +1,6 @@
 ---
 description: |
-    API documentation for modules: main, fda_server, server, client.
+    API documentation for modules: main, fda_server, server, client, loss, style_transfer.
 
 lang: en
 
@@ -925,6 +925,880 @@ Args
 Returns
 -----=
 Length of the local dataset, model's state dictionary.
+
+
+
+    
+# Module `loss` {#id}
+
+
+
+
+
+
+    
+## Functions
+
+
+    
+### Function `weight_test_loss` {#id}
+
+
+
+
+>     def weight_test_loss(
+>         losses
+>     )
+
+
+Computes the weighted test loss based on the given dictionary of losses.
+
+
+Args
+-----=
+<code>losses</code> (dict): A dictionary containing the losses for different samples.
+
+Returns
+-----=
+<code>float</code>
+:   The weighted average of the losses.
+
+
+
+    
+### Function `weight_train_loss` {#id}
+
+
+
+
+>     def weight_train_loss(
+>         losses
+>     )
+
+
+Computes weighted training losses based on the given dictionary of losses.
+
+
+Args
+-----=
+<code>losses</code> (dict): A dictionary containing the losses for different samples.
+
+Returns
+-----=
+<code>dict</code>: A dictionary containing the weighted average of losses.
+
+
+    
+## Classes
+
+
+    
+### Class `EntropyLoss` {#id}
+
+
+
+
+>     class EntropyLoss(
+>         lambda_entropy=0.005,
+>         num_classes=13,
+>         **kwargs
+>     )
+
+
+Entropy loss.
+
+
+Args
+-----=
+**```lambda_entropy```** :&ensp;<code>float</code>
+:   Weighting factor for the entropy loss.
+
+
+**```num_classes```** :&ensp;<code>int</code>
+:   Number of classes.
+
+
+Inherits from:
+    nn.Module
+
+Initializes internal Module state, shared by both nn.Module and ScriptModule.
+
+
+    
+#### Ancestors (in MRO)
+
+* [torch.nn.modules.module.Module](#torch.nn.modules.module.Module)
+
+
+
+
+
+
+    
+#### Methods
+
+
+    
+##### Method `entropy_loss` {#id}
+
+
+
+
+>     def entropy_loss(
+>         self,
+>         pred
+>     )
+
+
+
+
+    
+##### Method `forward` {#id}
+
+
+
+
+>     def forward(
+>         self,
+>         pred
+>     ) ‑> Callable[..., Any]
+
+
+Forward pass of the entropy loss.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted logits.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated loss value.
+
+
+
+    
+### Class `IW_MaxSquareloss` {#id}
+
+
+
+
+>     class IW_MaxSquareloss(
+>         ignore_index=255,
+>         ratio=0.2,
+>         **kwargs
+>     )
+
+
+Implements the IW_MaxSquareloss loss function for image segmentation.
+
+
+Args
+-----=
+<code>ignore\_index</code> (int): The index value to be ignored during loss calculation.
+<code>ratio</code> (float): The ratio parameter for weight calculation.
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated loss value.
+
+
+Initializes internal Module state, shared by both nn.Module and ScriptModule.
+
+
+    
+#### Ancestors (in MRO)
+
+* [torch.nn.modules.module.Module](#torch.nn.modules.module.Module)
+
+
+
+    
+#### Class variables
+
+
+    
+##### Variable `requires_reduction` {#id}
+
+
+
+
+
+
+
+
+
+    
+#### Methods
+
+
+    
+##### Method `forward` {#id}
+
+
+
+
+>     def forward(
+>         self,
+>         pred,
+>         **kwargs
+>     ) ‑> Callable[..., Any]
+
+
+Defines the computation performed at every call.
+
+Should be overridden by all subclasses.
+
+**Note:** 
+Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.
+
+
+    
+### Class `SelfTrainingLoss` {#id}
+
+
+
+
+>     class SelfTrainingLoss(
+>         conf_th=0.9,
+>         fraction=0.66,
+>         ignore_index=255,
+>         lambda_selftrain=1,
+>         **kwargs
+>     )
+
+
+Implements the self-training loss for image segmentation.
+
+
+Args
+-----=
+<code>conf\_th</code> (float): Confidence threshold for pseudo-labeling.
+<code>fraction</code> (float): Fraction of top-k pixels to be considered for pseudo-labeling.
+<code>ignore\_index</code> (int): The index value to be ignored during loss calculation.
+<code>lambda\_selftrain</code> (float): Weighting factor for the self-training loss.
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated loss value.
+
+
+Initializes internal Module state, shared by both nn.Module and ScriptModule.
+
+
+    
+#### Ancestors (in MRO)
+
+* [torch.nn.modules.module.Module](#torch.nn.modules.module.Module)
+
+
+    
+#### Descendants
+
+* [loss.SelfTrainingLossEntropy](#loss.SelfTrainingLossEntropy)
+
+
+    
+#### Class variables
+
+
+    
+##### Variable `requires_reduction` {#id}
+
+
+
+
+
+
+
+
+
+    
+#### Methods
+
+
+    
+##### Method `forward` {#id}
+
+
+
+
+>     def forward(
+>         self,
+>         pred,
+>         imgs=None,
+>         seg=False
+>     ) ‑> Callable[..., Any]
+
+
+Forward pass of the self-training loss.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted logits.
+
+
+**```imgs```** :&ensp;<code>torch.Tensor</code>
+:   The input images (optional).
+
+
+**```seg```** :&ensp;<code>bool</code>
+:   Whether the prediction is segmentation logits.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated loss value.
+
+
+
+    
+##### Method `get_batch_mask` {#id}
+
+
+
+
+>     def get_batch_mask(
+>         self,
+>         pred,
+>         pseudo_lab
+>     )
+
+
+Generates the mask for pseudo-labeling for a batch of samples.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted probabilities.
+
+
+**```pseudo_lab```** :&ensp;<code>torch.Tensor</code>
+:   The pseudo labels.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The generated batch mask.
+
+
+
+    
+##### Method `get_image_mask` {#id}
+
+
+
+
+>     def get_image_mask(
+>         self,
+>         prob,
+>         pseudo_lab
+>     )
+
+
+Generates the mask for pseudo-labeling based on confidence threshold and top-k fraction.
+
+
+Args
+-----=
+**```prob```** :&ensp;<code>torch.Tensor</code>
+:   The predicted probabilities.
+
+
+**```pseudo_lab```** :&ensp;<code>torch.Tensor</code>
+:   The pseudo labels.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The generated mask.
+
+
+
+    
+##### Method `get_pseudo_lab` {#id}
+
+
+
+
+>     def get_pseudo_lab(
+>         self,
+>         pred,
+>         imgs=None,
+>         return_mask_fract=False,
+>         model=None,
+>         seg=False
+>     )
+
+
+Generates pseudo-labels for the given predictions and images.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted probabilities.
+
+
+**```imgs```** :&ensp;<code>torch.Tensor</code>
+:   The input images.
+
+
+**```return_mask_fract```** :&ensp;<code>bool</code>
+:   Whether to return the mask fraction.
+
+
+**```model```**
+:   The teacher model (optional).
+
+
+**```seg```** :&ensp;<code>bool</code>
+:   Whether the prediction is segmentation logits.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The generated pseudo-labels.
+
+
+
+    
+##### Method `set_teacher` {#id}
+
+
+
+
+>     def set_teacher(
+>         self,
+>         model
+>     )
+
+
+Sets the teacher model for self-training.
+
+
+Args
+-----=
+**```model```**
+:   The teacher model.
+
+
+
+Returns
+-----=
+None
+
+    
+### Class `SelfTrainingLossEntropy` {#id}
+
+
+
+
+>     class SelfTrainingLossEntropy(
+>         lambda_entropy=0.005,
+>         **kwargs
+>     )
+
+
+Self-training loss with entropy regularization.
+
+
+Args
+-----=
+**```lambda_entropy```** :&ensp;<code>float</code>
+:   Weighting factor for the entropy regularization.
+
+
+Inherits from:
+    SelfTrainingLoss
+
+Initializes internal Module state, shared by both nn.Module and ScriptModule.
+
+
+    
+#### Ancestors (in MRO)
+
+* [loss.SelfTrainingLoss](#loss.SelfTrainingLoss)
+* [torch.nn.modules.module.Module](#torch.nn.modules.module.Module)
+
+
+
+
+
+    
+#### Static methods
+
+
+    
+##### `Method entropy_loss` {#id}
+
+
+
+
+>     def entropy_loss(
+>         pred
+>     )
+
+
+Calculates the entropy loss.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted logits.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated entropy loss.
+
+
+
+
+    
+#### Methods
+
+
+    
+##### Method `cross_entropy` {#id}
+
+
+
+
+>     def cross_entropy(
+>         self,
+>         pred,
+>         imgs=None
+>     )
+
+
+Calculates the cross-entropy loss.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted logits.
+
+
+**```imgs```** :&ensp;<code>torch.Tensor</code>
+:   The input images.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated cross-entropy loss.
+
+
+
+    
+##### Method `forward` {#id}
+
+
+
+
+>     def forward(
+>         self,
+>         pred,
+>         imgs=None
+>     ) ‑> Callable[..., Any]
+
+
+Forward pass of the self-training loss with entropy regularization.
+
+
+Args
+-----=
+**```pred```** :&ensp;<code>torch.Tensor</code>
+:   The predicted logits.
+
+
+**```imgs```** :&ensp;<code>torch.Tensor</code>
+:   The input images.
+
+
+
+Returns
+-----=
+<code>torch.Tensor</code>
+:   The calculated loss value.
+
+
+
+
+
+    
+# Module `style_transfer` {#id}
+
+
+
+
+
+
+
+    
+## Classes
+
+
+    
+### Class `StyleAugment` {#id}
+
+
+
+
+>     class StyleAugment(
+>         n_images_per_style=10,
+>         L=0.1,
+>         size=(1024, 512),
+>         b=None
+>     )
+
+
+Class for applying FDA (Fouried Domain Adaptation) style augmentation to images.
+
+
+Args
+-----=
+**```n_images_per_style```** :&ensp;<code>int</code>
+:   Number of images per style.
+
+
+**```L```** :&ensp;<code>float</code>
+:   Parameter for computing the size of the style patch.
+
+
+**```size```** :&ensp;<code>tuple</code>
+:   Desired size of the images after preprocessing.
+
+
+**```b```** :&ensp;<code>int</code>
+:   Size of the style patch.
+
+
+
+Methods
+-----=
+preprocess(self, x): Preprocesses the input image.
+deprocess(self, x, size): Deprocesses the input image.
+add_style(self, loader, multiple_styles=False, name=None): Adds styles to the style pool.
+_extract_style(self, img_np): Extracts the style from an image.
+compute_size(self, amp_shift): Computes the size of the style patch.
+apply_style(self, image): Applies a random style to the input image.
+_apply_style(self, img): Applies a specific style to the input image.
+test(self, images_np, images_target_np=None, size=None): Tests the style augmentation on input images.
+
+
+
+
+
+
+
+    
+#### Methods
+
+
+    
+##### Method `add_style` {#id}
+
+
+
+
+>     def add_style(
+>         self,
+>         loader,
+>         multiple_styles=False,
+>         name=None
+>     )
+
+
+Adds styles to the style pool.
+
+
+Args
+-----=
+**```loader```**
+:   Data loader for loading images.
+
+
+**```multiple_styles```** :&ensp;<code>bool</code>
+:   Whether to add multiple styles per image.
+
+
+**```name```** :&ensp;<code>str</code>
+:   Name of the style.
+
+
+
+Returns
+-----=
+None
+
+    
+##### Method `apply_style` {#id}
+
+
+
+
+>     def apply_style(
+>         self,
+>         image
+>     )
+
+
+
+
+    
+##### Method `compute_size` {#id}
+
+
+
+
+>     def compute_size(
+>         self,
+>         amp_shift
+>     )
+
+
+Computes the size of the style patch.
+
+
+Args
+-----=
+**```amp_shift```**
+:   Shifted amplitude spectrum.
+
+
+
+Returns
+-----=
+<code>tuple</code>
+:   Size parameters (h1, h2, w1, w2) of the style patch.
+
+
+
+    
+##### Method `deprocess` {#id}
+
+
+
+
+>     def deprocess(
+>         self,
+>         x,
+>         size
+>     )
+
+
+Deprocesses the input image.
+
+
+Args
+-----=
+**```x```**
+:   Input image.
+
+
+**```size```**
+:   Desired size of the output image.
+
+
+
+Returns
+-----=
+<code>PIL.Image.Image</code>
+:   Deprocessed image.
+
+
+
+    
+##### Method `preprocess` {#id}
+
+
+
+
+>     def preprocess(
+>         self,
+>         x
+>     )
+
+
+Preprocesses the input image.
+
+
+Args
+-----=
+**```x```**
+:   Input image.
+
+
+
+Returns
+-----=
+<code>np.ndarray</code>
+:   Preprocessed image.
+
+
+
+    
+##### Method `test` {#id}
+
+
+
+
+>     def test(
+>         self,
+>         images_np,
+>         images_target_np=None,
+>         size=None
+>     )
+
+
+Tests the style augmentation on input images.
+
+
+Args
+-----=
+**```images_np```**
+:   Input images.
+
+
+**```images_target_np```**
+:   Target images (optional).
+
+
+**```size```**
+:   Desired size of the images (optional).
+
+
+
+Returns
+-----=
+None
 
 
 -----
