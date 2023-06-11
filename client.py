@@ -263,7 +263,7 @@ class Client:
         stop_condition = False
 
         # If the teacher is set it means we are in FDA mode
-        if self.fda:
+        if self.args.fda:
             if self.teacher:
                 crit, red = self.__get_criterion_and_reduction_rules()
             else:
