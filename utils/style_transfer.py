@@ -94,7 +94,7 @@ class StyleAugment:
         loader.return_unprocessed_image = True
         n = 0
         styles = []
-
+        print(len(loader))
         for sample in tqdm(loader, total=min(len(loader), self.n_images_per_style)):
 
             image = self.preprocess(sample)
