@@ -47,5 +47,6 @@ def get_parser():
     parser.add_argument('--val', action='store_true', default=False, help='Activate validation during training')
     parser.add_argument('--teacher_step', type=int, default = INF, help='How often change the teacher model in FDA settings')
     parser.add_argument('--resume', action='store_true', default=False, help='Resume from training model')
+    parser.add_argument('--plot', action='store_true', default=False, help='Plot miou graph (used only with --val)')
 
     return parser

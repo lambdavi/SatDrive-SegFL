@@ -291,6 +291,9 @@ class Client:
             # If --val is enabled, evalutes on the train/test sets and save checkpoints if --chp enabled
             if eval_metric and eval_datasets and self.args.val:
                 for i, eval_dataset in enumerate(eval_datasets):
+                    if i != 0:
+                        if not self.args.plot:
+                            continue
                     eval_miou=self.test(eval_metric, True, eval_dataset)
                     print(f"\tValidation MioU on {m[i]}: {eval_miou}")
                     self.mious[i].append(eval_miou)
@@ -306,6 +309,7 @@ class Client:
                 if(stop_condition):
                     print(f"Training stopped at epoch {epoch+1}: Stopping condition satisfied")
                     break
+                
             
         print("-----------------------------------------------------")
 

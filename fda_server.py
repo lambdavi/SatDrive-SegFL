@@ -93,9 +93,6 @@ class FdaServer:
                 
         if (not self.args.load) or self.args.resume or retrain_error:
             _, model_dict = self.train_round_source(self.source_dataset)
-            """if self.args.chp:
-                pth = f"models/checkpoints/{get_save_string(self.args, True)}_checkpoint.pth"
-                model_dict = torch.load(pth)"""
             self.model_params_dict = model_dict
             self.source_model.load_state_dict(self.model_params_dict)
 
