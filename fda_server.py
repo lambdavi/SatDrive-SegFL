@@ -68,6 +68,7 @@ class FdaServer:
         """
         Extracts styles from the training clients and adds them to the style augmenter.
         """
+        print(f"Extracting the style from {len(self.train_clients)} clients.")
         for c in self.train_clients:
             self.styleaug.add_style(c.dataset)
     
