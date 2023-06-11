@@ -156,6 +156,7 @@ class Server:
 
         if self.args.val == False:
             self.eval_train()
+            self.eval_validation()
             self.test()
 
     def eval_train(self):
