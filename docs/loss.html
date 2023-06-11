@@ -1,0 +1,1398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>loss API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>loss</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import torch
+import torch.nn as nn
+import numpy as np
+import torch.nn.functional as F
+
+def weight_train_loss(losses):
+    &#34;&#34;&#34;
+    Computes weighted training losses based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        `dict`: A dictionary containing the weighted average of losses.
+    &#34;&#34;&#34;
+    fin_losses = {}
+    c = list(losses.keys())[0]
+    loss_names = list(losses[c][&#39;loss&#39;].keys())
+    for l_name in loss_names:
+        tot_loss = 0
+        weights = 0
+        for _, d in losses.items():
+            try:
+                tot_loss += d[&#39;loss&#39;][l_name][-1] * d[&#39;num_samples&#39;]
+                weights += d[&#39;num_samples&#39;]
+            except:
+                pass
+        fin_losses[l_name] = tot_loss / weights
+    return fin_losses
+
+
+def weight_test_loss(losses):
+    &#34;&#34;&#34;
+    Computes the weighted test loss based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        float: The weighted average of the losses.
+    &#34;&#34;&#34;
+    tot_loss = 0
+    weights = 0
+    for k, v in losses.items():
+        tot_loss = tot_loss + v[&#39;loss&#39;] * v[&#39;num_samples&#39;]
+        weights = weights + v[&#39;num_samples&#39;]
+    return tot_loss / weights
+
+class IW_MaxSquareloss(nn.Module):
+    &#34;&#34;&#34;
+    Implements the IW_MaxSquareloss loss function for image segmentation.
+
+    Args:
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `ratio` (float): The ratio parameter for weight calculation.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    requires_reduction = False
+
+    def __init__(self, ignore_index=255, ratio=0.2, **kwargs):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.ratio = ratio
+
+    def forward(self, pred, **kwargs):
+        prob = F.softmax(pred, dim=1)
+        N, C, H, W = prob.size()
+        mask = (prob != self.ignore_index)
+        maxpred, argpred = torch.max(prob, 1)
+        mask_arg = (maxpred != self.ignore_index)
+        argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long) * self.ignore_index)
+        label = argpred
+        weights = []
+        batch_size = prob.size(0)
+        for i in range(batch_size):
+            hist = torch.histc(label[i].cpu().data.float(),
+                               bins=C + 1, min=-1,
+                               max=C - 1).float()
+            hist = hist[1:]
+            weight = \
+            (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
+                argpred.device)[argpred[i]].detach()
+            weights.append(weight)
+        weights = torch.stack(weights, dim=0).unsqueeze(1)
+        mask = mask_arg.unsqueeze(1).expand_as(prob)
+        prior = torch.mean(prob, (2, 3), True).detach()
+        loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
+        return loss
+    
+class SelfTrainingLoss(nn.Module):
+    &#34;&#34;&#34;
+    Implements the self-training loss for image segmentation.
+
+    Args:
+        `conf_th` (float): Confidence threshold for pseudo-labeling.
+        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `lambda_selftrain` (float): Weighting factor for the self-training loss.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    requires_reduction = False
+
+    def __init__(self, conf_th=0.9, fraction=0.66, ignore_index=255, lambda_selftrain=1, **kwargs):
+        super().__init__()
+        self.conf_th = conf_th
+        self.fraction = fraction
+        self.ignore_index = ignore_index
+        self.teacher = None
+        self.lambda_selftrain = lambda_selftrain
+
+    def set_teacher(self, model):
+        &#34;&#34;&#34;
+        Sets the teacher model for self-training.
+
+        Args:
+            model: The teacher model.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.teacher = model
+
+    def get_image_mask(self, prob, pseudo_lab):
+        &#34;&#34;&#34;
+        Generates the mask for pseudo-labeling based on confidence threshold and top-k fraction.
+
+        Args:
+            prob (torch.Tensor): The predicted probabilities.
+            pseudo_lab (torch.Tensor): The pseudo labels.
+
+        Returns:
+            torch.Tensor: The generated mask.
+        &#34;&#34;&#34;
+        max_prob = prob.detach().clone().max(0)[0]
+        mask_prob = max_prob &gt; self.conf_th if 0. &lt; self.conf_th &lt; 1. else torch.zeros(max_prob.size(),
+                                                                                       dtype=torch.bool).to(
+            max_prob.device)
+        mask_topk = torch.zeros(max_prob.size(), dtype=torch.bool).to(max_prob.device)
+        if 0. &lt; self.fraction &lt; 1.:
+            for c in pseudo_lab.unique():
+                mask_c = pseudo_lab == c
+                max_prob_c = max_prob.clone()
+                max_prob_c[~mask_c] = 0
+                _, idx_c = torch.topk(max_prob_c.flatten(), k=int(mask_c.sum() * self.fraction))
+                mask_topk_c = torch.zeros_like(max_prob_c.flatten(), dtype=torch.bool)
+                mask_topk_c[idx_c] = 1
+                mask_c &amp;= mask_topk_c.unflatten(dim=0, sizes=max_prob_c.size())
+                mask_topk |= mask_c
+        return mask_prob | mask_topk
+
+    def get_batch_mask(self, pred, pseudo_lab):
+        &#34;&#34;&#34;
+        Generates the mask for pseudo-labeling for a batch of samples.
+
+        Args:
+            pred (torch.Tensor): The predicted probabilities.
+            pseudo_lab (torch.Tensor): The pseudo labels.
+
+        Returns:
+            torch.Tensor: The generated batch mask.
+        &#34;&#34;&#34;
+        b, _, _, _ = pred.size()
+        mask = torch.stack([self.get_image_mask(pb, pl) for pb, pl in zip(F.softmax(pred, dim=1), pseudo_lab)], dim=0)
+        return mask
+
+    def get_pseudo_lab(self, pred, imgs=None, return_mask_fract=False, model=None, seg=False):
+        &#34;&#34;&#34;
+        Generates pseudo-labels for the given predictions and images.
+
+        Args:
+            pred (torch.Tensor): The predicted probabilities.
+            imgs (torch.Tensor): The input images.
+            return_mask_fract (bool): Whether to return the mask fraction.
+            model: The teacher model (optional).
+            seg (bool): Whether the prediction is segmentation logits.
+
+        Returns:
+            torch.Tensor: The generated pseudo-labels.
+        &#34;&#34;&#34;
+        teacher = self.teacher if model is None else model
+        if teacher is not None:
+            with torch.no_grad():
+                try:
+                    if seg:
+                        logi = self.teacher(imgs)
+                        logits = logi.logits
+                        pred = nn.functional.interpolate(
+                                logits, 
+                                size=imgs.shape[-2:], 
+                                mode=&#34;bilinear&#34;, 
+                                align_corners=False
+                        )
+                    else:
+                        pred = teacher(imgs)[&#39;out&#39;]
+                except:
+                    pred = teacher(imgs)
+                pseudo_lab = pred.detach().max(1)[1]
+        else:
+            pseudo_lab = pred.detach().max(1)[1]
+        mask = self.get_batch_mask(pred, pseudo_lab)
+        pseudo_lab[~mask] = self.ignore_index
+        if return_mask_fract:
+            return pseudo_lab, F.softmax(pred, dim=1), mask.sum() / mask.numel()
+        return pseudo_lab
+
+    def forward(self, pred, imgs=None, seg=False):
+        &#34;&#34;&#34;
+        Forward pass of the self-training loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images (optional).
+            seg (bool): Whether the prediction is segmentation logits.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        &#34;&#34;&#34;
+        pseudo_lab = self.get_pseudo_lab(pred, imgs, seg=seg)
+        loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction=&#39;none&#39;)
+        return loss.mean() * self.lambda_selftrain
+
+class SelfTrainingLossEntropy(SelfTrainingLoss):
+    &#34;&#34;&#34;
+    Self-training loss with entropy regularization.
+
+    Args:
+        lambda_entropy (float): Weighting factor for the entropy regularization.
+
+    Inherits from:
+        SelfTrainingLoss
+    &#34;&#34;&#34;
+    def __init__(self, lambda_entropy=0.005, **kwargs):
+        super().__init__(**kwargs)
+        self.lambda_entropy = lambda_entropy
+
+    def cross_entropy(self, pred, imgs=None):
+        &#34;&#34;&#34;
+        Calculates the cross-entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images.
+
+        Returns:
+            torch.Tensor: The calculated cross-entropy loss.
+        &#34;&#34;&#34;
+        pseudo_lab = self.get_pseudo_lab(pred, imgs)
+        loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction=&#39;none&#39;)
+        return loss.mean()
+
+    @staticmethod
+    def entropy_loss(pred):
+        &#34;&#34;&#34;
+        Calculates the entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+
+        Returns:
+            torch.Tensor: The calculated entropy loss.
+        &#34;&#34;&#34;
+        p = F.softmax(pred, dim=1)
+        logp = F.log_softmax(pred, dim=1)
+        plogp = p * logp
+        ent = -1.0 * plogp.sum(dim=1)
+        ent = ent / 2.9444
+        ent = ent ** 2.0 + 1e-8
+        ent = ent ** 2.0
+        return ent.mean()
+
+    def forward(self, pred, imgs=None):
+        &#34;&#34;&#34;
+        Forward pass of the self-training loss with entropy regularization.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        &#34;&#34;&#34;
+        ce_loss = self.cross_entropy(pred, imgs)
+        entropy_loss = self.entropy_loss(pred)*self.lambda_entropy
+        loss = ce_loss + entropy_loss
+        return loss
+    
+class EntropyLoss(nn.Module):
+    &#34;&#34;&#34;
+    Entropy loss.
+
+    Args:
+        lambda_entropy (float): Weighting factor for the entropy loss.
+        num_classes (int): Number of classes.
+
+    Inherits from:
+        nn.Module
+    &#34;&#34;&#34;
+    def __init__(self, lambda_entropy=0.005, num_classes=13, **kwargs):
+        super().__init__(**kwargs)
+        self.lambda_entropy = lambda_entropy
+        self.normalization_factor = self.__get_normalization_factor(num_classes)
+
+    def __get_normalization_factor(self, num_classes):
+        &#34;&#34;&#34;
+        Calculates the normalization factor for entropy loss.
+
+        Args:
+            num_classes (int): Number of classes.
+
+        Returns:
+            float: The normalization factor.
+        &#34;&#34;&#34;
+        a = torch.ones((1, num_classes, 1, 1))
+        a = 1 / num_classes * a
+        p = F.softmax(a, dim=1)
+        logp = F.log_softmax(a, dim=1)
+        plogp = p * logp
+        ent = -1.0 * plogp.sum(dim=1)
+        return ent.item()
+
+    def entropy_loss(self, pred):
+        p = F.softmax(pred, dim=1)
+        logp = F.log_softmax(pred, dim=1)
+        plogp = p * logp
+        ent = -1.0 * plogp.sum(dim=1)
+        ent = ent / self.normalization_factor
+        ent = ent ** 2.0 + 1e-8
+        ent = ent ** 2.0
+        return ent.mean()
+
+    def forward(self, pred):
+        &#34;&#34;&#34;
+        Forward pass of the entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        &#34;&#34;&#34;
+        loss = self.entropy_loss(pred)*self.lambda_entropy
+        return loss</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="loss.weight_test_loss"><code class="name flex">
+<span>def <span class="ident">weight_test_loss</span></span>(<span>losses)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Computes the weighted test loss based on the given dictionary of losses.</p>
+<h2 id="args">Args</h2>
+<p><code>losses</code> (dict): A dictionary containing the losses for different samples.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The weighted average of the losses.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_test_loss(losses):
+    &#34;&#34;&#34;
+    Computes the weighted test loss based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        float: The weighted average of the losses.
+    &#34;&#34;&#34;
+    tot_loss = 0
+    weights = 0
+    for k, v in losses.items():
+        tot_loss = tot_loss + v[&#39;loss&#39;] * v[&#39;num_samples&#39;]
+        weights = weights + v[&#39;num_samples&#39;]
+    return tot_loss / weights</code></pre>
+</details>
+</dd>
+<dt id="loss.weight_train_loss"><code class="name flex">
+<span>def <span class="ident">weight_train_loss</span></span>(<span>losses)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Computes weighted training losses based on the given dictionary of losses.</p>
+<h2 id="args">Args</h2>
+<p><code>losses</code> (dict): A dictionary containing the losses for different samples.</p>
+<h2 id="returns">Returns</h2>
+<p><code>dict</code>: A dictionary containing the weighted average of losses.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_train_loss(losses):
+    &#34;&#34;&#34;
+    Computes weighted training losses based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        `dict`: A dictionary containing the weighted average of losses.
+    &#34;&#34;&#34;
+    fin_losses = {}
+    c = list(losses.keys())[0]
+    loss_names = list(losses[c][&#39;loss&#39;].keys())
+    for l_name in loss_names:
+        tot_loss = 0
+        weights = 0
+        for _, d in losses.items():
+            try:
+                tot_loss += d[&#39;loss&#39;][l_name][-1] * d[&#39;num_samples&#39;]
+                weights += d[&#39;num_samples&#39;]
+            except:
+                pass
+        fin_losses[l_name] = tot_loss / weights
+    return fin_losses</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="loss.EntropyLoss"><code class="flex name class">
+<span>class <span class="ident">EntropyLoss</span></span>
+<span>(</span><span>lambda_entropy=0.005, num_classes=13, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Entropy loss.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lambda_entropy</code></strong> :&ensp;<code>float</code></dt>
+<dd>Weighting factor for the entropy loss.</dd>
+<dt><strong><code>num_classes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of classes.</dd>
+</dl>
+<p>Inherits from:
+nn.Module</p>
+<p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EntropyLoss(nn.Module):
+    &#34;&#34;&#34;
+    Entropy loss.
+
+    Args:
+        lambda_entropy (float): Weighting factor for the entropy loss.
+        num_classes (int): Number of classes.
+
+    Inherits from:
+        nn.Module
+    &#34;&#34;&#34;
+    def __init__(self, lambda_entropy=0.005, num_classes=13, **kwargs):
+        super().__init__(**kwargs)
+        self.lambda_entropy = lambda_entropy
+        self.normalization_factor = self.__get_normalization_factor(num_classes)
+
+    def __get_normalization_factor(self, num_classes):
+        &#34;&#34;&#34;
+        Calculates the normalization factor for entropy loss.
+
+        Args:
+            num_classes (int): Number of classes.
+
+        Returns:
+            float: The normalization factor.
+        &#34;&#34;&#34;
+        a = torch.ones((1, num_classes, 1, 1))
+        a = 1 / num_classes * a
+        p = F.softmax(a, dim=1)
+        logp = F.log_softmax(a, dim=1)
+        plogp = p * logp
+        ent = -1.0 * plogp.sum(dim=1)
+        return ent.item()
+
+    def entropy_loss(self, pred):
+        p = F.softmax(pred, dim=1)
+        logp = F.log_softmax(pred, dim=1)
+        plogp = p * logp
+        ent = -1.0 * plogp.sum(dim=1)
+        ent = ent / self.normalization_factor
+        ent = ent ** 2.0 + 1e-8
+        ent = ent ** 2.0
+        return ent.mean()
+
+    def forward(self, pred):
+        &#34;&#34;&#34;
+        Forward pass of the entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        &#34;&#34;&#34;
+        loss = self.entropy_loss(pred)*self.lambda_entropy
+        return loss</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="loss.EntropyLoss.entropy_loss"><code class="name flex">
+<span>def <span class="ident">entropy_loss</span></span>(<span>self, pred)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def entropy_loss(self, pred):
+    p = F.softmax(pred, dim=1)
+    logp = F.log_softmax(pred, dim=1)
+    plogp = p * logp
+    ent = -1.0 * plogp.sum(dim=1)
+    ent = ent / self.normalization_factor
+    ent = ent ** 2.0 + 1e-8
+    ent = ent ** 2.0
+    return ent.mean()</code></pre>
+</details>
+</dd>
+<dt id="loss.EntropyLoss.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, pred) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Forward pass of the entropy loss.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted logits.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated loss value.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, pred):
+    &#34;&#34;&#34;
+    Forward pass of the entropy loss.
+
+    Args:
+        pred (torch.Tensor): The predicted logits.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    loss = self.entropy_loss(pred)*self.lambda_entropy
+    return loss</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="loss.IW_MaxSquareloss"><code class="flex name class">
+<span>class <span class="ident">IW_MaxSquareloss</span></span>
+<span>(</span><span>ignore_index=255, ratio=0.2, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Implements the IW_MaxSquareloss loss function for image segmentation.</p>
+<h2 id="args">Args</h2>
+<p><code>ignore_index</code> (int): The index value to be ignored during loss calculation.
+<code>ratio</code> (float): The ratio parameter for weight calculation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated loss value.</dd>
+</dl>
+<p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IW_MaxSquareloss(nn.Module):
+    &#34;&#34;&#34;
+    Implements the IW_MaxSquareloss loss function for image segmentation.
+
+    Args:
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `ratio` (float): The ratio parameter for weight calculation.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    requires_reduction = False
+
+    def __init__(self, ignore_index=255, ratio=0.2, **kwargs):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.ratio = ratio
+
+    def forward(self, pred, **kwargs):
+        prob = F.softmax(pred, dim=1)
+        N, C, H, W = prob.size()
+        mask = (prob != self.ignore_index)
+        maxpred, argpred = torch.max(prob, 1)
+        mask_arg = (maxpred != self.ignore_index)
+        argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long) * self.ignore_index)
+        label = argpred
+        weights = []
+        batch_size = prob.size(0)
+        for i in range(batch_size):
+            hist = torch.histc(label[i].cpu().data.float(),
+                               bins=C + 1, min=-1,
+                               max=C - 1).float()
+            hist = hist[1:]
+            weight = \
+            (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
+                argpred.device)[argpred[i]].detach()
+            weights.append(weight)
+        weights = torch.stack(weights, dim=0).unsqueeze(1)
+        mask = mask_arg.unsqueeze(1).expand_as(prob)
+        prior = torch.mean(prob, (2, 3), True).detach()
+        loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
+        return loss</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="loss.IW_MaxSquareloss.requires_reduction"><code class="name">var <span class="ident">requires_reduction</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="loss.IW_MaxSquareloss.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, pred, **kwargs) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, pred, **kwargs):
+    prob = F.softmax(pred, dim=1)
+    N, C, H, W = prob.size()
+    mask = (prob != self.ignore_index)
+    maxpred, argpred = torch.max(prob, 1)
+    mask_arg = (maxpred != self.ignore_index)
+    argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long) * self.ignore_index)
+    label = argpred
+    weights = []
+    batch_size = prob.size(0)
+    for i in range(batch_size):
+        hist = torch.histc(label[i].cpu().data.float(),
+                           bins=C + 1, min=-1,
+                           max=C - 1).float()
+        hist = hist[1:]
+        weight = \
+        (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
+            argpred.device)[argpred[i]].detach()
+        weights.append(weight)
+    weights = torch.stack(weights, dim=0).unsqueeze(1)
+    mask = mask_arg.unsqueeze(1).expand_as(prob)
+    prior = torch.mean(prob, (2, 3), True).detach()
+    loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
+    return loss</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="loss.SelfTrainingLoss"><code class="flex name class">
+<span>class <span class="ident">SelfTrainingLoss</span></span>
+<span>(</span><span>conf_th=0.9, fraction=0.66, ignore_index=255, lambda_selftrain=1, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Implements the self-training loss for image segmentation.</p>
+<h2 id="args">Args</h2>
+<p><code>conf_th</code> (float): Confidence threshold for pseudo-labeling.
+<code>fraction</code> (float): Fraction of top-k pixels to be considered for pseudo-labeling.
+<code>ignore_index</code> (int): The index value to be ignored during loss calculation.
+<code>lambda_selftrain</code> (float): Weighting factor for the self-training loss.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated loss value.</dd>
+</dl>
+<p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SelfTrainingLoss(nn.Module):
+    &#34;&#34;&#34;
+    Implements the self-training loss for image segmentation.
+
+    Args:
+        `conf_th` (float): Confidence threshold for pseudo-labeling.
+        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `lambda_selftrain` (float): Weighting factor for the self-training loss.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    requires_reduction = False
+
+    def __init__(self, conf_th=0.9, fraction=0.66, ignore_index=255, lambda_selftrain=1, **kwargs):
+        super().__init__()
+        self.conf_th = conf_th
+        self.fraction = fraction
+        self.ignore_index = ignore_index
+        self.teacher = None
+        self.lambda_selftrain = lambda_selftrain
+
+    def set_teacher(self, model):
+        &#34;&#34;&#34;
+        Sets the teacher model for self-training.
+
+        Args:
+            model: The teacher model.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.teacher = model
+
+    def get_image_mask(self, prob, pseudo_lab):
+        &#34;&#34;&#34;
+        Generates the mask for pseudo-labeling based on confidence threshold and top-k fraction.
+
+        Args:
+            prob (torch.Tensor): The predicted probabilities.
+            pseudo_lab (torch.Tensor): The pseudo labels.
+
+        Returns:
+            torch.Tensor: The generated mask.
+        &#34;&#34;&#34;
+        max_prob = prob.detach().clone().max(0)[0]
+        mask_prob = max_prob &gt; self.conf_th if 0. &lt; self.conf_th &lt; 1. else torch.zeros(max_prob.size(),
+                                                                                       dtype=torch.bool).to(
+            max_prob.device)
+        mask_topk = torch.zeros(max_prob.size(), dtype=torch.bool).to(max_prob.device)
+        if 0. &lt; self.fraction &lt; 1.:
+            for c in pseudo_lab.unique():
+                mask_c = pseudo_lab == c
+                max_prob_c = max_prob.clone()
+                max_prob_c[~mask_c] = 0
+                _, idx_c = torch.topk(max_prob_c.flatten(), k=int(mask_c.sum() * self.fraction))
+                mask_topk_c = torch.zeros_like(max_prob_c.flatten(), dtype=torch.bool)
+                mask_topk_c[idx_c] = 1
+                mask_c &amp;= mask_topk_c.unflatten(dim=0, sizes=max_prob_c.size())
+                mask_topk |= mask_c
+        return mask_prob | mask_topk
+
+    def get_batch_mask(self, pred, pseudo_lab):
+        &#34;&#34;&#34;
+        Generates the mask for pseudo-labeling for a batch of samples.
+
+        Args:
+            pred (torch.Tensor): The predicted probabilities.
+            pseudo_lab (torch.Tensor): The pseudo labels.
+
+        Returns:
+            torch.Tensor: The generated batch mask.
+        &#34;&#34;&#34;
+        b, _, _, _ = pred.size()
+        mask = torch.stack([self.get_image_mask(pb, pl) for pb, pl in zip(F.softmax(pred, dim=1), pseudo_lab)], dim=0)
+        return mask
+
+    def get_pseudo_lab(self, pred, imgs=None, return_mask_fract=False, model=None, seg=False):
+        &#34;&#34;&#34;
+        Generates pseudo-labels for the given predictions and images.
+
+        Args:
+            pred (torch.Tensor): The predicted probabilities.
+            imgs (torch.Tensor): The input images.
+            return_mask_fract (bool): Whether to return the mask fraction.
+            model: The teacher model (optional).
+            seg (bool): Whether the prediction is segmentation logits.
+
+        Returns:
+            torch.Tensor: The generated pseudo-labels.
+        &#34;&#34;&#34;
+        teacher = self.teacher if model is None else model
+        if teacher is not None:
+            with torch.no_grad():
+                try:
+                    if seg:
+                        logi = self.teacher(imgs)
+                        logits = logi.logits
+                        pred = nn.functional.interpolate(
+                                logits, 
+                                size=imgs.shape[-2:], 
+                                mode=&#34;bilinear&#34;, 
+                                align_corners=False
+                        )
+                    else:
+                        pred = teacher(imgs)[&#39;out&#39;]
+                except:
+                    pred = teacher(imgs)
+                pseudo_lab = pred.detach().max(1)[1]
+        else:
+            pseudo_lab = pred.detach().max(1)[1]
+        mask = self.get_batch_mask(pred, pseudo_lab)
+        pseudo_lab[~mask] = self.ignore_index
+        if return_mask_fract:
+            return pseudo_lab, F.softmax(pred, dim=1), mask.sum() / mask.numel()
+        return pseudo_lab
+
+    def forward(self, pred, imgs=None, seg=False):
+        &#34;&#34;&#34;
+        Forward pass of the self-training loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images (optional).
+            seg (bool): Whether the prediction is segmentation logits.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        &#34;&#34;&#34;
+        pseudo_lab = self.get_pseudo_lab(pred, imgs, seg=seg)
+        loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction=&#39;none&#39;)
+        return loss.mean() * self.lambda_selftrain</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="loss.SelfTrainingLossEntropy" href="#loss.SelfTrainingLossEntropy">SelfTrainingLossEntropy</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="loss.SelfTrainingLoss.requires_reduction"><code class="name">var <span class="ident">requires_reduction</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="loss.SelfTrainingLoss.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, pred, imgs=None, seg=False) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Forward pass of the self-training loss.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted logits.</dd>
+<dt><strong><code>imgs</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The input images (optional).</dd>
+<dt><strong><code>seg</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether the prediction is segmentation logits.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated loss value.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, pred, imgs=None, seg=False):
+    &#34;&#34;&#34;
+    Forward pass of the self-training loss.
+
+    Args:
+        pred (torch.Tensor): The predicted logits.
+        imgs (torch.Tensor): The input images (optional).
+        seg (bool): Whether the prediction is segmentation logits.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    pseudo_lab = self.get_pseudo_lab(pred, imgs, seg=seg)
+    loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction=&#39;none&#39;)
+    return loss.mean() * self.lambda_selftrain</code></pre>
+</details>
+</dd>
+<dt id="loss.SelfTrainingLoss.get_batch_mask"><code class="name flex">
+<span>def <span class="ident">get_batch_mask</span></span>(<span>self, pred, pseudo_lab)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates the mask for pseudo-labeling for a batch of samples.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted probabilities.</dd>
+<dt><strong><code>pseudo_lab</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The pseudo labels.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The generated batch mask.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_batch_mask(self, pred, pseudo_lab):
+    &#34;&#34;&#34;
+    Generates the mask for pseudo-labeling for a batch of samples.
+
+    Args:
+        pred (torch.Tensor): The predicted probabilities.
+        pseudo_lab (torch.Tensor): The pseudo labels.
+
+    Returns:
+        torch.Tensor: The generated batch mask.
+    &#34;&#34;&#34;
+    b, _, _, _ = pred.size()
+    mask = torch.stack([self.get_image_mask(pb, pl) for pb, pl in zip(F.softmax(pred, dim=1), pseudo_lab)], dim=0)
+    return mask</code></pre>
+</details>
+</dd>
+<dt id="loss.SelfTrainingLoss.get_image_mask"><code class="name flex">
+<span>def <span class="ident">get_image_mask</span></span>(<span>self, prob, pseudo_lab)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates the mask for pseudo-labeling based on confidence threshold and top-k fraction.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prob</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted probabilities.</dd>
+<dt><strong><code>pseudo_lab</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The pseudo labels.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The generated mask.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_image_mask(self, prob, pseudo_lab):
+    &#34;&#34;&#34;
+    Generates the mask for pseudo-labeling based on confidence threshold and top-k fraction.
+
+    Args:
+        prob (torch.Tensor): The predicted probabilities.
+        pseudo_lab (torch.Tensor): The pseudo labels.
+
+    Returns:
+        torch.Tensor: The generated mask.
+    &#34;&#34;&#34;
+    max_prob = prob.detach().clone().max(0)[0]
+    mask_prob = max_prob &gt; self.conf_th if 0. &lt; self.conf_th &lt; 1. else torch.zeros(max_prob.size(),
+                                                                                   dtype=torch.bool).to(
+        max_prob.device)
+    mask_topk = torch.zeros(max_prob.size(), dtype=torch.bool).to(max_prob.device)
+    if 0. &lt; self.fraction &lt; 1.:
+        for c in pseudo_lab.unique():
+            mask_c = pseudo_lab == c
+            max_prob_c = max_prob.clone()
+            max_prob_c[~mask_c] = 0
+            _, idx_c = torch.topk(max_prob_c.flatten(), k=int(mask_c.sum() * self.fraction))
+            mask_topk_c = torch.zeros_like(max_prob_c.flatten(), dtype=torch.bool)
+            mask_topk_c[idx_c] = 1
+            mask_c &amp;= mask_topk_c.unflatten(dim=0, sizes=max_prob_c.size())
+            mask_topk |= mask_c
+    return mask_prob | mask_topk</code></pre>
+</details>
+</dd>
+<dt id="loss.SelfTrainingLoss.get_pseudo_lab"><code class="name flex">
+<span>def <span class="ident">get_pseudo_lab</span></span>(<span>self, pred, imgs=None, return_mask_fract=False, model=None, seg=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates pseudo-labels for the given predictions and images.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted probabilities.</dd>
+<dt><strong><code>imgs</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The input images.</dd>
+<dt><strong><code>return_mask_fract</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to return the mask fraction.</dd>
+<dt><strong><code>model</code></strong></dt>
+<dd>The teacher model (optional).</dd>
+<dt><strong><code>seg</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether the prediction is segmentation logits.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The generated pseudo-labels.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_pseudo_lab(self, pred, imgs=None, return_mask_fract=False, model=None, seg=False):
+    &#34;&#34;&#34;
+    Generates pseudo-labels for the given predictions and images.
+
+    Args:
+        pred (torch.Tensor): The predicted probabilities.
+        imgs (torch.Tensor): The input images.
+        return_mask_fract (bool): Whether to return the mask fraction.
+        model: The teacher model (optional).
+        seg (bool): Whether the prediction is segmentation logits.
+
+    Returns:
+        torch.Tensor: The generated pseudo-labels.
+    &#34;&#34;&#34;
+    teacher = self.teacher if model is None else model
+    if teacher is not None:
+        with torch.no_grad():
+            try:
+                if seg:
+                    logi = self.teacher(imgs)
+                    logits = logi.logits
+                    pred = nn.functional.interpolate(
+                            logits, 
+                            size=imgs.shape[-2:], 
+                            mode=&#34;bilinear&#34;, 
+                            align_corners=False
+                    )
+                else:
+                    pred = teacher(imgs)[&#39;out&#39;]
+            except:
+                pred = teacher(imgs)
+            pseudo_lab = pred.detach().max(1)[1]
+    else:
+        pseudo_lab = pred.detach().max(1)[1]
+    mask = self.get_batch_mask(pred, pseudo_lab)
+    pseudo_lab[~mask] = self.ignore_index
+    if return_mask_fract:
+        return pseudo_lab, F.softmax(pred, dim=1), mask.sum() / mask.numel()
+    return pseudo_lab</code></pre>
+</details>
+</dd>
+<dt id="loss.SelfTrainingLoss.set_teacher"><code class="name flex">
+<span>def <span class="ident">set_teacher</span></span>(<span>self, model)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the teacher model for self-training.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong></dt>
+<dd>The teacher model.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_teacher(self, model):
+    &#34;&#34;&#34;
+    Sets the teacher model for self-training.
+
+    Args:
+        model: The teacher model.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self.teacher = model</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="loss.SelfTrainingLossEntropy"><code class="flex name class">
+<span>class <span class="ident">SelfTrainingLossEntropy</span></span>
+<span>(</span><span>lambda_entropy=0.005, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Self-training loss with entropy regularization.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lambda_entropy</code></strong> :&ensp;<code>float</code></dt>
+<dd>Weighting factor for the entropy regularization.</dd>
+</dl>
+<p>Inherits from:
+SelfTrainingLoss</p>
+<p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SelfTrainingLossEntropy(SelfTrainingLoss):
+    &#34;&#34;&#34;
+    Self-training loss with entropy regularization.
+
+    Args:
+        lambda_entropy (float): Weighting factor for the entropy regularization.
+
+    Inherits from:
+        SelfTrainingLoss
+    &#34;&#34;&#34;
+    def __init__(self, lambda_entropy=0.005, **kwargs):
+        super().__init__(**kwargs)
+        self.lambda_entropy = lambda_entropy
+
+    def cross_entropy(self, pred, imgs=None):
+        &#34;&#34;&#34;
+        Calculates the cross-entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images.
+
+        Returns:
+            torch.Tensor: The calculated cross-entropy loss.
+        &#34;&#34;&#34;
+        pseudo_lab = self.get_pseudo_lab(pred, imgs)
+        loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction=&#39;none&#39;)
+        return loss.mean()
+
+    @staticmethod
+    def entropy_loss(pred):
+        &#34;&#34;&#34;
+        Calculates the entropy loss.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+
+        Returns:
+            torch.Tensor: The calculated entropy loss.
+        &#34;&#34;&#34;
+        p = F.softmax(pred, dim=1)
+        logp = F.log_softmax(pred, dim=1)
+        plogp = p * logp
+        ent = -1.0 * plogp.sum(dim=1)
+        ent = ent / 2.9444
+        ent = ent ** 2.0 + 1e-8
+        ent = ent ** 2.0
+        return ent.mean()
+
+    def forward(self, pred, imgs=None):
+        &#34;&#34;&#34;
+        Forward pass of the self-training loss with entropy regularization.
+
+        Args:
+            pred (torch.Tensor): The predicted logits.
+            imgs (torch.Tensor): The input images.
+
+        Returns:
+            torch.Tensor: The calculated loss value.
+        &#34;&#34;&#34;
+        ce_loss = self.cross_entropy(pred, imgs)
+        entropy_loss = self.entropy_loss(pred)*self.lambda_entropy
+        loss = ce_loss + entropy_loss
+        return loss</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="loss.SelfTrainingLoss" href="#loss.SelfTrainingLoss">SelfTrainingLoss</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="loss.SelfTrainingLossEntropy.entropy_loss"><code class="name flex">
+<span>def <span class="ident">entropy_loss</span></span>(<span>pred)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates the entropy loss.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted logits.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated entropy loss.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def entropy_loss(pred):
+    &#34;&#34;&#34;
+    Calculates the entropy loss.
+
+    Args:
+        pred (torch.Tensor): The predicted logits.
+
+    Returns:
+        torch.Tensor: The calculated entropy loss.
+    &#34;&#34;&#34;
+    p = F.softmax(pred, dim=1)
+    logp = F.log_softmax(pred, dim=1)
+    plogp = p * logp
+    ent = -1.0 * plogp.sum(dim=1)
+    ent = ent / 2.9444
+    ent = ent ** 2.0 + 1e-8
+    ent = ent ** 2.0
+    return ent.mean()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="loss.SelfTrainingLossEntropy.cross_entropy"><code class="name flex">
+<span>def <span class="ident">cross_entropy</span></span>(<span>self, pred, imgs=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates the cross-entropy loss.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted logits.</dd>
+<dt><strong><code>imgs</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The input images.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated cross-entropy loss.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cross_entropy(self, pred, imgs=None):
+    &#34;&#34;&#34;
+    Calculates the cross-entropy loss.
+
+    Args:
+        pred (torch.Tensor): The predicted logits.
+        imgs (torch.Tensor): The input images.
+
+    Returns:
+        torch.Tensor: The calculated cross-entropy loss.
+    &#34;&#34;&#34;
+    pseudo_lab = self.get_pseudo_lab(pred, imgs)
+    loss = F.cross_entropy(input=pred, target=pseudo_lab, ignore_index=self.ignore_index, reduction=&#39;none&#39;)
+    return loss.mean()</code></pre>
+</details>
+</dd>
+<dt id="loss.SelfTrainingLossEntropy.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, pred, imgs=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Forward pass of the self-training loss with entropy regularization.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pred</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The predicted logits.</dd>
+<dt><strong><code>imgs</code></strong> :&ensp;<code>torch.Tensor</code></dt>
+<dd>The input images.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>The calculated loss value.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, pred, imgs=None):
+    &#34;&#34;&#34;
+    Forward pass of the self-training loss with entropy regularization.
+
+    Args:
+        pred (torch.Tensor): The predicted logits.
+        imgs (torch.Tensor): The input images.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    &#34;&#34;&#34;
+    ce_loss = self.cross_entropy(pred, imgs)
+    entropy_loss = self.entropy_loss(pred)*self.lambda_entropy
+    loss = ce_loss + entropy_loss
+    return loss</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="loss.SelfTrainingLoss" href="#loss.SelfTrainingLoss">SelfTrainingLoss</a></b></code>:
+<ul class="hlist">
+<li><code><a title="loss.SelfTrainingLoss.get_batch_mask" href="#loss.SelfTrainingLoss.get_batch_mask">get_batch_mask</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.get_image_mask" href="#loss.SelfTrainingLoss.get_image_mask">get_image_mask</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.get_pseudo_lab" href="#loss.SelfTrainingLoss.get_pseudo_lab">get_pseudo_lab</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.set_teacher" href="#loss.SelfTrainingLoss.set_teacher">set_teacher</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="loss.weight_test_loss" href="#loss.weight_test_loss">weight_test_loss</a></code></li>
+<li><code><a title="loss.weight_train_loss" href="#loss.weight_train_loss">weight_train_loss</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="loss.EntropyLoss" href="#loss.EntropyLoss">EntropyLoss</a></code></h4>
+<ul class="">
+<li><code><a title="loss.EntropyLoss.entropy_loss" href="#loss.EntropyLoss.entropy_loss">entropy_loss</a></code></li>
+<li><code><a title="loss.EntropyLoss.forward" href="#loss.EntropyLoss.forward">forward</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="loss.IW_MaxSquareloss" href="#loss.IW_MaxSquareloss">IW_MaxSquareloss</a></code></h4>
+<ul class="">
+<li><code><a title="loss.IW_MaxSquareloss.forward" href="#loss.IW_MaxSquareloss.forward">forward</a></code></li>
+<li><code><a title="loss.IW_MaxSquareloss.requires_reduction" href="#loss.IW_MaxSquareloss.requires_reduction">requires_reduction</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="loss.SelfTrainingLoss" href="#loss.SelfTrainingLoss">SelfTrainingLoss</a></code></h4>
+<ul class="two-column">
+<li><code><a title="loss.SelfTrainingLoss.forward" href="#loss.SelfTrainingLoss.forward">forward</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.get_batch_mask" href="#loss.SelfTrainingLoss.get_batch_mask">get_batch_mask</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.get_image_mask" href="#loss.SelfTrainingLoss.get_image_mask">get_image_mask</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.get_pseudo_lab" href="#loss.SelfTrainingLoss.get_pseudo_lab">get_pseudo_lab</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.requires_reduction" href="#loss.SelfTrainingLoss.requires_reduction">requires_reduction</a></code></li>
+<li><code><a title="loss.SelfTrainingLoss.set_teacher" href="#loss.SelfTrainingLoss.set_teacher">set_teacher</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="loss.SelfTrainingLossEntropy" href="#loss.SelfTrainingLossEntropy">SelfTrainingLossEntropy</a></code></h4>
+<ul class="">
+<li><code><a title="loss.SelfTrainingLossEntropy.cross_entropy" href="#loss.SelfTrainingLossEntropy.cross_entropy">cross_entropy</a></code></li>
+<li><code><a title="loss.SelfTrainingLossEntropy.entropy_loss" href="#loss.SelfTrainingLossEntropy.entropy_loss">entropy_loss</a></code></li>
+<li><code><a title="loss.SelfTrainingLossEntropy.forward" href="#loss.SelfTrainingLossEntropy.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
