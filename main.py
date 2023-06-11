@@ -77,16 +77,12 @@ def get_transforms(args):
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
         else:
-            train_transforms = [
-                sstr.Compose([
-                    RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
-                ]),
-                sstr.Compose([
+            train_transforms = sstr.Compose([
                     sstr.RandomCrop((512, 928 if args.model != "segformer" else 512)),
                     sstr.ToTensor(),
                     sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ]), 
-            ]
+                ])
+            
         test_transforms = sstr.Compose([
             sstr.ToTensor(),
             sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
