@@ -314,7 +314,7 @@ class Client:
         print("-----------------------------------------------------")
 
         # Save Graph if --val enabled
-        if self.args.val and (not self.args.fda):
+        if self.args.plot:
             self.plot_loss_miou()
 
         return len(self.dataset), self.model.state_dict()
