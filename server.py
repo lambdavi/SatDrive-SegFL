@@ -185,12 +185,11 @@ class Server:
         print("------------------------------------") 
 
         self.metrics["eval_train"].reset()
-
         self.validation_clients[0].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.validation_clients[0].test(self.metrics["eval_train"])
     
         res=self.metrics["eval_train"].get_results()
-        print(f'Validation: Mean IoU: {res["Mean IoU"]}')
+        print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
         return res["Mean IoU"]
 
     def test(self):
