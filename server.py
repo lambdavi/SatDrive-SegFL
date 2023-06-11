@@ -7,6 +7,7 @@ import torch
 from PIL import Image
 
 import datasets.ss_transforms as sstr
+from utils.utils import get_save_string
 
 
 class Server:
@@ -121,7 +122,7 @@ class Server:
             num_rounds = 1
         
         if self.args.load or self.args.resume:
-            pth = f"models/checkpoints/{self.args.model}_{self.args.dataset}_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_{self.args.dataset}_best_model.pth"
+            pth = f"models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, False)}_best_model.pth"
             try:
                 saved_params = torch.load(pth)
                 self.model_params_dict = saved_params
@@ -151,7 +152,7 @@ class Server:
             
             if self.args.save:
                 print("Saving model...")
-                torch.save(self.model_params_dict, f'models/{self.args.model}_{self.args.dataset}_best_model.pth')
+                torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
 
         if self.args.val == False:
             if self.args.dataset != "gta5":       
@@ -212,7 +213,7 @@ class Server:
 
         self.test_clients[1].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.test_clients[1].test(self.metrics["test_diff_dom"])
-        
+
         res=self.metrics["test_diff_dom"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 

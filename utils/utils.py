@@ -1,6 +1,21 @@
 import torch.nn as nn
 import numpy as np
 
+def get_save_string(args, is_source=False):
+    prefix=args.dataset + "_" + args.model + "_"
+    mode=""
+    if args.centr:
+        mode = "centr"
+    elif args.fda:
+        if is_source:
+            mode="fda_source"
+        else:
+            mode="fda"
+    else:
+        mode="distr"
+
+    return prefix+mode
+
 # Internal function
 def split_list_random(lst, m):
     n = len(lst)

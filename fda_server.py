@@ -8,7 +8,7 @@ from PIL import Image
 
 import datasets.ss_transforms as sstr
 from utils.style_transfer import StyleAugment
-
+from utils.utils import get_save_string
 
 class FdaServer:
     """
@@ -79,7 +79,7 @@ class FdaServer:
         retrain_error=False
 
         if self.args.load or self.args.resume:
-            pth = f"models/checkpoints/{self.args.model}_source_checkpoint.pth" if self.args.chp else f"models/{self.args.model}_source_best_model.pth"
+            pth = f"models/checkpoints/{get_save_string(self.args, True)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, True)}_best_model.pth"
             try:
                 saved_params = torch.load(pth)
                 self.model_params_dict = saved_params
@@ -94,14 +94,14 @@ class FdaServer:
         if (not self.args.load) or self.args.resume or retrain_error:
             _, model_dict = self.train_round_source(self.source_dataset)
             if self.args.chp:
-                pth = "models/checkpoints/source_checkpoint.pth"
+                pth = f"models/checkpoints/{get_save_string(self.args, True)}_checkpoint.pth"
                 model_dict = torch.load(pth)
             self.model_params_dict = model_dict
             self.source_model.load_state_dict(self.model_params_dict)
 
         if self.args.save:
             print("Saving training source...")
-            torch.save(self.model_params_dict, f'models/{self.args.model}_source_best_model.pth')
+            torch.save(self.model_params_dict, f'models/{get_save_string(self.args, True)}_best_model.pth')
 
     def train_round_source(self, client):
         """

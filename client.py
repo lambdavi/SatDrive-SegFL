@@ -9,8 +9,7 @@ from tqdm import tqdm
 
 from utils.early_stopping import EarlyStopper
 from utils.loss import IW_MaxSquareloss, SelfTrainingLoss
-from utils.utils import HardNegativeMining, MeanReduction
-
+from utils.utils import HardNegativeMining, MeanReduction, get_save_string
 
 class Client:
     """
@@ -246,6 +245,9 @@ class Client:
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
 
+        # This flag is used to save the chp with an adequate name 
+        is_source = False
+
         # Section to evalutation at each epoch if --val param is set
         best_miou = 0 if eval_metric else None
         if eval_datasets:
@@ -261,8 +263,13 @@ class Client:
         stop_condition = False
 
         # If the teacher is set it means we are in FDA mode
-        if self.teacher:
-            crit, red = self.__get_criterion_and_reduction_rules()
+        if self.fda:
+            if self.teacher:
+                crit, red = self.__get_criterion_and_reduction_rules()
+            else:
+                # This flag is used to save the chp with an adequate name 
+                is_source = True
+        
 
         print("-----------------------------------------------------")
 
@@ -289,10 +296,7 @@ class Client:
                     self.mious[i].append(eval_miou)
                     if self.args.chp and (eval_miou>best_miou) and i == 0:
                             best_miou = eval_miou
-                            if self.args.fda:
-                                torch.save(self.model.state_dict(), "models/checkpoints/source_checkpoint.pth")
-                            else:
-                                torch.save(self.model.state_dict(), f"models/checkpoints/{self.args.dataset}_checkpoint.pth")
+                            torch.save(self.model.state_dict(), f"models/checkpoints/{get_save_string(self.args, is_source)}_checkpoint.pth")
                             print(f"\tSaved checkpoint at epoch {epoch+1}.")
                 self.model.train()
 
