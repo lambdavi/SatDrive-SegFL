@@ -95,7 +95,7 @@ class FdaServer:
                 print("The checkpoint for this model does not exist. The model will be retrained.")
                 retrain_error=True
                 
-        if (not self.args.load) or self.args.resume or retrain_error:
+        if (not self.args.load and not self.args.load_from) or self.args.resume or retrain_error:
             _, model_dict = self.train_round_source(self.source_dataset)
             self.model_params_dict = model_dict
             self.source_model.load_state_dict(self.model_params_dict)

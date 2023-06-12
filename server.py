@@ -139,7 +139,7 @@ class Server:
                 print("The checkpoint for this model does not exist. The model will be retrained.")
                 retrain_error=True
             
-        if (not self.args.load) or self.args.resume or retrain_error:
+        if (not self.args.load and not self.args.load_from) or self.args.resume or retrain_error:
             for r in range(num_rounds):
                 print("------------------")
                 print(f"Round {r+1}/{num_rounds} started.")
