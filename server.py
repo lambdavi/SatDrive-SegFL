@@ -125,7 +125,6 @@ class Server:
             # If specified a custom name for the saved model load the path
             if self.args.load_from:
                 pth = self.args.load_from
-                print(pth)
             else:
                 pth = f"models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, False)}_best_model.pth"
             try:
