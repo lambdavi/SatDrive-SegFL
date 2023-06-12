@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from torch import nn
 from torchvision.models import resnet18
-from torchvision.transforms import RandomApply
+from torchvision.transforms import RandomApply, GaussianBlur, ElasticTransform
 from transformers import SegformerForSemanticSegmentation
 from transformers.utils import logging
 
@@ -71,12 +71,12 @@ def get_transforms(args):
     """ Get the transformations based both on the dataset and the model. """
     if args.model in ["segformer",'deeplabv3_mobilenetv2', 'bisenetv2']:
         if args.dataset == "loveda":
-            train_transforms = sstr.Compose([
+            train_transforms = [sstr.Compose([GaussianBlur(kernel_size=(4,4))]),
+                sstr.Compose([
                 sstr.RandomCrop((512, 512)),
-                sstr.RandomHorizontalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-            
+            ]
         else:
             train_transforms = [
                 sstr.Compose([
