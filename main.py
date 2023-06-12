@@ -40,7 +40,7 @@ def get_dataset_num_classes(dataset):
     if dataset == 'idda':
         return 16
     if dataset == 'gta5':
-        return 20
+        return 16
     if dataset == 'loveda':
         return 8
     raise NotImplementedError
