@@ -44,7 +44,7 @@ class FdaServer:
         # Style transfer
         self.styleaug = StyleAugment(args.n_images_per_style, args.fda_L, args.fda_size, b=args.fda_b) 
         
-        if not args.load:
+        if not args.load and not args.load_from:
             self.extract_styles()
         
     def select_clients(self, seed=None):
