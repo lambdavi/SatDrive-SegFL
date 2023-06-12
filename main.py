@@ -192,15 +192,20 @@ def get_datasets(args):
     elif args.dataset == "loveda":
         root = 'data/loveda'
 
-        # Extract all data from the Urban set (train) 
-        all_data_train = os.listdir(os.path.join(root, "Urban", "images_png"))
+        if not args.fda:
+            # Extract all data from the Urban set (train)  
+            folder_loveda = "Urban"
+        else:
+            # Extract all data from the target set (train) 
+            folder_loveda = "target"
 
+        all_data_train = os.listdir(os.path.join(root, folder_loveda, "images_png"))
         print(f"Total number of images to be loaded: {len(all_data_train)}")
         
         if args.centr:
             # If centralized we get all training data on one single client
             print("Centralized mode set.")
-            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder="Urban", transform=train_transforms,
+            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder=folder_loveda, transform=train_transforms,
                                                 client_name='centralized'))
         else:
             # Otherwise we divide data in multiple datasets.
@@ -209,7 +214,7 @@ def get_datasets(args):
             total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
             
             for i, samples in enumerate(total_client_splits):
-                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder="Urban", transform=train_transforms,
+                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder=folder_loveda, transform=train_transforms,
                                                 client_name="client_"+str(i)))
         
         # Extract test data from the Urban2 (test same domain) 
