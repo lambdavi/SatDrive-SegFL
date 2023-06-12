@@ -71,7 +71,7 @@ def get_transforms(args):
     """ Get the transformations based both on the dataset and the model. """
     if args.model in ["segformer",'deeplabv3_mobilenetv2', 'bisenetv2']:
         if args.dataset == "loveda":
-            train_transforms = [sstr.Compose([ElasticTransform(alpha=100.0)]),
+            train_transforms = [sstr.Compose([GaussianBlur(kernel_size=(5,9))]),
                 sstr.Compose([
                 sstr.RandomCrop((512, 512)),
                 sstr.ToTensor(),
