@@ -158,7 +158,7 @@ class Server:
                 print("Saving model...")
                 torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
 
-        if self.args.val == False:
+        if self.args.plot == False:
             self.eval_train()
             if self.validation_clients:
                 self.eval_validation()
