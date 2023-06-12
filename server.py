@@ -121,8 +121,12 @@ class Server:
         if self.args.centr:
             num_rounds = 1
         
-        if self.args.load or self.args.resume:
-            pth = f"models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, False)}_best_model.pth"
+        if self.args.load or self.args.resume or self.args.load_from:
+            # If specified a custom name for the saved model load the path
+            if self.args.load_from:
+                pth = self.args.load_from
+            else:
+                pth = f"models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, False)}_best_model.pth"
             try:
                 saved_params = torch.load(pth)
                 self.model_params_dict = saved_params
