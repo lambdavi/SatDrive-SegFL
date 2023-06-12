@@ -40,15 +40,18 @@ def get_dataset_num_classes(dataset):
     if dataset == 'idda':
         return 16
     if dataset == 'gta5':
-        return 16
+        return 20
     if dataset == 'loveda':
         return 8
     raise NotImplementedError
 
 def model_init(args):
     """ Get the model based on the value of args. """
+    if args.fda and args.load_from and args.dataset == "idda":
+        if args.model == 'deeplabv3_mobilenetv2':
+            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("gta5"))
     if args.model == 'deeplabv3_mobilenetv2':
-        return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
+            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("gta5"))
     if args.model == 'resnet18':
         model = resnet18()
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
