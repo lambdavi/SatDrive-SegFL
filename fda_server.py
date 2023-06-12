@@ -223,7 +223,7 @@ class FdaServer:
                 print("The checkpoint for this model does not exist. The model will be retrained.")
                 retrain_error=True
                 
-        if (not self.args.load) or self.args.resume or retrain_error:
+        if (not self.args.load) or self.args.resume or retrain_error or self.args.load_from:
             # Start of distributed train
             for r in range(num_rounds):                
                 print("------------------")
