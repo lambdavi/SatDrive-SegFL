@@ -50,6 +50,10 @@ def model_init(args):
     if args.fda and args.load_from and args.dataset == "idda":
         if args.model == 'deeplabv3_mobilenetv2':
             return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("gta5"))
+    
+    if args.centr and args.dataset == "gta5":
+        if args.model == 'deeplabv3_mobilenetv2':
+            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("idda"))
     if args.model == 'deeplabv3_mobilenetv2':
             return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("gta5"))
     if args.model == 'resnet18':
