@@ -55,7 +55,7 @@ def model_init(args):
         if args.model == 'deeplabv3_mobilenetv2':
             return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("idda"))
     if args.model == 'deeplabv3_mobilenetv2':
-            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("gta5"))
+            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
     if args.model == 'resnet18':
         model = resnet18()
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
