@@ -39,7 +39,7 @@ def get_parser():
     parser.add_argument('--fda_b', type=int, default=None, help='if != None it is used instead of fda_L:' 'b == 0 --> 1x1, b == 1 --> 3x3, b == 2 --> 5x5, ...')
     parser.add_argument('--fda_size', type=str2tuple(int), default='1024,512', help='size (W,H) to which resize images before style transfer')
     parser.add_argument('--es', type=str2tuple(float), default=None, help='patience,tol')
-    parser.add_argument('--save', type=str, default=False, help='Model saved at the end (training performed)')
+    parser.add_argument('--save', action='store_true', default=False, help='Model saved at the end (training performed)')
     parser.add_argument('--load', action='store_true', default=False, help='Load saved model')
     parser.add_argument('--load_from', default=None, help='Load saved model with a custom_name')
     parser.add_argument('--chp', action='store_true', default=False, help='Model checkpoints saved during training')
