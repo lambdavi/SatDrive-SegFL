@@ -73,7 +73,7 @@ def get_transforms(args):
         if args.dataset == "loveda":
             train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 512)),
-                sstr.RandomRotation(45),
+                sstr.RandomVerticalFlip(),
                 sstr.ToTensor(),
                 sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
             
