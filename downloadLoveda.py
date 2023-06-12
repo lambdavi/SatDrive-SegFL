@@ -4,7 +4,7 @@ import subprocess
 import os
 mega = Megatools()
 print("Version:", mega.version)
-url = "https://mega.nz/file/UeFAwAaC#wdJMiLsBUj4sfNWRSyNR35lgVvk-juBib1fu-3rGX0k"
+url = "https://mega.nz/file/dONCFICZ#Wtbbyxr9N0Yeqf6sTP9mPKH_aDwuRZ0IbUxWPI_zyYY"
 # Get a file name from url
 print(mega.filename(url))
 
