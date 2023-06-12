@@ -37,23 +37,14 @@ def set_seed(random_seed):
     torch.backends.cudnn.deterministic = True
 
 def get_dataset_num_classes(dataset):
-    if dataset == 'idda':
+    if dataset in ['idda','gta5']:
         return 16
-    if dataset == 'gta5':
-        return 20
     if dataset == 'loveda':
         return 8
     raise NotImplementedError
 
 def model_init(args):
     """ Get the model based on the value of args. """
-    if args.fda and args.load_from and args.dataset == "idda":
-        if args.model == 'deeplabv3_mobilenetv2':
-            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("gta5"))
-    
-    if args.centr and args.dataset == "gta5":
-        if args.model == 'deeplabv3_mobilenetv2':
-            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes("idda"))
     if args.model == 'deeplabv3_mobilenetv2':
             return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
     if args.model == 'resnet18':
