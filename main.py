@@ -78,6 +78,7 @@ def get_transforms(args):
         else:
             train_transforms = sstr.Compose([
                     sstr.RandomCrop((512, 928 if args.model != "segformer" else 512)),
+                    sstr.RandomHorizontalFlip(),
                     sstr.ToTensor(),
                     sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 ]), 
