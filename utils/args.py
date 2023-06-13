@@ -49,5 +49,6 @@ def get_parser():
     parser.add_argument('--teacher_step', type=int, default = INF, help='How often change the teacher model in FDA settings')
     parser.add_argument('--resume', action='store_true', default=False, help='Resume from training model')
     parser.add_argument('--plot', action='store_true', default=False, help='Plot miou graph (used only with --val)')
+    parser.add_argument('--pseudo_conf', type=float, default=0.9, help='conf of pseudolabels')
 
     return parser

@@ -152,7 +152,7 @@ class Server:
 
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
-                self.model.load_state_dict(self.model_params_dict, strict=False) 
+                self.model.load_state_dict(self.model_params_dict) 
             
             if self.args.save:
                 print("Saving model...")
