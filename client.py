@@ -115,7 +115,7 @@ class Client:
         """
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         if self.args.loss == "self":
-            criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf,  **shared_kwargs)
+            criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf, fraction=self.args.frac,  **shared_kwargs)
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == "iw":
             criterion = IW_MaxSquareloss()

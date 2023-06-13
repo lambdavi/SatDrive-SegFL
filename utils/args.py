@@ -50,5 +50,6 @@ def get_parser():
     parser.add_argument('--resume', action='store_true', default=False, help='Resume from training model')
     parser.add_argument('--plot', action='store_true', default=False, help='Plot miou graph (used only with --val)')
     parser.add_argument('--pseudo_conf', type=float, default=0.9, help='conf of pseudolabels')
+    parser.add_argument('--fract', type=float, default=0.66, help='fraction of topk')
 
     return parser
