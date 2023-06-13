@@ -245,6 +245,7 @@ class FdaServer:
         if self.args.save:
             print("Saving full FDA model...")
             torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
+        self.eval_train()
         self.test()
 
     def eval_train(self):
