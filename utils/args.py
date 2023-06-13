@@ -12,7 +12,6 @@ def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument('--dataset', type=str, choices=['idda', 'gta5', 'loveda'], required=True, help='dataset name')
-    parser.add_argument('--niid', action='store_true', default=False,  help='Run the experiment with the non-IID partition (IID by default). Only on FEMNIST dataset.')
     parser.add_argument('--model', type=str, choices=['deeplabv3_mobilenetv2', 'resnet18', 'segformer', 'bisenetv2'], help='model name')
     parser.add_argument('--transformer_model', type=str, choices=['b0', 'b1', 'b2'], default="b0", help='weights of the transformers b0 lighter - b2 heavier')
     parser.add_argument('--num_rounds', type=int, default=1, help='number of rounds')
@@ -20,6 +19,7 @@ def get_parser():
     parser.add_argument('--num_epochs_c', type=int, default=None, help='number of local epochs clients')
 
     parser.add_argument('--clients_per_round', type=int, default=1, help='number of clients trained per round')
+    parser.add_argument('--n_clients', type=int, default=24, help='number of clients t')
     parser.add_argument('--hnm', action='store_true', default=False, help='Use hard negative mining reduction or not')
     parser.add_argument('--lr', type=float, default=0.05, help='learning rate')
     parser.add_argument('--bs', type=int, default=4, help='batch size')

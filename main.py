@@ -156,7 +156,7 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print("Distributed Mode Set.")
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            total_client_splits = split_list_balanced(all_data_train, args.n_clients)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
@@ -206,7 +206,7 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print("Distributed Mode Set.")
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            total_client_splits = split_list_balanced(all_data_train, args.n_clients)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder=folder_loveda, transform=train_transforms,
