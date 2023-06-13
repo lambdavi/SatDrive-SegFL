@@ -240,7 +240,7 @@ class FdaServer:
                 self.model_params_dict = self.aggregate(updates)
 
                 # Save in the student model the aggregated weights
-                self.student_model.load_state_dict(self.model_params_dict)
+                self.student_model.load_state_dict(copy.deepcopy(self.model_params_dict))
 
         if self.args.save:
             print("Saving full FDA model...")
