@@ -154,9 +154,10 @@ class Client:
             c = crit(outputs)
             p = pseudo(outputs)
             loss = red(c, p)
+            
             optimizer.step()
             
-        print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs_c}: {loss.item()}")
+        print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs_c}: {abs(loss.item())}")
         
         if self.args.es:
             return self.early_stopper.early_stop(loss.item())
