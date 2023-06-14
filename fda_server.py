@@ -201,9 +201,9 @@ class FdaServer:
 
         # Centralized train on source dataset
         self.train_source()
-        self.eval_validation()
+        """self.eval_validation()
         self.eval_train()
-        self.test()
+        self.test()"""
 
         # Setup teacher and student
         self.teacher_model = copy.deepcopy(self.source_model)
