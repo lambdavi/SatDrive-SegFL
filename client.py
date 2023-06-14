@@ -118,7 +118,7 @@ class Client:
             criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf, fraction=self.args.fract,  **shared_kwargs)
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == "iw":
-            criterion = IW_MaxSquareloss()
+            criterion = IW_MaxSquareloss(**shared_kwargs)
             
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
