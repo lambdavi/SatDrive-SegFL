@@ -77,7 +77,6 @@ def get_transforms(args):
             train_transforms = [
                 sstr.Compose([
                     RandomApply([sstr.Lambda(lambda x: weather.add_rain(x))], p=0.15),
-                    sstr.ColorJitter(0.2,0.2,0.2,0.2)
                 ]),
                 sstr.Compose([
                     sstr.RandomCrop((512, 928 if args.model != "segformer" else 512)),
