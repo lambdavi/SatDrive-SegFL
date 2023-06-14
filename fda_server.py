@@ -222,29 +222,30 @@ class FdaServer:
             except:
                 print("The checkpoint for this model does not exist. The model will be retrained.")
                 retrain_error=True
-                
-        if (not self.args.load) or self.args.resume or retrain_error or self.args.load_from:
-            # Start of distributed train
-            for r in range(num_rounds):                
-                print("------------------")
-                print(f"Round {r+1}/{num_rounds} started.")
-                print("------------------")
+        
+        if not self.args.only:
+            if (not self.args.load) or self.args.resume or retrain_error or self.args.load_from:
+                # Start of distributed train
+                for r in range(num_rounds):                
+                    print("------------------")
+                    print(f"Round {r+1}/{num_rounds} started.")
+                    print("------------------")
 
-                # Select random subset of clients
-                chosen_clients = self.select_clients(seed=r)
-                
-                # Train a round
-                updates = self.train_round(chosen_clients)
+                    # Select random subset of clients
+                    chosen_clients = self.select_clients(seed=r)
+                    
+                    # Train a round
+                    updates = self.train_round(chosen_clients)
 
-                # Aggregate the parameters
-                self.model_params_dict = self.aggregate(updates)
+                    # Aggregate the parameters
+                    self.model_params_dict = self.aggregate(updates)
 
-                # Save in the student model the aggregated weights
-                self.student_model.load_state_dict(copy.deepcopy(self.model_params_dict))
+                    # Save in the student model the aggregated weights
+                    self.student_model.load_state_dict(copy.deepcopy(self.model_params_dict))
 
-        if self.args.save:
-            print("Saving full FDA model...")
-            torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
+            if self.args.save:
+                print("Saving full FDA model...")
+                torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
         self.eval_train()
         self.test()
 
