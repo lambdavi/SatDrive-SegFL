@@ -118,7 +118,8 @@ class Client:
             criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf, fraction=self.args.fract,  **shared_kwargs)
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == "iw":
-            criterion = IW_MaxSquareloss(**shared_kwargs)
+            n_class = 8 if self.args.dataset == "loveda" else 16
+            criterion = IW_MaxSquareloss(num_class=n_class)
             
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
@@ -150,8 +151,12 @@ class Client:
             optimizer.zero_grad()
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
-            
-            c = crit(outputs)
+            if self.args.loss == "iw":
+                self.teacher.eval()
+                pred = self.teacher(images)["out"]
+                c = crit(pred, outputs)
+            else:
+                c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
             
