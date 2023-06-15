@@ -152,10 +152,11 @@ class Client:
             outputs = self._get_outputs(images, _)
             if self.args.loss == "iw":
                 c = crit(outputs)
+                print(c.item())
             else:
                 c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
-            loss = red(c, p)
+            loss = abs(red(c, p))
             loss.backward()
             optimizer.step()
             
