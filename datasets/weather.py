@@ -5,6 +5,17 @@ from PIL import Image
 ### RAIN DATA AUGMENTATION ###
 
 def generate_random_lines(imshape, slant, drop_length):
+    """
+    Generates random lines (rain drops) on the image.
+
+    Args:
+        imshape (tuple): Shape of the image.
+        slant (int): Slant value for the rain drops.
+        drop_length (int): Length of the rain drops.
+
+    Returns:
+        list: List of coordinates representing the rain drops.
+    """
     drops = []
     num_drops = 800
     x = np.random.randint(0, imshape[1], size=(num_drops,))
@@ -17,6 +28,15 @@ def generate_random_lines(imshape, slant, drop_length):
     return drops
 
 def add_rain(pil_image):
+    """
+    Adds rain effect to the image.
+
+    Args:
+        pil_image (PIL.Image.Image): Input image.
+
+    Returns:
+        PIL.Image.Image: Image with rain effect added.
+    """
     # Convert PIL image to OpenCV image
     open_cv_image = np.array(pil_image)
     image = open_cv_image[:, :, ::-1].copy()

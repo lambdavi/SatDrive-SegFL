@@ -35,6 +35,7 @@ import torch
 from PIL import Image
 
 import datasets.ss_transforms as sstr
+from utils.utils import get_save_string
 
 
 class Server:
@@ -148,8 +149,12 @@ class Server:
         if self.args.centr:
             num_rounds = 1
         
-        if self.args.load or self.args.resume:
-            pth = f&#34;models/checkpoints/{self.args.model}_{self.args.dataset}_checkpoint.pth&#34; if self.args.chp else f&#34;models/{self.args.model}_{self.args.dataset}_best_model.pth&#34;
+        if self.args.load or self.args.resume or self.args.load_from:
+            # If specified a custom name for the saved model load the path
+            if self.args.load_from:
+                pth = self.args.load_from
+            else:
+                pth = f&#34;models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth&#34; if self.args.chp else f&#34;models/{get_save_string(self.args, False)}_best_model.pth&#34;
             try:
                 saved_params = torch.load(pth)
                 self.model_params_dict = saved_params
@@ -161,7 +166,7 @@ class Server:
                 print(&#34;The checkpoint for this model does not exist. The model will be retrained.&#34;)
                 retrain_error=True
             
-        if (not self.args.load) or self.args.resume or retrain_error:
+        if (not self.args.load and not self.args.load_from) or self.args.resume or retrain_error:
             for r in range(num_rounds):
                 print(&#34;------------------&#34;)
                 print(f&#34;Round {r+1}/{num_rounds} started.&#34;)
@@ -175,15 +180,16 @@ class Server:
 
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
-                self.model.load_state_dict(self.model_params_dict, strict=False) 
+                self.model.load_state_dict(self.model_params_dict) 
             
             if self.args.save:
                 print(&#34;Saving model...&#34;)
-                torch.save(self.model_params_dict, f&#39;models/{self.args.model}_{self.args.dataset}_best_model.pth&#39;)
+                torch.save(self.model_params_dict, f&#39;models/{get_save_string(self.args, False)}_best_model.pth&#39;)
 
-        if self.args.val == False:
-            if self.args.dataset != &#34;gta5&#34;:       
-                self.eval_train()
+        if self.args.plot == False:
+            self.eval_train()
+            if self.validation_clients:
+                self.eval_validation()
             self.test()
 
     def eval_train(self):
@@ -212,12 +218,11 @@ class Server:
         print(&#34;------------------------------------&#34;) 
 
         self.metrics[&#34;eval_train&#34;].reset()
-
         self.validation_clients[0].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.validation_clients[0].test(self.metrics[&#34;eval_train&#34;])
     
         res=self.metrics[&#34;eval_train&#34;].get_results()
-        print(f&#39;Validation: Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
+        print(f&#39;Acc: {res[&#34;Overall Acc&#34;]}, Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
         return res[&#34;Mean IoU&#34;]
 
     def test(self):
@@ -240,7 +245,7 @@ class Server:
 
         self.test_clients[1].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.test_clients[1].test(self.metrics[&#34;test_diff_dom&#34;])
-        
+
         res=self.metrics[&#34;test_diff_dom&#34;].get_results()
         print(f&#39;Acc: {res[&#34;Overall Acc&#34;]}, Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
 
@@ -477,8 +482,12 @@ the client-server framework.</p>
         if self.args.centr:
             num_rounds = 1
         
-        if self.args.load or self.args.resume:
-            pth = f&#34;models/checkpoints/{self.args.model}_{self.args.dataset}_checkpoint.pth&#34; if self.args.chp else f&#34;models/{self.args.model}_{self.args.dataset}_best_model.pth&#34;
+        if self.args.load or self.args.resume or self.args.load_from:
+            # If specified a custom name for the saved model load the path
+            if self.args.load_from:
+                pth = self.args.load_from
+            else:
+                pth = f&#34;models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth&#34; if self.args.chp else f&#34;models/{get_save_string(self.args, False)}_best_model.pth&#34;
             try:
                 saved_params = torch.load(pth)
                 self.model_params_dict = saved_params
@@ -490,7 +499,7 @@ the client-server framework.</p>
                 print(&#34;The checkpoint for this model does not exist. The model will be retrained.&#34;)
                 retrain_error=True
             
-        if (not self.args.load) or self.args.resume or retrain_error:
+        if (not self.args.load and not self.args.load_from) or self.args.resume or retrain_error:
             for r in range(num_rounds):
                 print(&#34;------------------&#34;)
                 print(f&#34;Round {r+1}/{num_rounds} started.&#34;)
@@ -504,15 +513,16 @@ the client-server framework.</p>
 
                 # Aggregate the parameters
                 self.model_params_dict = self.aggregate(updates)
-                self.model.load_state_dict(self.model_params_dict, strict=False) 
+                self.model.load_state_dict(self.model_params_dict) 
             
             if self.args.save:
                 print(&#34;Saving model...&#34;)
-                torch.save(self.model_params_dict, f&#39;models/{self.args.model}_{self.args.dataset}_best_model.pth&#39;)
+                torch.save(self.model_params_dict, f&#39;models/{get_save_string(self.args, False)}_best_model.pth&#39;)
 
-        if self.args.val == False:
-            if self.args.dataset != &#34;gta5&#34;:       
-                self.eval_train()
+        if self.args.plot == False:
+            self.eval_train()
+            if self.validation_clients:
+                self.eval_validation()
             self.test()
 
     def eval_train(self):
@@ -541,12 +551,11 @@ the client-server framework.</p>
         print(&#34;------------------------------------&#34;) 
 
         self.metrics[&#34;eval_train&#34;].reset()
-
         self.validation_clients[0].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.validation_clients[0].test(self.metrics[&#34;eval_train&#34;])
     
         res=self.metrics[&#34;eval_train&#34;].get_results()
-        print(f&#39;Validation: Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
+        print(f&#39;Acc: {res[&#34;Overall Acc&#34;]}, Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
         return res[&#34;Mean IoU&#34;]
 
     def test(self):
@@ -569,7 +578,7 @@ the client-server framework.</p>
 
         self.test_clients[1].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
         self.test_clients[1].test(self.metrics[&#34;test_diff_dom&#34;])
-        
+
         res=self.metrics[&#34;test_diff_dom&#34;].get_results()
         print(f&#39;Acc: {res[&#34;Overall Acc&#34;]}, Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
 
@@ -752,12 +761,11 @@ the client-server framework.</p>
     print(&#34;------------------------------------&#34;) 
 
     self.metrics[&#34;eval_train&#34;].reset()
-
     self.validation_clients[0].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
     self.validation_clients[0].test(self.metrics[&#34;eval_train&#34;])
 
     res=self.metrics[&#34;eval_train&#34;].get_results()
-    print(f&#39;Validation: Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
+    print(f&#39;Acc: {res[&#34;Overall Acc&#34;]}, Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)
     return res[&#34;Mean IoU&#34;]</code></pre>
 </details>
 </dd>
@@ -922,7 +930,7 @@ the client-server framework.</p>
 
     self.test_clients[1].model.load_state_dict((copy.deepcopy(self.model_params_dict)))
     self.test_clients[1].test(self.metrics[&#34;test_diff_dom&#34;])
-    
+
     res=self.metrics[&#34;test_diff_dom&#34;].get_results()
     print(f&#39;Acc: {res[&#34;Overall Acc&#34;]}, Mean IoU: {res[&#34;Mean IoU&#34;]}&#39;)</code></pre>
 </details>
@@ -946,8 +954,12 @@ the client-server framework.</p>
     if self.args.centr:
         num_rounds = 1
     
-    if self.args.load or self.args.resume:
-        pth = f&#34;models/checkpoints/{self.args.model}_{self.args.dataset}_checkpoint.pth&#34; if self.args.chp else f&#34;models/{self.args.model}_{self.args.dataset}_best_model.pth&#34;
+    if self.args.load or self.args.resume or self.args.load_from:
+        # If specified a custom name for the saved model load the path
+        if self.args.load_from:
+            pth = self.args.load_from
+        else:
+            pth = f&#34;models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth&#34; if self.args.chp else f&#34;models/{get_save_string(self.args, False)}_best_model.pth&#34;
         try:
             saved_params = torch.load(pth)
             self.model_params_dict = saved_params
@@ -959,7 +971,7 @@ the client-server framework.</p>
             print(&#34;The checkpoint for this model does not exist. The model will be retrained.&#34;)
             retrain_error=True
         
-    if (not self.args.load) or self.args.resume or retrain_error:
+    if (not self.args.load and not self.args.load_from) or self.args.resume or retrain_error:
         for r in range(num_rounds):
             print(&#34;------------------&#34;)
             print(f&#34;Round {r+1}/{num_rounds} started.&#34;)
@@ -973,15 +985,16 @@ the client-server framework.</p>
 
             # Aggregate the parameters
             self.model_params_dict = self.aggregate(updates)
-            self.model.load_state_dict(self.model_params_dict, strict=False) 
+            self.model.load_state_dict(self.model_params_dict) 
         
         if self.args.save:
             print(&#34;Saving model...&#34;)
-            torch.save(self.model_params_dict, f&#39;models/{self.args.model}_{self.args.dataset}_best_model.pth&#39;)
+            torch.save(self.model_params_dict, f&#39;models/{get_save_string(self.args, False)}_best_model.pth&#39;)
 
-    if self.args.val == False:
-        if self.args.dataset != &#34;gta5&#34;:       
-            self.eval_train()
+    if self.args.plot == False:
+        self.eval_train()
+        if self.validation_clients:
+            self.eval_validation()
         self.test()</code></pre>
 </details>
 </dd>

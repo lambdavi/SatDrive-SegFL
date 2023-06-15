@@ -215,7 +215,7 @@ class SelfTrainingLoss(nn.Module):
         Args:
             pred (torch.Tensor): The predicted logits.
             imgs (torch.Tensor): The input images (optional).
-            seg (bool): Whether the prediction is segmentation logits.
+            seg (bool): Whether the prediction is performed by SegFormer.
 
         Returns:
             torch.Tensor: The calculated loss value.

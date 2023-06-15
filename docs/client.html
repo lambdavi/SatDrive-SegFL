@@ -37,8 +37,7 @@ from tqdm import tqdm
 
 from utils.early_stopping import EarlyStopper
 from utils.loss import IW_MaxSquareloss, SelfTrainingLoss
-from utils.utils import HardNegativeMining, MeanReduction
-
+from utils.utils import HardNegativeMining, MeanReduction, get_save_string
 
 class Client:
     &#34;&#34;&#34;
@@ -144,7 +143,8 @@ class Client:
         &#34;&#34;&#34;
         shared_kwargs = {&#39;ignore_index&#39;: 255, &#39;reduction&#39;: &#39;none&#39;}
         if self.args.loss == &#34;self&#34;:
-            criterion = SelfTrainingLoss(lambda_selftrain=1,  **shared_kwargs)
+            # Get the module in charge of the pseudolabels
+            criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf, fraction=self.args.fract,  **shared_kwargs)
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == &#34;iw&#34;:
             criterion = IW_MaxSquareloss()
@@ -159,7 +159,6 @@ class Client:
     def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
         &#34;&#34;&#34;
         Run a pseudo-epoch for self-training.
-
         Args:
             `cur_epoch`: Current epoch index.\n
             `optimizer`: Optimizer object.\n
@@ -173,18 +172,23 @@ class Client:
             return outs.max(1)[1]
         
         self.model.train()
+        # Flag to handle the segformer in pseudolabels generation
         seg = self.args.model == &#34;segformer&#34;
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
+            # Empty the cache of the GPU
             torch.cuda.empty_cache()
             optimizer.zero_grad()
+            # Move images and outputs to the GPU
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
+            # Get criterion and reduction method accordingly
             c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
+            loss.backward()
             optimizer.step()
             
-        print(f&#34;\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}&#34;)
+        print(f&#34;\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs_c}: {loss.item()}&#34;)
         
         if self.args.es:
             return self.early_stopper.early_stop(loss.item())
@@ -205,16 +209,14 @@ class Client:
         &#34;&#34;&#34;
         self.model.train()
         for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
+            # Move images and outputs to the GPU
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            
+            # Get outputs of the model
             outputs = self._get_outputs(images, labels)
-            if self.args.model == &#34;bisenetv2&#34;:
-                for log in outputs:
-                    loss += self.reduction(self.criterion(log,labels),labels)
-            else:
-                loss = self.reduction(self.criterion(outputs,labels),labels)
+            # Get the loss value
+            loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
@@ -274,6 +276,9 @@ class Client:
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
 
+        # This flag is used to save the chp with an adequate name 
+        is_source = False
+
         # Section to evalutation at each epoch if --val param is set
         best_miou = 0 if eval_metric else None
         if eval_datasets:
@@ -289,8 +294,13 @@ class Client:
         stop_condition = False
 
         # If the teacher is set it means we are in FDA mode
-        if self.teacher:
-            crit, red = self.__get_criterion_and_reduction_rules()
+        if self.args.fda:
+            if self.teacher:
+                crit, red = self.__get_criterion_and_reduction_rules()
+            else:
+                # This flag is used to save the chp with an adequate name 
+                is_source = True
+        
 
         print(&#34;-----------------------------------------------------&#34;)
 
@@ -312,15 +322,15 @@ class Client:
             # If --val is enabled, evalutes on the train/test sets and save checkpoints if --chp enabled
             if eval_metric and eval_datasets and self.args.val:
                 for i, eval_dataset in enumerate(eval_datasets):
+                    if i != 0:
+                        if not self.args.plot:
+                            continue
                     eval_miou=self.test(eval_metric, True, eval_dataset)
                     print(f&#34;\tValidation MioU on {m[i]}: {eval_miou}&#34;)
                     self.mious[i].append(eval_miou)
                     if self.args.chp and (eval_miou&gt;best_miou) and i == 0:
                             best_miou = eval_miou
-                            if self.args.fda:
-                                torch.save(self.model.state_dict(), &#34;models/checkpoints/source_checkpoint.pth&#34;)
-                            else:
-                                torch.save(self.model.state_dict(), f&#34;models/checkpoints/{self.args.dataset}_checkpoint.pth&#34;)
+                            torch.save(self.model.state_dict(), f&#34;models/checkpoints/{get_save_string(self.args, is_source)}_checkpoint.pth&#34;)
                             print(f&#34;\tSaved checkpoint at epoch {epoch+1}.&#34;)
                 self.model.train()
 
@@ -330,11 +340,12 @@ class Client:
                 if(stop_condition):
                     print(f&#34;Training stopped at epoch {epoch+1}: Stopping condition satisfied&#34;)
                     break
+                
             
         print(&#34;-----------------------------------------------------&#34;)
 
         # Save Graph if --val enabled
-        if self.args.val:
+        if self.args.plot:
             self.plot_loss_miou()
 
         return len(self.dataset), self.model.state_dict()
@@ -530,7 +541,8 @@ class Client:
         &#34;&#34;&#34;
         shared_kwargs = {&#39;ignore_index&#39;: 255, &#39;reduction&#39;: &#39;none&#39;}
         if self.args.loss == &#34;self&#34;:
-            criterion = SelfTrainingLoss(lambda_selftrain=1,  **shared_kwargs)
+            # Get the module in charge of the pseudolabels
+            criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf, fraction=self.args.fract,  **shared_kwargs)
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == &#34;iw&#34;:
             criterion = IW_MaxSquareloss()
@@ -545,7 +557,6 @@ class Client:
     def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
         &#34;&#34;&#34;
         Run a pseudo-epoch for self-training.
-
         Args:
             `cur_epoch`: Current epoch index.\n
             `optimizer`: Optimizer object.\n
@@ -559,18 +570,23 @@ class Client:
             return outs.max(1)[1]
         
         self.model.train()
+        # Flag to handle the segformer in pseudolabels generation
         seg = self.args.model == &#34;segformer&#34;
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
+            # Empty the cache of the GPU
             torch.cuda.empty_cache()
             optimizer.zero_grad()
+            # Move images and outputs to the GPU
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
+            # Get criterion and reduction method accordingly
             c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
+            loss.backward()
             optimizer.step()
             
-        print(f&#34;\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}&#34;)
+        print(f&#34;\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs_c}: {loss.item()}&#34;)
         
         if self.args.es:
             return self.early_stopper.early_stop(loss.item())
@@ -591,16 +607,14 @@ class Client:
         &#34;&#34;&#34;
         self.model.train()
         for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
+            # Move images and outputs to the GPU
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            
+            # Get outputs of the model
             outputs = self._get_outputs(images, labels)
-            if self.args.model == &#34;bisenetv2&#34;:
-                for log in outputs:
-                    loss += self.reduction(self.criterion(log,labels),labels)
-            else:
-                loss = self.reduction(self.criterion(outputs,labels),labels)
+            # Get the loss value
+            loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
@@ -660,6 +674,9 @@ class Client:
         
         optimizer, scheduler = self.get_optimizer_and_scheduler()
 
+        # This flag is used to save the chp with an adequate name 
+        is_source = False
+
         # Section to evalutation at each epoch if --val param is set
         best_miou = 0 if eval_metric else None
         if eval_datasets:
@@ -675,8 +692,13 @@ class Client:
         stop_condition = False
 
         # If the teacher is set it means we are in FDA mode
-        if self.teacher:
-            crit, red = self.__get_criterion_and_reduction_rules()
+        if self.args.fda:
+            if self.teacher:
+                crit, red = self.__get_criterion_and_reduction_rules()
+            else:
+                # This flag is used to save the chp with an adequate name 
+                is_source = True
+        
 
         print(&#34;-----------------------------------------------------&#34;)
 
@@ -698,15 +720,15 @@ class Client:
             # If --val is enabled, evalutes on the train/test sets and save checkpoints if --chp enabled
             if eval_metric and eval_datasets and self.args.val:
                 for i, eval_dataset in enumerate(eval_datasets):
+                    if i != 0:
+                        if not self.args.plot:
+                            continue
                     eval_miou=self.test(eval_metric, True, eval_dataset)
                     print(f&#34;\tValidation MioU on {m[i]}: {eval_miou}&#34;)
                     self.mious[i].append(eval_miou)
                     if self.args.chp and (eval_miou&gt;best_miou) and i == 0:
                             best_miou = eval_miou
-                            if self.args.fda:
-                                torch.save(self.model.state_dict(), &#34;models/checkpoints/source_checkpoint.pth&#34;)
-                            else:
-                                torch.save(self.model.state_dict(), f&#34;models/checkpoints/{self.args.dataset}_checkpoint.pth&#34;)
+                            torch.save(self.model.state_dict(), f&#34;models/checkpoints/{get_save_string(self.args, is_source)}_checkpoint.pth&#34;)
                             print(f&#34;\tSaved checkpoint at epoch {epoch+1}.&#34;)
                 self.model.train()
 
@@ -716,11 +738,12 @@ class Client:
                 if(stop_condition):
                     print(f&#34;Training stopped at epoch {epoch+1}: Stopping condition satisfied&#34;)
                     break
+                
             
         print(&#34;-----------------------------------------------------&#34;)
 
         # Save Graph if --val enabled
-        if self.args.val:
+        if self.args.plot:
             self.plot_loss_miou()
 
         return len(self.dataset), self.model.state_dict()
@@ -934,16 +957,14 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
     &#34;&#34;&#34;
     self.model.train()
     for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
+        # Move images and outputs to the GPU
         images = images.to(self.device, dtype=torch.float32)
         labels = labels.to(self.device, dtype=torch.long)
         optimizer.zero_grad()
-        
+        # Get outputs of the model
         outputs = self._get_outputs(images, labels)
-        if self.args.model == &#34;bisenetv2&#34;:
-            for log in outputs:
-                loss += self.reduction(self.criterion(log,labels),labels)
-        else:
-            loss = self.reduction(self.criterion(outputs,labels),labels)
+        # Get the loss value
+        loss = self.reduction(self.criterion(outputs,labels),labels)
         loss.backward()
         # Update parameters
         optimizer.step()
@@ -970,7 +991,6 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
 <pre><code class="python">def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
     &#34;&#34;&#34;
     Run a pseudo-epoch for self-training.
-
     Args:
         `cur_epoch`: Current epoch index.\n
         `optimizer`: Optimizer object.\n
@@ -984,18 +1004,23 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
         return outs.max(1)[1]
     
     self.model.train()
+    # Flag to handle the segformer in pseudolabels generation
     seg = self.args.model == &#34;segformer&#34;
     for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
+        # Empty the cache of the GPU
         torch.cuda.empty_cache()
         optimizer.zero_grad()
+        # Move images and outputs to the GPU
         images = images.to(self.device, dtype=torch.float32)
         outputs = self._get_outputs(images, _)
+        # Get criterion and reduction method accordingly
         c = crit(outputs, images, seg=seg)
         p = pseudo(outputs)
         loss = red(c, p)
+        loss.backward()
         optimizer.step()
         
-    print(f&#34;\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs}: {loss.item()}&#34;)
+    print(f&#34;\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs_c}: {loss.item()}&#34;)
     
     if self.args.es:
         return self.early_stopper.early_stop(loss.item())
@@ -1126,6 +1151,9 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
     
     optimizer, scheduler = self.get_optimizer_and_scheduler()
 
+    # This flag is used to save the chp with an adequate name 
+    is_source = False
+
     # Section to evalutation at each epoch if --val param is set
     best_miou = 0 if eval_metric else None
     if eval_datasets:
@@ -1141,8 +1169,13 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
     stop_condition = False
 
     # If the teacher is set it means we are in FDA mode
-    if self.teacher:
-        crit, red = self.__get_criterion_and_reduction_rules()
+    if self.args.fda:
+        if self.teacher:
+            crit, red = self.__get_criterion_and_reduction_rules()
+        else:
+            # This flag is used to save the chp with an adequate name 
+            is_source = True
+    
 
     print(&#34;-----------------------------------------------------&#34;)
 
@@ -1164,15 +1197,15 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
         # If --val is enabled, evalutes on the train/test sets and save checkpoints if --chp enabled
         if eval_metric and eval_datasets and self.args.val:
             for i, eval_dataset in enumerate(eval_datasets):
+                if i != 0:
+                    if not self.args.plot:
+                        continue
                 eval_miou=self.test(eval_metric, True, eval_dataset)
                 print(f&#34;\tValidation MioU on {m[i]}: {eval_miou}&#34;)
                 self.mious[i].append(eval_miou)
                 if self.args.chp and (eval_miou&gt;best_miou) and i == 0:
                         best_miou = eval_miou
-                        if self.args.fda:
-                            torch.save(self.model.state_dict(), &#34;models/checkpoints/source_checkpoint.pth&#34;)
-                        else:
-                            torch.save(self.model.state_dict(), f&#34;models/checkpoints/{self.args.dataset}_checkpoint.pth&#34;)
+                        torch.save(self.model.state_dict(), f&#34;models/checkpoints/{get_save_string(self.args, is_source)}_checkpoint.pth&#34;)
                         print(f&#34;\tSaved checkpoint at epoch {epoch+1}.&#34;)
             self.model.train()
 
@@ -1182,11 +1215,12 @@ over the epochs. It plots the mIoU values stored in the <code>mious</code> attri
             if(stop_condition):
                 print(f&#34;Training stopped at epoch {epoch+1}: Stopping condition satisfied&#34;)
                 break
+            
         
     print(&#34;-----------------------------------------------------&#34;)
 
     # Save Graph if --val enabled
-    if self.args.val:
+    if self.args.plot:
         self.plot_loss_miou()
 
     return len(self.dataset), self.model.state_dict()</code></pre>

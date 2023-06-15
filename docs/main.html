@@ -35,7 +35,7 @@ import numpy as np
 import torch
 from torch import nn
 from torchvision.models import resnet18
-from torchvision.transforms import RandomApply
+from torchvision.transforms import RandomApply, GaussianBlur, ElasticTransform
 from transformers import SegformerForSemanticSegmentation
 from transformers.utils import logging
 
@@ -56,6 +56,7 @@ from utils.utils import split_list_balanced, split_list_random
 
 
 def set_seed(random_seed):
+    &#34;&#34;&#34; Set the defined seed to reproducibility of the results &#34;&#34;&#34;
     random.seed(random_seed)
     np.random.seed(random_seed)
     torch.manual_seed(random_seed)
@@ -65,10 +66,9 @@ def set_seed(random_seed):
     torch.backends.cudnn.deterministic = True
 
 def get_dataset_num_classes(dataset):
-    if dataset == &#39;idda&#39;:
+    &#34;&#34;&#34; Get dataset classes to initialize the model. &#34;&#34;&#34;
+    if dataset in [&#39;idda&#39;,&#39;gta5&#39;]:
         return 16
-    if dataset == &#39;gta5&#39;:
-        return 20
     if dataset == &#39;loveda&#39;:
         return 8
     raise NotImplementedError
@@ -76,7 +76,7 @@ def get_dataset_num_classes(dataset):
 def model_init(args):
     &#34;&#34;&#34; Get the model based on the value of args. &#34;&#34;&#34;
     if args.model == &#39;deeplabv3_mobilenetv2&#39;:
-        return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
+            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
     if args.model == &#39;resnet18&#39;:
         model = resnet18()
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
@@ -102,8 +102,7 @@ def get_transforms(args):
             train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 512)),
                 sstr.ToTensor(),
-                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
+                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
         else:
             train_transforms = [
                 sstr.Compose([
@@ -187,7 +186,7 @@ def get_datasets(args):
             # Otherwise we divide data in multiple datasets.
             print(&#34;Distributed Mode Set.&#34;)
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            total_client_splits = split_list_balanced(all_data_train, args.n_clients)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
@@ -218,24 +217,29 @@ def get_datasets(args):
     elif args.dataset == &#34;loveda&#34;:
         root = &#39;data/loveda&#39;
 
-        # Extract all data from the Urban set (train) 
-        all_data_train = os.listdir(os.path.join(root, &#34;Urban&#34;, &#34;images_png&#34;))
+        if not args.fda:
+            # Extract all data from the Urban set (train)  
+            folder_loveda = &#34;Urban&#34;
+        else:
+            # Extract all data from the target set (train) 
+            folder_loveda = &#34;target&#34;
 
+        all_data_train = os.listdir(os.path.join(root, folder_loveda, &#34;images_png&#34;))
         print(f&#34;Total number of images to be loaded: {len(all_data_train)}&#34;)
         
         if args.centr:
             # If centralized we get all training data on one single client
             print(&#34;Centralized mode set.&#34;)
-            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder=&#34;Urban&#34;, transform=train_transforms,
+            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder=folder_loveda, transform=train_transforms,
                                                 client_name=&#39;centralized&#39;))
         else:
             # Otherwise we divide data in multiple datasets.
             print(&#34;Distributed Mode Set.&#34;)
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            total_client_splits = split_list_balanced(all_data_train, args.n_clients)
             
             for i, samples in enumerate(total_client_splits):
-                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder=&#34;Urban&#34;, transform=train_transforms,
+                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder=folder_loveda, transform=train_transforms,
                                                 client_name=&#34;client_&#34;+str(i)))
         
         # Extract test data from the Urban2 (test same domain) 
@@ -255,7 +259,7 @@ def get_datasets(args):
     return train_datasets, test_datasets, None
 
 def get_source_client(args, model):
-    &#34;&#34;&#34; Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
+    &#34;&#34;&#34; Function to get the source client based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
         Args:
             `args`, `model` (pytorch)
         Returns:
@@ -408,16 +412,15 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">get_dataset_num_classes</span></span>(<span>dataset)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get dataset classes to initialize the model.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_dataset_num_classes(dataset):
-    if dataset == &#39;idda&#39;:
+    &#34;&#34;&#34; Get dataset classes to initialize the model. &#34;&#34;&#34;
+    if dataset in [&#39;idda&#39;,&#39;gta5&#39;]:
         return 16
-    if dataset == &#39;gta5&#39;:
-        return 20
     if dataset == &#39;loveda&#39;:
         return 8
     raise NotImplementedError</code></pre>
@@ -488,7 +491,7 @@ validation datasets.</p></div>
             # Otherwise we divide data in multiple datasets.
             print(&#34;Distributed Mode Set.&#34;)
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            total_client_splits = split_list_balanced(all_data_train, args.n_clients)
             
             for i, samples in enumerate(total_client_splits):
                 train_datasets.append(GTA5Dataset(root=root, list_samples=samples, transform=train_transforms,
@@ -519,24 +522,29 @@ validation datasets.</p></div>
     elif args.dataset == &#34;loveda&#34;:
         root = &#39;data/loveda&#39;
 
-        # Extract all data from the Urban set (train) 
-        all_data_train = os.listdir(os.path.join(root, &#34;Urban&#34;, &#34;images_png&#34;))
+        if not args.fda:
+            # Extract all data from the Urban set (train)  
+            folder_loveda = &#34;Urban&#34;
+        else:
+            # Extract all data from the target set (train) 
+            folder_loveda = &#34;target&#34;
 
+        all_data_train = os.listdir(os.path.join(root, folder_loveda, &#34;images_png&#34;))
         print(f&#34;Total number of images to be loaded: {len(all_data_train)}&#34;)
         
         if args.centr:
             # If centralized we get all training data on one single client
             print(&#34;Centralized mode set.&#34;)
-            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder=&#34;Urban&#34;, transform=train_transforms,
+            train_datasets.append(LoveDADataset(root=root, list_samples=all_data_train, folder=folder_loveda, transform=train_transforms,
                                                 client_name=&#39;centralized&#39;))
         else:
             # Otherwise we divide data in multiple datasets.
             print(&#34;Distributed Mode Set.&#34;)
 
-            total_client_splits = split_list_balanced(all_data_train, args.clients_per_round*4)
+            total_client_splits = split_list_balanced(all_data_train, args.n_clients)
             
             for i, samples in enumerate(total_client_splits):
-                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder=&#34;Urban&#34;, transform=train_transforms,
+                train_datasets.append(LoveDADataset(root=root, list_samples=samples, folder=folder_loveda, transform=train_transforms,
                                                 client_name=&#34;client_&#34;+str(i)))
         
         # Extract test data from the Urban2 (test same domain) 
@@ -560,7 +568,7 @@ validation datasets.</p></div>
 <span>def <span class="ident">get_source_client</span></span>(<span>args, model)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. </p>
+<div class="desc"><p>Function to get the source client based on the dataset. This function is only used in the fda setting. Returns None otehrwise. </p>
 <h2 id="args">Args</h2>
 <p><code>args</code>, <code>model</code> (pytorch)</p>
 <h2 id="returns">Returns</h2>
@@ -571,7 +579,7 @@ on the dataset split.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_source_client(args, model):
-    &#34;&#34;&#34; Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
+    &#34;&#34;&#34; Function to get the source client based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
         Args:
             `args`, `model` (pytorch)
         Returns:
@@ -619,8 +627,7 @@ on the dataset split.</p></div>
             train_transforms = sstr.Compose([
                 sstr.RandomCrop((512, 512)),
                 sstr.ToTensor(),
-                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
+                sstr.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
         else:
             train_transforms = [
                 sstr.Compose([
@@ -726,7 +733,7 @@ on the dataset split.</p></div>
 <pre><code class="python">def model_init(args):
     &#34;&#34;&#34; Get the model based on the value of args. &#34;&#34;&#34;
     if args.model == &#39;deeplabv3_mobilenetv2&#39;:
-        return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
+            return deeplabv3_mobilenetv2(num_classes=get_dataset_num_classes(args.dataset))
     if args.model == &#39;resnet18&#39;:
         model = resnet18()
         model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
@@ -779,12 +786,13 @@ on the dataset split.</p></div>
 <span>def <span class="ident">set_seed</span></span>(<span>random_seed)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set the defined seed to reproducibility of the results</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_seed(random_seed):
+    &#34;&#34;&#34; Set the defined seed to reproducibility of the results &#34;&#34;&#34;
     random.seed(random_seed)
     np.random.seed(random_seed)
     torch.manual_seed(random_seed)

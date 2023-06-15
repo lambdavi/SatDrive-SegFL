@@ -11,30 +11,58 @@ The repository supports experiments on the following datasets:
 2. Reduced **GTA5**
    - Task: semantic segmentation for autonomous driving
    - downloadGta.py available to download it.
+2. Reduced **LoveDA**
+   - Task: semantic segmentation for satellite/aerial imagery.
+   - downloadLoveda.py available to download it.
+NOTE: to use the scripts and download the files run before (if needed):
+```bash 
+pip install pymegatools
+```
 
 ## How to run
-The ```main.py``` orchestrates training. All arguments need to be specified through the ```args``` parameter (options can be found in ```utils/args.py```).
+The ```main.py``` orchestrates the steup. All arguments need to be specified through the ```args``` parameter (options can be found in ```utils/args.py```).
 Example of experiments:
 
 ### Centralized mode: 
-- **IDDA** (Semantic Segmentation)
+- **IDDA** 
 ```bash
 python main.py --dataset idda --centr --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 20 --clients_per_round 8 
 ```
 
 ### Distributed mode: 
-- **GTA** (Semantic Segmentation)
+- **GTA5** 
 ```bash
-python main.py --dataset gta5 --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8 
+python main.py --dataset idda --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8 
 ```
 
-### FDA mode: 
-- **GTA** (Semantic Segmentation)
+### FDA mode (pretraining + distributed mode): 
+- **GTA as source and IDDA as target** 
 ```bash
-python main.py --dataset idda --fda --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8 
+python main.py --dataset idda --fda --model deeplabv3_mobilenetv2 --num_rounds 200 --num_epochs 2 --clients_per_round 8
 ```
 
-## References
-[1] Caldas, Sebastian, et al. "Leaf: A benchmark for federated settings." Workshop on Federated Learning for Data Privacy and Confidentiality (2019). 
+## Reproducing results:
+Some checkpoints are already available in the repo. In particular they are located in ```models/checkpoints```.
 
-[2] Fantauzzo, Lidia, et al. "FedDrive: generalizing federated learning to semantic segmentation in autonomous driving." 2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2022.
+To reproduce the result you can use the args --load_from (e.g.):
+- **GTA as source and IDDA as target** 
+```bash
+python main.py --dataset idda --fda --model deeplabv3_mobilenetv2 --load_from "models/checkpoints/gta5_fda" --num_rounds 200 --num_epochs 2 --clients_per_round 8
+```
+
+### gta5_fda
+Load the best checkpoint of the model trained on gta5 dataset + FDA transformation.
+
+### gta5_nofda
+Load the best checkpoint of the model trained on gta5 dataset w/o FDA.
+
+### loveda_nofda.pth
+Load the best checkpoint of the model trained loveda.
+
+All the checkpoints are saved on a run of 100 epochs.
+
+For other checkpoints (e.g. Segformer checkpoints):
+[Drive Checkpoints](https://drive.google.com/drive/folders/1tN2UJx91axP7mkj51X1SL3WceAXCCCGv?usp=sharing)
+
+
+

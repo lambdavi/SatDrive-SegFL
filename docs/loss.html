@@ -122,10 +122,10 @@ class SelfTrainingLoss(nn.Module):
     Implements the self-training loss for image segmentation.
 
     Args:
-        `conf_th` (float): Confidence threshold for pseudo-labeling.
-        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.
-        `ignore_index` (int): The index value to be ignored during loss calculation.
-        `lambda_selftrain` (float): Weighting factor for the self-training loss.
+        `conf_th` (float): Confidence threshold for pseudo-labeling.\n
+        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.\n
+        `ignore_index` (int): The index value to be ignored during loss calculation.\n
+        `lambda_selftrain` (float): Weighting factor for the self-training loss.\n
 
     Returns:
         torch.Tensor: The calculated loss value.
@@ -215,6 +215,7 @@ class SelfTrainingLoss(nn.Module):
                 try:
                     if seg:
                         logi = self.teacher(imgs)
+                        # Get logits
                         logits = logi.logits
                         pred = nn.functional.interpolate(
                                 logits, 
@@ -242,7 +243,7 @@ class SelfTrainingLoss(nn.Module):
         Args:
             pred (torch.Tensor): The predicted logits.
             imgs (torch.Tensor): The input images (optional).
-            seg (bool): Whether the prediction is segmentation logits.
+            seg (bool): Whether the prediction is performed by SegFormer.
 
         Returns:
             torch.Tensor: The calculated loss value.
@@ -724,10 +725,10 @@ registered hooks while the latter silently ignores them.</p>
 <dd>
 <div class="desc"><p>Implements the self-training loss for image segmentation.</p>
 <h2 id="args">Args</h2>
-<p><code>conf_th</code> (float): Confidence threshold for pseudo-labeling.
-<code>fraction</code> (float): Fraction of top-k pixels to be considered for pseudo-labeling.
-<code>ignore_index</code> (int): The index value to be ignored during loss calculation.
-<code>lambda_selftrain</code> (float): Weighting factor for the self-training loss.</p>
+<p><code>conf_th</code> (float): Confidence threshold for pseudo-labeling.</p>
+<p><code>fraction</code> (float): Fraction of top-k pixels to be considered for pseudo-labeling.</p>
+<p><code>ignore_index</code> (int): The index value to be ignored during loss calculation.</p>
+<p><code>lambda_selftrain</code> (float): Weighting factor for the self-training loss.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>torch.Tensor</code></dt>
@@ -743,10 +744,10 @@ registered hooks while the latter silently ignores them.</p>
     Implements the self-training loss for image segmentation.
 
     Args:
-        `conf_th` (float): Confidence threshold for pseudo-labeling.
-        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.
-        `ignore_index` (int): The index value to be ignored during loss calculation.
-        `lambda_selftrain` (float): Weighting factor for the self-training loss.
+        `conf_th` (float): Confidence threshold for pseudo-labeling.\n
+        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.\n
+        `ignore_index` (int): The index value to be ignored during loss calculation.\n
+        `lambda_selftrain` (float): Weighting factor for the self-training loss.\n
 
     Returns:
         torch.Tensor: The calculated loss value.
@@ -836,6 +837,7 @@ registered hooks while the latter silently ignores them.</p>
                 try:
                     if seg:
                         logi = self.teacher(imgs)
+                        # Get logits
                         logits = logi.logits
                         pred = nn.functional.interpolate(
                                 logits, 
@@ -863,7 +865,7 @@ registered hooks while the latter silently ignores them.</p>
         Args:
             pred (torch.Tensor): The predicted logits.
             imgs (torch.Tensor): The input images (optional).
-            seg (bool): Whether the prediction is segmentation logits.
+            seg (bool): Whether the prediction is performed by SegFormer.
 
         Returns:
             torch.Tensor: The calculated loss value.
@@ -901,7 +903,7 @@ registered hooks while the latter silently ignores them.</p>
 <dt><strong><code>imgs</code></strong> :&ensp;<code>torch.Tensor</code></dt>
 <dd>The input images (optional).</dd>
 <dt><strong><code>seg</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether the prediction is segmentation logits.</dd>
+<dd>Whether the prediction is performed by SegFormer.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -919,7 +921,7 @@ registered hooks while the latter silently ignores them.</p>
     Args:
         pred (torch.Tensor): The predicted logits.
         imgs (torch.Tensor): The input images (optional).
-        seg (bool): Whether the prediction is segmentation logits.
+        seg (bool): Whether the prediction is performed by SegFormer.
 
     Returns:
         torch.Tensor: The calculated loss value.
@@ -1063,6 +1065,7 @@ registered hooks while the latter silently ignores them.</p>
             try:
                 if seg:
                     logi = self.teacher(imgs)
+                    # Get logits
                     logits = logi.logits
                     pred = nn.functional.interpolate(
                             logits, 

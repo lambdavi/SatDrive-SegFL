@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>stream_metrics API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>stream_metrics</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+
+
+class Metrics:
+    &#34;&#34;&#34;
+    Base class for calculating evaluation metrics.
+
+    Args:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+
+    Attributes:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+        confusion_matrix (ndarray): Confusion matrix.
+        total_samples (int): Total number of samples.
+        results (dict): Evaluation results.
+
+    Methods:
+        reset(self): Resets the confusion matrix and total samples count.
+    &#34;&#34;&#34;
+    def __init__(self, n_classes, name):
+        super().__init__()
+        self.n_classes = n_classes
+        self.name = name
+        self.confusion_matrix = np.zeros((n_classes, n_classes))
+        self.total_samples = 0
+        self.results = {}
+
+    def reset(self):
+        &#34;&#34;&#34;
+        Resets the confusion matrix and total samples count.
+        &#34;&#34;&#34;
+        self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))
+        self.total_samples = 0
+
+
+class StreamClsMetrics(Metrics):
+    &#34;&#34;&#34;
+    Class for evaluating classification metrics in a streaming manner.
+
+    Args:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+
+    Inherits:
+        Metrics: Base class for calculating evaluation metrics.
+
+    Methods:
+        update(self, label, prediction): Updates the metrics with a new label and prediction.
+        get_results(self): Calculates and returns the evaluation results.
+        __str__(self): Returns a string representation of the evaluation results.
+    &#34;&#34;&#34;
+    def __init__(self, n_classes, name):
+        super().__init__(n_classes=n_classes, name=name)
+
+    def update(self, label, prediction):
+        &#34;&#34;&#34;
+        Updates the metrics with a new label and prediction.
+
+        Args:
+            label (int): True label.
+            prediction (int): Predicted label.
+        &#34;&#34;&#34;
+        self.confusion_matrix[label[0]][prediction[0]] += 1
+        self.total_samples += 1
+
+    def get_results(self):
+        &#34;&#34;&#34;
+        Calculates and returns the evaluation results.
+
+        Returns:
+            dict: Evaluation results including total samples, overall accuracy, mean accuracy, and class accuracy.
+        &#34;&#34;&#34;
+        eps = 1e-6
+        hist = self.confusion_matrix
+
+        gt_sum = hist.sum(axis=1)
+        mask = (gt_sum != 0)
+        diag = np.diag(hist)
+
+        acc = diag.sum() / hist.sum()
+        acc_cls_c = diag / (gt_sum + eps)
+        acc_cls = np.mean(acc_cls_c[mask])
+        cls_acc = dict(zip(range(self.n_classes), [acc_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+        self.results = {
+            &#34;Total samples&#34;: self.total_samples,
+            &#34;Overall Acc&#34;: acc,
+            &#34;Mean Acc&#34;: acc_cls,
+            &#34;Class Acc&#34;: cls_acc
+        }
+
+    def __str__(self):
+        &#34;&#34;&#34;
+        Returns a string representation of the evaluation results.
+
+        Returns:
+            str: String representation of the evaluation results.
+        &#34;&#34;&#34;
+        string = &#34;\n&#34;
+        ignore = [&#34;Class Acc&#34;, &#34;Confusion Matrix Pred&#34;, &#34;Confusion Matrix&#34;, &#34;Confusion Matrix Text&#34;]
+        for k, v in self.results.items():
+            if k not in ignore:
+                string += &#34;%s: %f\n&#34; % (k, v)
+        string += &#39;Class Acc:\n&#39;
+        for k, v in self.results[&#39;Class Acc&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+        return string
+
+
+class StreamSegMetrics(Metrics):
+    &#34;&#34;&#34;
+    Class for evaluating segmentation metrics in a streaming manner.
+
+    Args:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+
+    Inherits:
+        Metrics: Base class for calculating evaluation metrics.
+
+    Methods:
+        update(self, label_trues, label_preds): Updates the metrics with new labels and predictions.
+        get_results(self): Calculates and returns the evaluation results.
+        confusion_matrix_to_text(self): Converts the confusion matrix to a text representation.
+        __str__(self): Returns a string representation of the evaluation results.
+    &#34;&#34;&#34;
+    def __init__(self, n_classes, name):
+        super().__init__(n_classes=n_classes, name=name)
+
+    def _fast_hist(self, label_true, label_pred):
+        &#34;&#34;&#34;
+        Computes the histogram of true and predicted labels.
+
+        Args:
+            label_true (ndarray): True labels.
+            label_pred (ndarray): Predicted labels.
+
+        Returns:
+            ndarray: Histogram of true and predicted labels.
+        &#34;&#34;&#34;
+        mask = (label_true &gt;= 0) &amp; (label_true &lt; self.n_classes)
+        hist = np.bincount(
+            self.n_classes * label_true[mask].astype(int) + label_pred[mask],
+            minlength=self.n_classes ** 2,
+        ).reshape(self.n_classes, self.n_classes)
+        return hist
+
+    def update(self, label_trues, label_preds):
+        &#34;&#34;&#34;
+        Updates the metrics with new labels and predictions.
+
+        Args:
+            label_trues (list or ndarray): List of true labels.
+            label_preds (list or ndarray): List of predicted labels.
+        &#34;&#34;&#34;
+        for lt, lp in zip(label_trues, label_preds):
+            self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
+        self.total_samples += len(label_trues)
+
+    def get_results(self):
+        &#34;&#34;&#34;
+        Calculates and returns the evaluation results.
+
+        Returns:
+            dict: Evaluation results including total samples, overall accuracy, mean accuracy, mean precision,
+                  frequency-weighted accuracy, mean IoU, class IoU, class accuracy, and class precision.
+        &#34;&#34;&#34;
+
+        eps = 1e-6
+        hist = self.confusion_matrix
+
+        gt_sum = hist.sum(axis=1)
+        mask = (gt_sum != 0)
+        diag = np.diag(hist)
+
+        acc = diag.sum() / hist.sum()
+        acc_cls_c = diag / (gt_sum + eps)
+        acc_cls = np.mean(acc_cls_c[mask])
+        precision_cls_c = diag / (hist.sum(axis=0) + eps)
+        precision_cls = np.mean(precision_cls_c)
+        iu = diag / (gt_sum + hist.sum(axis=0) - diag + eps)
+        mean_iu = np.mean(iu[mask])
+        freq = hist.sum(axis=1) / hist.sum()
+        fwavacc = (freq[freq &gt; 0] * iu[freq &gt; 0]).sum()
+
+        cls_iu = dict(zip(range(self.n_classes), [iu[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+        cls_acc = dict(zip(range(self.n_classes), [acc_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+        cls_prec = dict(zip(range(self.n_classes), [precision_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+
+        self.results = {
+            &#34;Total samples&#34;: self.total_samples,
+            &#34;Overall Acc&#34;: acc,
+            &#34;Mean Acc&#34;: acc_cls,
+            &#34;Mean Precision&#34;: precision_cls,
+            &#34;FreqW Acc&#34;: fwavacc,
+            &#34;Mean IoU&#34;: mean_iu,
+            &#34;Class IoU&#34;: cls_iu,
+            &#34;Class Acc&#34;: cls_acc,
+            &#34;Class Prec&#34;: cls_prec,
+        }
+
+        return self.results
+
+    def confusion_matrix_to_text(self):
+        &#34;&#34;&#34;
+        Converts the confusion matrix to a text representation.
+
+        Returns:
+            str: Text representation of the confusion matrix.
+        &#34;&#34;&#34;
+        string = []
+        for i in range(self.n_classes):
+            string.append(f&#34;{i} : {self.confusion_matrix[i].tolist()}&#34;)
+        return &#34;\n&#34; + &#34;\n&#34;.join(string)
+
+    def __str__(self):
+        &#34;&#34;&#34;
+        Returns a string representation of the evaluation results.
+
+        Returns:
+            str: String representation of the evaluation results.
+        &#34;&#34;&#34;
+        string = &#34;\n&#34;
+        ignore = [&#34;Class IoU&#34;, &#34;Class Acc&#34;, &#34;Class Prec&#34;,
+                  &#34;Confusion Matrix Pred&#34;, &#34;Confusion Matrix&#34;, &#34;Confusion Matrix Text&#34;]
+        for k, v in self.results.items():
+            if k not in ignore:
+                string += &#34;%s: %f\n&#34; % (k, v)
+
+        string += &#39;Class IoU:\n&#39;
+        for k, v in self.results[&#39;Class IoU&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+
+        string += &#39;Class Acc:\n&#39;
+        for k, v in self.results[&#39;Class Acc&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+
+        string += &#39;Class Prec:\n&#39;
+        for k, v in self.results[&#39;Class Prec&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+
+        return string</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="stream_metrics.Metrics"><code class="flex name class">
+<span>class <span class="ident">Metrics</span></span>
+<span>(</span><span>n_classes, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for calculating evaluation metrics.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_classes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of classes.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the metrics.</dd>
+</dl>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>n_classes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of classes.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the metrics.</dd>
+<dt><strong><code>confusion_matrix</code></strong> :&ensp;<code>ndarray</code></dt>
+<dd>Confusion matrix.</dd>
+<dt><strong><code>total_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>Total number of samples.</dd>
+<dt><strong><code>results</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Evaluation results.</dd>
+</dl>
+<h2 id="methods">Methods</h2>
+<p>reset(self): Resets the confusion matrix and total samples count.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Metrics:
+    &#34;&#34;&#34;
+    Base class for calculating evaluation metrics.
+
+    Args:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+
+    Attributes:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+        confusion_matrix (ndarray): Confusion matrix.
+        total_samples (int): Total number of samples.
+        results (dict): Evaluation results.
+
+    Methods:
+        reset(self): Resets the confusion matrix and total samples count.
+    &#34;&#34;&#34;
+    def __init__(self, n_classes, name):
+        super().__init__()
+        self.n_classes = n_classes
+        self.name = name
+        self.confusion_matrix = np.zeros((n_classes, n_classes))
+        self.total_samples = 0
+        self.results = {}
+
+    def reset(self):
+        &#34;&#34;&#34;
+        Resets the confusion matrix and total samples count.
+        &#34;&#34;&#34;
+        self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))
+        self.total_samples = 0</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="stream_metrics.StreamClsMetrics" href="#stream_metrics.StreamClsMetrics">StreamClsMetrics</a></li>
+<li><a title="stream_metrics.StreamSegMetrics" href="#stream_metrics.StreamSegMetrics">StreamSegMetrics</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="stream_metrics.Metrics.reset"><code class="name flex">
+<span>def <span class="ident">reset</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Resets the confusion matrix and total samples count.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reset(self):
+    &#34;&#34;&#34;
+    Resets the confusion matrix and total samples count.
+    &#34;&#34;&#34;
+    self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))
+    self.total_samples = 0</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="stream_metrics.StreamClsMetrics"><code class="flex name class">
+<span>class <span class="ident">StreamClsMetrics</span></span>
+<span>(</span><span>n_classes, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class for evaluating classification metrics in a streaming manner.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_classes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of classes.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the metrics.</dd>
+</dl>
+<h2 id="inherits">Inherits</h2>
+<p>Metrics: Base class for calculating evaluation metrics.</p>
+<h2 id="methods">Methods</h2>
+<p>update(self, label, prediction): Updates the metrics with a new label and prediction.
+get_results(self): Calculates and returns the evaluation results.
+<strong>str</strong>(self): Returns a string representation of the evaluation results.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class StreamClsMetrics(Metrics):
+    &#34;&#34;&#34;
+    Class for evaluating classification metrics in a streaming manner.
+
+    Args:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+
+    Inherits:
+        Metrics: Base class for calculating evaluation metrics.
+
+    Methods:
+        update(self, label, prediction): Updates the metrics with a new label and prediction.
+        get_results(self): Calculates and returns the evaluation results.
+        __str__(self): Returns a string representation of the evaluation results.
+    &#34;&#34;&#34;
+    def __init__(self, n_classes, name):
+        super().__init__(n_classes=n_classes, name=name)
+
+    def update(self, label, prediction):
+        &#34;&#34;&#34;
+        Updates the metrics with a new label and prediction.
+
+        Args:
+            label (int): True label.
+            prediction (int): Predicted label.
+        &#34;&#34;&#34;
+        self.confusion_matrix[label[0]][prediction[0]] += 1
+        self.total_samples += 1
+
+    def get_results(self):
+        &#34;&#34;&#34;
+        Calculates and returns the evaluation results.
+
+        Returns:
+            dict: Evaluation results including total samples, overall accuracy, mean accuracy, and class accuracy.
+        &#34;&#34;&#34;
+        eps = 1e-6
+        hist = self.confusion_matrix
+
+        gt_sum = hist.sum(axis=1)
+        mask = (gt_sum != 0)
+        diag = np.diag(hist)
+
+        acc = diag.sum() / hist.sum()
+        acc_cls_c = diag / (gt_sum + eps)
+        acc_cls = np.mean(acc_cls_c[mask])
+        cls_acc = dict(zip(range(self.n_classes), [acc_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+        self.results = {
+            &#34;Total samples&#34;: self.total_samples,
+            &#34;Overall Acc&#34;: acc,
+            &#34;Mean Acc&#34;: acc_cls,
+            &#34;Class Acc&#34;: cls_acc
+        }
+
+    def __str__(self):
+        &#34;&#34;&#34;
+        Returns a string representation of the evaluation results.
+
+        Returns:
+            str: String representation of the evaluation results.
+        &#34;&#34;&#34;
+        string = &#34;\n&#34;
+        ignore = [&#34;Class Acc&#34;, &#34;Confusion Matrix Pred&#34;, &#34;Confusion Matrix&#34;, &#34;Confusion Matrix Text&#34;]
+        for k, v in self.results.items():
+            if k not in ignore:
+                string += &#34;%s: %f\n&#34; % (k, v)
+        string += &#39;Class Acc:\n&#39;
+        for k, v in self.results[&#39;Class Acc&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+        return string</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="stream_metrics.Metrics" href="#stream_metrics.Metrics">Metrics</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="stream_metrics.StreamClsMetrics.get_results"><code class="name flex">
+<span>def <span class="ident">get_results</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates and returns the evaluation results.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Evaluation results including total samples, overall accuracy, mean accuracy, and class accuracy.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_results(self):
+    &#34;&#34;&#34;
+    Calculates and returns the evaluation results.
+
+    Returns:
+        dict: Evaluation results including total samples, overall accuracy, mean accuracy, and class accuracy.
+    &#34;&#34;&#34;
+    eps = 1e-6
+    hist = self.confusion_matrix
+
+    gt_sum = hist.sum(axis=1)
+    mask = (gt_sum != 0)
+    diag = np.diag(hist)
+
+    acc = diag.sum() / hist.sum()
+    acc_cls_c = diag / (gt_sum + eps)
+    acc_cls = np.mean(acc_cls_c[mask])
+    cls_acc = dict(zip(range(self.n_classes), [acc_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+    self.results = {
+        &#34;Total samples&#34;: self.total_samples,
+        &#34;Overall Acc&#34;: acc,
+        &#34;Mean Acc&#34;: acc_cls,
+        &#34;Class Acc&#34;: cls_acc
+    }</code></pre>
+</details>
+</dd>
+<dt id="stream_metrics.StreamClsMetrics.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, label, prediction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates the metrics with a new label and prediction.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>label</code></strong> :&ensp;<code>int</code></dt>
+<dd>True label.</dd>
+<dt><strong><code>prediction</code></strong> :&ensp;<code>int</code></dt>
+<dd>Predicted label.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update(self, label, prediction):
+    &#34;&#34;&#34;
+    Updates the metrics with a new label and prediction.
+
+    Args:
+        label (int): True label.
+        prediction (int): Predicted label.
+    &#34;&#34;&#34;
+    self.confusion_matrix[label[0]][prediction[0]] += 1
+    self.total_samples += 1</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="stream_metrics.Metrics" href="#stream_metrics.Metrics">Metrics</a></b></code>:
+<ul class="hlist">
+<li><code><a title="stream_metrics.Metrics.reset" href="#stream_metrics.Metrics.reset">reset</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="stream_metrics.StreamSegMetrics"><code class="flex name class">
+<span>class <span class="ident">StreamSegMetrics</span></span>
+<span>(</span><span>n_classes, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class for evaluating segmentation metrics in a streaming manner.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_classes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of classes.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the metrics.</dd>
+</dl>
+<h2 id="inherits">Inherits</h2>
+<p>Metrics: Base class for calculating evaluation metrics.</p>
+<h2 id="methods">Methods</h2>
+<p>update(self, label_trues, label_preds): Updates the metrics with new labels and predictions.
+get_results(self): Calculates and returns the evaluation results.
+confusion_matrix_to_text(self): Converts the confusion matrix to a text representation.
+<strong>str</strong>(self): Returns a string representation of the evaluation results.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class StreamSegMetrics(Metrics):
+    &#34;&#34;&#34;
+    Class for evaluating segmentation metrics in a streaming manner.
+
+    Args:
+        n_classes (int): Number of classes.
+        name (str): Name of the metrics.
+
+    Inherits:
+        Metrics: Base class for calculating evaluation metrics.
+
+    Methods:
+        update(self, label_trues, label_preds): Updates the metrics with new labels and predictions.
+        get_results(self): Calculates and returns the evaluation results.
+        confusion_matrix_to_text(self): Converts the confusion matrix to a text representation.
+        __str__(self): Returns a string representation of the evaluation results.
+    &#34;&#34;&#34;
+    def __init__(self, n_classes, name):
+        super().__init__(n_classes=n_classes, name=name)
+
+    def _fast_hist(self, label_true, label_pred):
+        &#34;&#34;&#34;
+        Computes the histogram of true and predicted labels.
+
+        Args:
+            label_true (ndarray): True labels.
+            label_pred (ndarray): Predicted labels.
+
+        Returns:
+            ndarray: Histogram of true and predicted labels.
+        &#34;&#34;&#34;
+        mask = (label_true &gt;= 0) &amp; (label_true &lt; self.n_classes)
+        hist = np.bincount(
+            self.n_classes * label_true[mask].astype(int) + label_pred[mask],
+            minlength=self.n_classes ** 2,
+        ).reshape(self.n_classes, self.n_classes)
+        return hist
+
+    def update(self, label_trues, label_preds):
+        &#34;&#34;&#34;
+        Updates the metrics with new labels and predictions.
+
+        Args:
+            label_trues (list or ndarray): List of true labels.
+            label_preds (list or ndarray): List of predicted labels.
+        &#34;&#34;&#34;
+        for lt, lp in zip(label_trues, label_preds):
+            self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
+        self.total_samples += len(label_trues)
+
+    def get_results(self):
+        &#34;&#34;&#34;
+        Calculates and returns the evaluation results.
+
+        Returns:
+            dict: Evaluation results including total samples, overall accuracy, mean accuracy, mean precision,
+                  frequency-weighted accuracy, mean IoU, class IoU, class accuracy, and class precision.
+        &#34;&#34;&#34;
+
+        eps = 1e-6
+        hist = self.confusion_matrix
+
+        gt_sum = hist.sum(axis=1)
+        mask = (gt_sum != 0)
+        diag = np.diag(hist)
+
+        acc = diag.sum() / hist.sum()
+        acc_cls_c = diag / (gt_sum + eps)
+        acc_cls = np.mean(acc_cls_c[mask])
+        precision_cls_c = diag / (hist.sum(axis=0) + eps)
+        precision_cls = np.mean(precision_cls_c)
+        iu = diag / (gt_sum + hist.sum(axis=0) - diag + eps)
+        mean_iu = np.mean(iu[mask])
+        freq = hist.sum(axis=1) / hist.sum()
+        fwavacc = (freq[freq &gt; 0] * iu[freq &gt; 0]).sum()
+
+        cls_iu = dict(zip(range(self.n_classes), [iu[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+        cls_acc = dict(zip(range(self.n_classes), [acc_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+        cls_prec = dict(zip(range(self.n_classes), [precision_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+
+        self.results = {
+            &#34;Total samples&#34;: self.total_samples,
+            &#34;Overall Acc&#34;: acc,
+            &#34;Mean Acc&#34;: acc_cls,
+            &#34;Mean Precision&#34;: precision_cls,
+            &#34;FreqW Acc&#34;: fwavacc,
+            &#34;Mean IoU&#34;: mean_iu,
+            &#34;Class IoU&#34;: cls_iu,
+            &#34;Class Acc&#34;: cls_acc,
+            &#34;Class Prec&#34;: cls_prec,
+        }
+
+        return self.results
+
+    def confusion_matrix_to_text(self):
+        &#34;&#34;&#34;
+        Converts the confusion matrix to a text representation.
+
+        Returns:
+            str: Text representation of the confusion matrix.
+        &#34;&#34;&#34;
+        string = []
+        for i in range(self.n_classes):
+            string.append(f&#34;{i} : {self.confusion_matrix[i].tolist()}&#34;)
+        return &#34;\n&#34; + &#34;\n&#34;.join(string)
+
+    def __str__(self):
+        &#34;&#34;&#34;
+        Returns a string representation of the evaluation results.
+
+        Returns:
+            str: String representation of the evaluation results.
+        &#34;&#34;&#34;
+        string = &#34;\n&#34;
+        ignore = [&#34;Class IoU&#34;, &#34;Class Acc&#34;, &#34;Class Prec&#34;,
+                  &#34;Confusion Matrix Pred&#34;, &#34;Confusion Matrix&#34;, &#34;Confusion Matrix Text&#34;]
+        for k, v in self.results.items():
+            if k not in ignore:
+                string += &#34;%s: %f\n&#34; % (k, v)
+
+        string += &#39;Class IoU:\n&#39;
+        for k, v in self.results[&#39;Class IoU&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+
+        string += &#39;Class Acc:\n&#39;
+        for k, v in self.results[&#39;Class Acc&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+
+        string += &#39;Class Prec:\n&#39;
+        for k, v in self.results[&#39;Class Prec&#39;].items():
+            string += &#34;\tclass %d: %s\n&#34; % (k, str(v))
+
+        return string</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="stream_metrics.Metrics" href="#stream_metrics.Metrics">Metrics</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="stream_metrics.StreamSegMetrics.confusion_matrix_to_text"><code class="name flex">
+<span>def <span class="ident">confusion_matrix_to_text</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converts the confusion matrix to a text representation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Text representation of the confusion matrix.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def confusion_matrix_to_text(self):
+    &#34;&#34;&#34;
+    Converts the confusion matrix to a text representation.
+
+    Returns:
+        str: Text representation of the confusion matrix.
+    &#34;&#34;&#34;
+    string = []
+    for i in range(self.n_classes):
+        string.append(f&#34;{i} : {self.confusion_matrix[i].tolist()}&#34;)
+    return &#34;\n&#34; + &#34;\n&#34;.join(string)</code></pre>
+</details>
+</dd>
+<dt id="stream_metrics.StreamSegMetrics.get_results"><code class="name flex">
+<span>def <span class="ident">get_results</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates and returns the evaluation results.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Evaluation results including total samples, overall accuracy, mean accuracy, mean precision,
+frequency-weighted accuracy, mean IoU, class IoU, class accuracy, and class precision.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_results(self):
+    &#34;&#34;&#34;
+    Calculates and returns the evaluation results.
+
+    Returns:
+        dict: Evaluation results including total samples, overall accuracy, mean accuracy, mean precision,
+              frequency-weighted accuracy, mean IoU, class IoU, class accuracy, and class precision.
+    &#34;&#34;&#34;
+
+    eps = 1e-6
+    hist = self.confusion_matrix
+
+    gt_sum = hist.sum(axis=1)
+    mask = (gt_sum != 0)
+    diag = np.diag(hist)
+
+    acc = diag.sum() / hist.sum()
+    acc_cls_c = diag / (gt_sum + eps)
+    acc_cls = np.mean(acc_cls_c[mask])
+    precision_cls_c = diag / (hist.sum(axis=0) + eps)
+    precision_cls = np.mean(precision_cls_c)
+    iu = diag / (gt_sum + hist.sum(axis=0) - diag + eps)
+    mean_iu = np.mean(iu[mask])
+    freq = hist.sum(axis=1) / hist.sum()
+    fwavacc = (freq[freq &gt; 0] * iu[freq &gt; 0]).sum()
+
+    cls_iu = dict(zip(range(self.n_classes), [iu[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+    cls_acc = dict(zip(range(self.n_classes), [acc_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+    cls_prec = dict(zip(range(self.n_classes), [precision_cls_c[i] if m else &#34;X&#34; for i, m in enumerate(mask)]))
+
+    self.results = {
+        &#34;Total samples&#34;: self.total_samples,
+        &#34;Overall Acc&#34;: acc,
+        &#34;Mean Acc&#34;: acc_cls,
+        &#34;Mean Precision&#34;: precision_cls,
+        &#34;FreqW Acc&#34;: fwavacc,
+        &#34;Mean IoU&#34;: mean_iu,
+        &#34;Class IoU&#34;: cls_iu,
+        &#34;Class Acc&#34;: cls_acc,
+        &#34;Class Prec&#34;: cls_prec,
+    }
+
+    return self.results</code></pre>
+</details>
+</dd>
+<dt id="stream_metrics.StreamSegMetrics.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, label_trues, label_preds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates the metrics with new labels and predictions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>label_trues</code></strong> :&ensp;<code>list</code> or <code>ndarray</code></dt>
+<dd>List of true labels.</dd>
+<dt><strong><code>label_preds</code></strong> :&ensp;<code>list</code> or <code>ndarray</code></dt>
+<dd>List of predicted labels.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update(self, label_trues, label_preds):
+    &#34;&#34;&#34;
+    Updates the metrics with new labels and predictions.
+
+    Args:
+        label_trues (list or ndarray): List of true labels.
+        label_preds (list or ndarray): List of predicted labels.
+    &#34;&#34;&#34;
+    for lt, lp in zip(label_trues, label_preds):
+        self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
+    self.total_samples += len(label_trues)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="stream_metrics.Metrics" href="#stream_metrics.Metrics">Metrics</a></b></code>:
+<ul class="hlist">
+<li><code><a title="stream_metrics.Metrics.reset" href="#stream_metrics.Metrics.reset">reset</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="stream_metrics.Metrics" href="#stream_metrics.Metrics">Metrics</a></code></h4>
+<ul class="">
+<li><code><a title="stream_metrics.Metrics.reset" href="#stream_metrics.Metrics.reset">reset</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="stream_metrics.StreamClsMetrics" href="#stream_metrics.StreamClsMetrics">StreamClsMetrics</a></code></h4>
+<ul class="">
+<li><code><a title="stream_metrics.StreamClsMetrics.get_results" href="#stream_metrics.StreamClsMetrics.get_results">get_results</a></code></li>
+<li><code><a title="stream_metrics.StreamClsMetrics.update" href="#stream_metrics.StreamClsMetrics.update">update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="stream_metrics.StreamSegMetrics" href="#stream_metrics.StreamSegMetrics">StreamSegMetrics</a></code></h4>
+<ul class="">
+<li><code><a title="stream_metrics.StreamSegMetrics.confusion_matrix_to_text" href="#stream_metrics.StreamSegMetrics.confusion_matrix_to_text">confusion_matrix_to_text</a></code></li>
+<li><code><a title="stream_metrics.StreamSegMetrics.get_results" href="#stream_metrics.StreamSegMetrics.get_results">get_results</a></code></li>
+<li><code><a title="stream_metrics.StreamSegMetrics.update" href="#stream_metrics.StreamSegMetrics.update">update</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
