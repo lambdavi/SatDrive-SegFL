@@ -154,7 +154,7 @@ class Client:
             if self.args.loss == "iw":
                 self.teacher.eval()
                 pred = self.teacher(images)["out"]
-                prob = torch.nn.functional.F.softmax(pred, dim=1)
+                prob = torch.nn.functional.softmax(pred, dim=1)
                 c = crit(pred, prob)
             else:
                 c = crit(outputs, images, seg=seg)
