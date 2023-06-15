@@ -18,7 +18,7 @@ The repository supports experiments on the following datasets:
 NOTE: to use the scripts and download the files run before (if needed): ```pip install pymegatools```
 
 ## How to run
-The ```main.py``` orchestrates the steup. All arguments need to be specified through the ```args``` parameter (options can be found in ```utils/args.py```).
+The ```main.py``` setup the whole application. All arguments need to be specified through the ```args``` parameter (options can be found in ```utils/args.py```).
 Example of experiments:
 
 ### Centralized mode: 
