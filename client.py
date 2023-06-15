@@ -152,8 +152,7 @@ class Client:
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
             if self.args.loss == "iw":
-                pred = self.teacher(images)["out"]
-                c = crit(pred)
+                c = crit(outputs)
             else:
                 c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
