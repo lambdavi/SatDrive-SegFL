@@ -7,7 +7,6 @@ def str2tuple(tp=int):
         return tuple(tp(i) for i in s.split(','))
     return convert
 
-
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0, help='random seed')

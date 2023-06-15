@@ -28,6 +28,7 @@ from utils.utils import split_list_balanced, split_list_random
 
 
 def set_seed(random_seed):
+    """ Set the defined seed to reproducibility of the results """
     random.seed(random_seed)
     np.random.seed(random_seed)
     torch.manual_seed(random_seed)
@@ -37,6 +38,7 @@ def set_seed(random_seed):
     torch.backends.cudnn.deterministic = True
 
 def get_dataset_num_classes(dataset):
+    """ Get dataset classes to initialize the model. """
     if dataset in ['idda','gta5']:
         return 16
     if dataset == 'loveda':
@@ -229,7 +231,7 @@ def get_datasets(args):
     return train_datasets, test_datasets, None
 
 def get_source_client(args, model):
-    """ Function to get the clients based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
+    """ Function to get the source client based on the dataset. This function is only used in the fda setting. Returns None otehrwise. \n
         Args:
             `args`, `model` (pytorch)
         Returns:

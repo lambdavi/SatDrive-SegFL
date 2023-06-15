@@ -146,14 +146,13 @@ class FdaServer:
         # Test client augmetation
         for i, c in enumerate(clients):
             print(f"Client: {c.name} turn: Num. of samples: {len(c.dataset)}, ({i+1}/{len(clients)})")
-            #Update parameters of the client model
             # Load student_model params
             c.model.load_state_dict(copy.deepcopy(self.student_model.state_dict()))
             # Set teacher model on the client
             c.set_teacher(self.teacher_model)
             # Reset counter for early stop
             c.early_stopper.reset_counter()
-            # Temp line. setup train
+            # Start the train on the client
             update = c.train()
             updates.append(update)
         return updates
@@ -201,15 +200,18 @@ class FdaServer:
 
         # Centralized train on source dataset
         self.train_source()
-        """self.eval_validation()
+        # Validate on the train source
+        self.eval_source()
+        # Validate on train partition of the tarhet
         self.eval_train()
-        self.test()"""
+        # Validate on the test sets
+        self.test()
 
         # Setup teacher and student
         self.teacher_model = copy.deepcopy(self.source_model)
         self.student_model = copy.deepcopy(self.source_model)
 
-        # Check for skip all the training if we want to load an existing checkpoint
+        # Load an existing checkpoint and resume training logic
         if self.args.load or self.args.resume:
             pth = f"models/checkpoints/{get_save_string(self.args, False)}_checkpoint.pth" if self.args.chp else f"models/{get_save_string(self.args, False)}_best_model.pth"
             try:
@@ -222,7 +224,8 @@ class FdaServer:
             except:
                 print("The checkpoint for this model does not exist. The model will be retrained.")
                 retrain_error=True
-                
+        
+        # DISTRIBUTED TRAINING
         if (not self.args.load) or self.args.resume or retrain_error or self.args.load_from:
             # Start of distributed train
             for r in range(num_rounds):                
@@ -246,9 +249,28 @@ class FdaServer:
             print("Saving full FDA model...")
             torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
 
-        self.eval_validation()
+        # Validate on the train source
+        self.eval_source()
+        # Validate on train partition of the tarhet
         self.eval_train()
+        # Validate on the test sets
         self.test()
+
+    def eval_source(self):
+        """
+        This method handles the evaluation on the source client
+        """
+        print("------------------------------------")
+        print(f"Test on SOURCE DATASET started.")
+        print("------------------------------------")
+
+        self.metrics["eval_train"].reset()
+
+        self.source_dataset[0].model.load_state_dict(copy.deepcopy(self.model_params_dict))
+        self.source_dataset[0].test(self.metrics["eval_train"])
+
+        res=self.metrics["eval_train"].get_results()
+        print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
 
     def eval_train(self):
         """
@@ -263,22 +285,6 @@ class FdaServer:
         for c in self.train_clients:
             c.model.load_state_dict(copy.deepcopy(self.model_params_dict))
             c.test(self.metrics["eval_train"])
-
-        res=self.metrics["eval_train"].get_results()
-        print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
-
-    def eval_validation(self):
-        """
-        This method handles the evaluation on the validation client(s)
-        """
-        print("------------------------------------")
-        print(f"Test on SOURCE DATASET started.")
-        print("------------------------------------")
-
-        self.metrics["eval_train"].reset()
-
-        self.source_dataset[0].model.load_state_dict(copy.deepcopy(self.model_params_dict))
-        self.source_dataset[0].test(self.metrics["eval_train"])
 
         res=self.metrics["eval_train"].get_results()
         print(f'Acc: {res["Overall Acc"]}, Mean IoU: {res["Mean IoU"]}')
@@ -314,7 +320,6 @@ class FdaServer:
     def predict(self, image_path):
         """
         Handles the the prediction. Outputs an image in the root directory.
-
         Args: 
             `image_path`: path to the image to predict.
         """

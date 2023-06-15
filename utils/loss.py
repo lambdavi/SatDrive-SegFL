@@ -94,10 +94,10 @@ class SelfTrainingLoss(nn.Module):
     Implements the self-training loss for image segmentation.
 
     Args:
-        `conf_th` (float): Confidence threshold for pseudo-labeling.
-        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.
-        `ignore_index` (int): The index value to be ignored during loss calculation.
-        `lambda_selftrain` (float): Weighting factor for the self-training loss.
+        `conf_th` (float): Confidence threshold for pseudo-labeling.\n
+        `fraction` (float): Fraction of top-k pixels to be considered for pseudo-labeling.\n
+        `ignore_index` (int): The index value to be ignored during loss calculation.\n
+        `lambda_selftrain` (float): Weighting factor for the self-training loss.\n
 
     Returns:
         torch.Tensor: The calculated loss value.
@@ -187,6 +187,7 @@ class SelfTrainingLoss(nn.Module):
                 try:
                     if seg:
                         logi = self.teacher(imgs)
+                        # Get logits
                         logits = logi.logits
                         pred = nn.functional.interpolate(
                                 logits, 

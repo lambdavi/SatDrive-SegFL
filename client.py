@@ -115,6 +115,7 @@ class Client:
         """
         shared_kwargs = {'ignore_index': 255, 'reduction': 'none'}
         if self.args.loss == "self":
+            # Get the module in charge of the pseudolabels
             criterion = SelfTrainingLoss(lambda_selftrain=1, conf_th=self.args.pseudo_conf, fraction=self.args.fract,  **shared_kwargs)
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == "iw":
@@ -130,7 +131,6 @@ class Client:
     def run_epoch_pseudo(self, cur_epoch, optimizer, crit, red):
         """
         Run a pseudo-epoch for self-training.
-
         Args:
             `cur_epoch`: Current epoch index.\n
             `optimizer`: Optimizer object.\n
@@ -144,13 +144,16 @@ class Client:
             return outs.max(1)[1]
         
         self.model.train()
+        # Flag to handle the segformer in pseudolabels generation
         seg = self.args.model == "segformer"
         for (images, _) in tqdm(self.train_loader, total=len(self.train_loader)):
+            # Empty the cache of the GPU
             torch.cuda.empty_cache()
             optimizer.zero_grad()
+            # Move images and outputs to the GPU
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
-            
+            # Get criterion and reduction method accordingly
             c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
@@ -178,16 +181,14 @@ class Client:
         """
         self.model.train()
         for (images, labels) in tqdm(self.train_loader, total=len(self.train_loader)):
+            # Move images and outputs to the GPU
             images = images.to(self.device, dtype=torch.float32)
             labels = labels.to(self.device, dtype=torch.long)
             optimizer.zero_grad()
-            
+            # Get outputs of the model
             outputs = self._get_outputs(images, labels)
-            if self.args.model == "bisenetv2":
-                for log in outputs:
-                    loss += self.reduction(self.criterion(log,labels),labels)
-            else:
-                loss = self.reduction(self.criterion(outputs,labels),labels)
+            # Get the loss value
+            loss = self.reduction(self.criterion(outputs,labels),labels)
             loss.backward()
             # Update parameters
             optimizer.step()
