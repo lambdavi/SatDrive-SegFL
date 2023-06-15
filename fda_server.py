@@ -231,7 +231,7 @@ class FdaServer:
                 print("------------------")
 
                 # Select random subset of clients
-                chosen_clients = self.select_clients(seed=r)
+                chosen_clients = self.select_clients()
                 
                 # Train a round
                 updates = self.train_round(chosen_clients)
