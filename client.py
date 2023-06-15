@@ -158,7 +158,7 @@ class Client:
                 c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
             loss = red(c, p)
-            
+            loss.backward()
             optimizer.step()
             
         print(f"\tLoss value at epoch {cur_epoch+1}/{self.args.num_epochs_c}: {loss.item()}")
