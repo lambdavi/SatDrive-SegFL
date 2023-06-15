@@ -200,9 +200,9 @@ class FdaServer:
             num_rounds = 1
 
         # Centralized train on source dataset
-        self.train_source()
+        """self.train_source()
         self.eval_validation()
-        self.eval_train()
+        self.eval_train()"""
         self.test()
 
         # Setup teacher and student
