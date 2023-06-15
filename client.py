@@ -119,7 +119,7 @@ class Client:
             criterion.set_teacher(copy.deepcopy(self.teacher))
         elif self.args.loss == "iw":
             n_class = 8 if self.args.dataset == "loveda" else 16
-            criterion = IW_MaxSquareloss(num_class=n_class)
+            criterion = IW_MaxSquareloss(**shared_kwargs)
             
         if hasattr(criterion, 'requires_reduction') and not criterion.requires_reduction:
             reduction = lambda x, y: x
@@ -152,9 +152,8 @@ class Client:
             images = images.to(self.device, dtype=torch.float32)
             outputs = self._get_outputs(images, _)
             if self.args.loss == "iw":
-                self.teacher.eval()
                 pred = self.teacher(images)["out"]
-                c = crit(outputs)
+                c = crit(pred)
             else:
                 c = crit(outputs, images, seg=seg)
             p = pseudo(outputs)
