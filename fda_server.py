@@ -202,8 +202,8 @@ class FdaServer:
         # Centralized train on source dataset
         """self.train_source()
         self.eval_validation()
-        self.eval_train()"""
-        self.test()
+        self.eval_train()
+        self.test()"""
 
         # Setup teacher and student
         self.teacher_model = copy.deepcopy(self.source_model)
@@ -245,8 +245,8 @@ class FdaServer:
         if self.args.save:
             print("Saving full FDA model...")
             torch.save(self.model_params_dict, f'models/{get_save_string(self.args, False)}_best_model.pth')
-        self.eval_train()
         self.eval_validation()
+        self.eval_train()
         self.test()
 
     def eval_train(self):
