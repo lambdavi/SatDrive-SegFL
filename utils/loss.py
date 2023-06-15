@@ -83,8 +83,8 @@ class IW_MaxSquareloss(nn.Module):
             (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
                 argpred.device)[argpred[i]].detach()
             weights.append(weight)
-        #weights = torch.stack(weights, dim=0).unsqueeze(1)
-        weights = torch.stack(weights, dim=0)
+        weights = torch.stack(weights, dim=0).unsqueeze(1)
+        #weights = torch.stack(weights, dim=0)
         mask = mask_arg.unsqueeze(1).expand_as(prob)
         prior = torch.mean(prob, (2, 3), True).detach()
         loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
