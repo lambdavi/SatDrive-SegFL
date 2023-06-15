@@ -14,10 +14,8 @@ The repository supports experiments on the following datasets:
 2. Reduced **LoveDA**
    - Task: semantic segmentation for satellite/aerial imagery.
    - downloadLoveda.py available to download it.
-NOTE: to use the scripts and download the files run before (if needed):
-```bash 
-pip install pymegatools
-```
+
+NOTE: to use the scripts and download the files run before (if needed): ```pip install pymegatools```
 
 ## How to run
 The ```main.py``` orchestrates the steup. All arguments need to be specified through the ```args``` parameter (options can be found in ```utils/args.py```).
