@@ -3,42 +3,90 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
+def weight_train_loss(losses):
+    """
+    Computes weighted training losses based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        `dict`: A dictionary containing the weighted average of losses.
+    """
+    fin_losses = {}
+    c = list(losses.keys())[0]
+    loss_names = list(losses[c]['loss'].keys())
+    for l_name in loss_names:
+        tot_loss = 0
+        weights = 0
+        for _, d in losses.items():
+            try:
+                tot_loss += d['loss'][l_name][-1] * d['num_samples']
+                weights += d['num_samples']
+            except:
+                pass
+        fin_losses[l_name] = tot_loss / weights
+    return fin_losses
+
+
+def weight_test_loss(losses):
+    """
+    Computes the weighted test loss based on the given dictionary of losses.
+
+    Args:
+        `losses` (dict): A dictionary containing the losses for different samples.
+
+    Returns:
+        float: The weighted average of the losses.
+    """
+    tot_loss = 0
+    weights = 0
+    for k, v in losses.items():
+        tot_loss = tot_loss + v['loss'] * v['num_samples']
+        weights = weights + v['num_samples']
+    return tot_loss / weights
 
 class IW_MaxSquareloss(nn.Module):
-    def __init__(self, ignore_index= 255, num_class=16, ratio=0.2):
+    """
+    Implements the IW_MaxSquareloss loss function for image segmentation.
+
+    Args:
+        `ignore_index` (int): The index value to be ignored during loss calculation.
+        `ratio` (float): The ratio parameter for weight calculation.
+
+    Returns:
+        torch.Tensor: The calculated loss value.
+    """
+    requires_reduction = False
+
+    def __init__(self, ignore_index=255, ratio=0.2, **kwargs):
         super().__init__()
         self.ignore_index = ignore_index
-        self.num_class = num_class
         self.ratio = ratio
-    
-    def forward(self, pred, prob, label=None):
-        """
-        :param pred: predictions (N, C, H, W)
-        :param prob: probability of pred (N, C, H, W)
-        :param label(optional): the map for counting label numbers (N, C, H, W)
-        :return: maximum squares loss with image-wise weighting factor
-        """
-        # prob -= 0.5
+
+    def forward(self, pred, **kwargs):
+        prob = F.softmax(pred, dim=1)
         N, C, H, W = prob.size()
         mask = (prob != self.ignore_index)
         maxpred, argpred = torch.max(prob, 1)
         mask_arg = (maxpred != self.ignore_index)
-        argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long)*self.ignore_index)
-        if label is None:
-            label = argpred
+        argpred = torch.where(mask_arg, argpred, torch.ones(1).to(prob.device, dtype=torch.long) * self.ignore_index)
+        label = argpred
         weights = []
         batch_size = prob.size(0)
         for i in range(batch_size):
-            hist = torch.histc(label[i].cpu().data.float(), 
-                            bins=self.num_class+1, min=-1,
-                            max=self.num_class-1).float()
+            hist = torch.histc(label[i].cpu().data.float(),
+                               bins=C + 1, min=-1,
+                               max=C - 1).float()
             hist = hist[1:]
-            weight = (1/torch.max(torch.pow(hist, self.ratio)*torch.pow(hist.sum(), 1-self.ratio), torch.ones(1))).to(argpred.device)[argpred[i]].detach()
+            weight = \
+            (1 / torch.max(torch.pow(hist, self.ratio) * torch.pow(hist.sum(), 1 - self.ratio), torch.ones(1))).to(
+                argpred.device)[argpred[i]].detach()
             weights.append(weight)
-        weights = torch.stack(weights, dim=0)
+        weights = torch.stack(weights, dim=0).unsqueeze(1)
         mask = mask_arg.unsqueeze(1).expand_as(prob)
-        prior = torch.mean(prob, (2,3), True).detach()
-        loss = -torch.sum((torch.pow(prob, 2)*weights)[mask]) / (batch_size*self.num_class)
+        prior = torch.mean(prob, (2, 3), True).detach()
+        loss = -torch.sum((torch.pow(prob, 2) * weights)[mask]) / (batch_size * C)
         return loss
     
 class SelfTrainingLoss(nn.Module):
@@ -257,15 +305,6 @@ class EntropyLoss(nn.Module):
         self.normalization_factor = self.__get_normalization_factor(num_classes)
 
     def __get_normalization_factor(self, num_classes):
-        """
-        Calculates the normalization factor for entropy loss.
-
-        Args:
-            num_classes (int): Number of classes.
-
-        Returns:
-            float: The normalization factor.
-        """
         a = torch.ones((1, num_classes, 1, 1))
         a = 1 / num_classes * a
         p = F.softmax(a, dim=1)
@@ -285,14 +324,6 @@ class EntropyLoss(nn.Module):
         return ent.mean()
 
     def forward(self, pred):
-        """
-        Forward pass of the entropy loss.
-
-        Args:
-            pred (torch.Tensor): The predicted logits.
-
-        Returns:
-            torch.Tensor: The calculated loss value.
-        """
         loss = self.entropy_loss(pred)*self.lambda_entropy
         return loss
+
