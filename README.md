@@ -1,7 +1,7 @@
 # Real World Federated Learning
 ### Machine Learning and Deep Learning 2023
 #### Politecnico di Torino
-Code for the Federated Learning project.
+Code for the "Federated Learning for Autonomous Driving" project.
 
 #### Datasets
 The repository supports experiments on the following datasets:
