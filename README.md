@@ -1,4 +1,4 @@
-# Real World Federated Learning
+# Exploring Federated Learning for Semantic Segmentation in Autonomous Driving Scenarios
 ### Machine Learning and Deep Learning 2023
 #### Politecnico di Torino
 Code for the "Federated Learning for Autonomous Driving" project.
