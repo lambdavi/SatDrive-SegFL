@@ -1,9 +1,10 @@
 # Exploring Federated Learning for Semantic Segmentation in Autonomous Driving and Satellite Images Scenarios
 ### (Developed for the Machine Learning and Deep Learning 2023 course)
 #### Politecnico di Torino
-## [Paper Link:](paper.pdf)
 
+### [Paper Link](paper.pdf)
 
+## About
 #### Datasets
 The repository supports experiments on the following datasets:
 1. Reduced **Federated IDDA** from FedDrive [2]
