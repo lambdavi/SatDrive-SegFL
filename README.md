@@ -2,7 +2,7 @@
 ### (Developed for the Machine Learning and Deep Learning 2023 course)
 #### Politecnico di Torino
 
-### [Paper Link](paper.pdf)
+### [Read the paper](paper.pdf)
 
 ## About
 #### Datasets
