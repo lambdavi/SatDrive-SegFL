@@ -1,7 +1,6 @@
-# Exploring Federated Learning for Semantic Segmentation in Autonomous Driving Scenarios
-### Machine Learning and Deep Learning 2023
+# Exploring Federated Learning for Semantic Segmentation in Autonomous Driving and Satellite Images Scenarios
+### (Developed for the Machine Learning and Deep Learning 2023 course)
 #### Politecnico di Torino
-Code for the "Federated Learning for Autonomous Driving" project.
 
 #### Datasets
 The repository supports experiments on the following datasets:
